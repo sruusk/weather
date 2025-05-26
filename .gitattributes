@@ -5,3 +5,4 @@ linux/** linguist-vendored
 macos/** linguist-vendored
 windows/** linguist-vendored
 web/** linguist-vendored
+assets/smartmet-alert-client/** linguist-vendored
