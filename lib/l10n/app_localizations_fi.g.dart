@@ -1,0 +1,281 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.g.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Finnish (`fi`).
+class AppLocalizationsFi extends AppLocalizations {
+  AppLocalizationsFi([String locale = 'fi']) : super(locale);
+
+  @override
+  String get appTitle => 'Sää';
+
+  @override
+  String get noLocationSelected => 'Sijaintia ei ole valittu';
+
+  @override
+  String error(String error) {
+    return 'Virhe: $error';
+  }
+
+  @override
+  String get noObservationStationsFound => 'Havaintoasemia ei löytynyt';
+
+  @override
+  String distance(String distance) {
+    return 'Etäisyys: $distance km';
+  }
+
+  @override
+  String get temperature => 'Lämpötila';
+
+  @override
+  String get humidity => 'Kosteus';
+
+  @override
+  String get dewPoint => 'Kastepiste';
+
+  @override
+  String get windSpeed => 'Tuulen nopeus';
+
+  @override
+  String get windDirection => 'Tuulen suunta';
+
+  @override
+  String get windGust => 'Tuulen puuska';
+
+  @override
+  String get precipitation => 'Sademäärä';
+
+  @override
+  String get snowDepth => 'Lumen syvyys';
+
+  @override
+  String get pressure => 'Ilmanpaine';
+
+  @override
+  String get cloudBase => 'Pilvien korkeus';
+
+  @override
+  String get visibility => 'Näkyvyys';
+
+  @override
+  String get noTemperatureHistoryData => 'Lämpötilahistoriaa ei saatavilla';
+
+  @override
+  String get temperatureCelsius => '°C';
+
+  @override
+  String get homePageTitle => 'Sää';
+
+  @override
+  String get favouritesPageTitle => 'Suosikit';
+
+  @override
+  String get warningsPageTitle => 'Varoitukset';
+
+  @override
+  String get weatherSymbolsPageTitle => 'Sääsymbolit';
+
+  @override
+  String get settingsPageTitle => 'Asetukset';
+
+  @override
+  String get aboutPageTitle => 'Tietoja';
+
+  @override
+  String get getCurrentWeather => 'Hae nykyinen sää';
+
+  @override
+  String get checkForWarnings => 'Tarkista hälytykset';
+
+  @override
+  String get contactSupport => 'Ota yhteyttä tukeen';
+
+  @override
+  String get language => 'Kieli';
+
+  @override
+  String get temperatureUnit => 'Lämpötilayksikkö';
+
+  @override
+  String get notifications => 'Ilmoitukset';
+
+  @override
+  String get version => 'Versio';
+
+  @override
+  String get appDescription =>
+      'Yksinkertainen sääsovellus, joka tarjoaa nykyiset sääolosuhteet, ennusteet ja säävaroitukset.';
+
+  @override
+  String get languageSupport =>
+      'Tämä sovellus tukee sekä englannin että suomen kieltä.';
+
+  @override
+  String get clearDay => 'Selkeä Päivä';
+
+  @override
+  String get clearNight => 'Selkeä Yö';
+
+  @override
+  String get partlyCloudyDay => 'Osittain Pilvinen Päivä';
+
+  @override
+  String get partlyCloudyNight => 'Osittain Pilvinen Yö';
+
+  @override
+  String get cloudy => 'Pilvinen';
+
+  @override
+  String get rain => 'Sade';
+
+  @override
+  String get thunderstorm => 'Ukkosmyrsky';
+
+  @override
+  String get thunderstormWithRain => 'Ukkosmyrsky Sateella';
+
+  @override
+  String get snow => 'Lumi';
+
+  @override
+  String get fog => 'Sumu';
+
+  @override
+  String get wind => 'Tuuli';
+
+  @override
+  String get tornado => 'Tornado';
+
+  @override
+  String get thunderstormLine => 'Ukkosmyrsky (Viiva)';
+
+  @override
+  String get windLine => 'Tuuli (Viiva)';
+
+  @override
+  String get clearDayDesc => 'Kirkas taivas päivällä';
+
+  @override
+  String get clearNightDesc => 'Kirkas taivas yöllä';
+
+  @override
+  String get partlyCloudyDayDesc => 'Joitakin pilviä päivällä';
+
+  @override
+  String get partlyCloudyNightDesc => 'Joitakin pilviä yöllä';
+
+  @override
+  String get cloudyDesc => 'Enimmäkseen tai täysin pilvinen';
+
+  @override
+  String get rainDesc => 'Sademäärä';
+
+  @override
+  String get thunderstormDesc => 'Myrsky ukkosella ja salamoinnilla';
+
+  @override
+  String get thunderstormWithRainDesc =>
+      'Myrsky ukkosella, salamoinnilla ja sateella';
+
+  @override
+  String get snowDesc => 'Lumisade';
+
+  @override
+  String get fogDesc => 'Heikentynyt näkyvyys sumun vuoksi';
+
+  @override
+  String get windDesc => 'Voimakkaat tuulet';
+
+  @override
+  String get tornadoDesc => 'Voimakas pyörivä ilmapatsas';
+
+  @override
+  String get lineStyleDesc => 'Viivatyylinen versio';
+
+  @override
+  String get radar => 'Sadetutka';
+
+  @override
+  String get appSettingsAndPreferences =>
+      'Sovelluksen asetukset ja määritykset';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get finnish => 'Suomi';
+
+  @override
+  String get celsius => 'Celsius';
+
+  @override
+  String get fahrenheit => 'Fahrenheit';
+
+  @override
+  String get enabled => 'Käytössä';
+
+  @override
+  String get geolocation => 'Sijainti';
+
+  @override
+  String get disabled => 'Pois käytöstä';
+
+  @override
+  String get dataSourcesHeader => 'Tietolähteet';
+
+  @override
+  String get openMeteoDescription => 'Säädata - Open-Meteo';
+
+  @override
+  String get fmiDescription =>
+      'Havainnot, varoitukset ja tutkakuvat - Ilmatieteenlaitos.';
+
+  @override
+  String get openStreetMapDescription => 'Karttadata - OpenStreetMap';
+
+  @override
+  String get visitWebsite => 'Vieraile sivustolla';
+
+  @override
+  String get theme => 'Teema';
+
+  @override
+  String get dark => 'Tumma';
+
+  @override
+  String get light => 'Vaalea';
+
+  @override
+  String get searchForLocation => 'Etsi sijaintia';
+
+  @override
+  String get searchAndAddFavourites => 'Etsi ja lisää suosikkeihin';
+
+  @override
+  String get supportContactNotImplemented =>
+      'Yhteydenotto ei ole vielä mahdollista.';
+
+  @override
+  String get noSavedLocations => 'Ei tallennettuja sijainteja';
+
+  @override
+  String get licensesHeader => 'Lisenssit';
+
+  @override
+  String get smartmetAlertClientName => 'SmartMet Alert Client';
+
+  @override
+  String get smartmetAlertClientLicense => 'MIT Lisenssi';
+
+  @override
+  String get viewLicense => 'Näytä lisenssi';
+
+  @override
+  String get observations => 'Havainnot';
+
+  @override
+  String get weatherWarnings => 'Varoitukset';
+}

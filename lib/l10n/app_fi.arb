@@ -1,0 +1,363 @@
+{
+  "@@locale": "fi",
+  "appTitle": "Sää",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "noLocationSelected": "Sijaintia ei ole valittu",
+  "@noLocationSelected": {
+    "description": "Message shown when no location is selected"
+  },
+  "error": "Virhe: {error}",
+  "@error": {
+    "description": "Error message with details",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "noObservationStationsFound": "Havaintoasemia ei löytynyt",
+  "@noObservationStationsFound": {
+    "description": "Message shown when no observation stations are found"
+  },
+  "distance": "Etäisyys: {distance} km",
+  "@distance": {
+    "description": "Distance to the observation station",
+    "placeholders": {
+      "distance": {
+        "type": "String",
+        "example": "5.2"
+      }
+    }
+  },
+  "temperature": "Lämpötila",
+  "@temperature": {
+    "description": "Label for temperature measurement"
+  },
+  "humidity": "Kosteus",
+  "@humidity": {
+    "description": "Label for humidity measurement"
+  },
+  "dewPoint": "Kastepiste",
+  "@dewPoint": {
+    "description": "Label for dew point measurement"
+  },
+  "windSpeed": "Tuulen nopeus",
+  "@windSpeed": {
+    "description": "Label for wind speed measurement"
+  },
+  "windDirection": "Tuulen suunta",
+  "@windDirection": {
+    "description": "Label for wind direction measurement"
+  },
+  "windGust": "Tuulen puuska",
+  "@windGust": {
+    "description": "Label for wind gust measurement"
+  },
+  "precipitation": "Sademäärä",
+  "@precipitation": {
+    "description": "Label for precipitation measurement"
+  },
+  "snowDepth": "Lumen syvyys",
+  "@snowDepth": {
+    "description": "Label for snow depth measurement"
+  },
+  "pressure": "Ilmanpaine",
+  "@pressure": {
+    "description": "Label for pressure measurement"
+  },
+  "cloudBase": "Pilvien korkeus",
+  "@cloudBase": {
+    "description": "Label for cloud base measurement"
+  },
+  "visibility": "Näkyvyys",
+  "@visibility": {
+    "description": "Label for visibility measurement"
+  },
+  "noTemperatureHistoryData": "Lämpötilahistoriaa ei saatavilla",
+  "@noTemperatureHistoryData": {
+    "description": "Message shown when no temperature history data is available"
+  },
+  "temperatureCelsius": "°C",
+  "@temperatureCelsius": {
+    "description": "Temperature in Celsius"
+  },
+  "homePageTitle": "Sää",
+  "@homePageTitle": {
+    "description": "Title for the home page"
+  },
+  "favouritesPageTitle": "Suosikit",
+  "@favouritesPageTitle": {
+    "description": "Title for the favourites page"
+  },
+  "warningsPageTitle": "Varoitukset",
+  "@warningsPageTitle": {
+    "description": "Title for the warnings page"
+  },
+  "weatherSymbolsPageTitle": "Sääsymbolit",
+  "@weatherSymbolsPageTitle": {
+    "description": "Title for the weather symbols page"
+  },
+  "settingsPageTitle": "Asetukset",
+  "@settingsPageTitle": {
+    "description": "Title for the settings page"
+  },
+  "aboutPageTitle": "Tietoja",
+  "@aboutPageTitle": {
+    "description": "Title for the about page"
+  },
+  "getCurrentWeather": "Hae nykyinen sää",
+  "@getCurrentWeather": {
+    "description": "Button to get current weather"
+  },
+  "checkForWarnings": "Tarkista hälytykset",
+  "@checkForWarnings": {
+    "description": "Button to check for warnings"
+  },
+  "contactSupport": "Ota yhteyttä tukeen",
+  "@contactSupport": {
+    "description": "Button to contact support"
+  },
+  "language": "Kieli",
+  "@language": {
+    "description": "Label for language setting"
+  },
+  "temperatureUnit": "Lämpötilayksikkö",
+  "@temperatureUnit": {
+    "description": "Label for temperature unit setting"
+  },
+  "notifications": "Ilmoitukset",
+  "@notifications": {
+    "description": "Label for notifications setting"
+  },
+  "version": "Versio",
+  "@version": {
+    "description": "Label for app version"
+  },
+  "appDescription": "Yksinkertainen sääsovellus, joka tarjoaa nykyiset sääolosuhteet, ennusteet ja säävaroitukset.",
+  "@appDescription": {
+    "description": "Description of the application"
+  },
+  "languageSupport": "Tämä sovellus tukee sekä englannin että suomen kieltä.",
+  "@languageSupport": {
+    "description": "Information about language support"
+  },
+  "clearDay": "Selkeä Päivä",
+  "@clearDay": {
+    "description": "Weather symbol title"
+  },
+  "clearNight": "Selkeä Yö",
+  "@clearNight": {
+    "description": "Weather symbol title"
+  },
+  "partlyCloudyDay": "Osittain Pilvinen Päivä",
+  "@partlyCloudyDay": {
+    "description": "Weather symbol title"
+  },
+  "partlyCloudyNight": "Osittain Pilvinen Yö",
+  "@partlyCloudyNight": {
+    "description": "Weather symbol title"
+  },
+  "cloudy": "Pilvinen",
+  "@cloudy": {
+    "description": "Weather symbol title"
+  },
+  "rain": "Sade",
+  "@rain": {
+    "description": "Weather symbol title"
+  },
+  "thunderstorm": "Ukkosmyrsky",
+  "@thunderstorm": {
+    "description": "Weather symbol title"
+  },
+  "thunderstormWithRain": "Ukkosmyrsky Sateella",
+  "@thunderstormWithRain": {
+    "description": "Weather symbol title"
+  },
+  "snow": "Lumi",
+  "@snow": {
+    "description": "Weather symbol title"
+  },
+  "fog": "Sumu",
+  "@fog": {
+    "description": "Weather symbol title"
+  },
+  "wind": "Tuuli",
+  "@wind": {
+    "description": "Weather symbol title"
+  },
+  "tornado": "Tornado",
+  "@tornado": {
+    "description": "Weather symbol title"
+  },
+  "thunderstormLine": "Ukkosmyrsky (Viiva)",
+  "@thunderstormLine": {
+    "description": "Weather symbol title"
+  },
+  "windLine": "Tuuli (Viiva)",
+  "@windLine": {
+    "description": "Weather symbol title"
+  },
+  "clearDayDesc": "Kirkas taivas päivällä",
+  "@clearDayDesc": {
+    "description": "Weather symbol description"
+  },
+  "clearNightDesc": "Kirkas taivas yöllä",
+  "@clearNightDesc": {
+    "description": "Weather symbol description"
+  },
+  "partlyCloudyDayDesc": "Joitakin pilviä päivällä",
+  "@partlyCloudyDayDesc": {
+    "description": "Weather symbol description"
+  },
+  "partlyCloudyNightDesc": "Joitakin pilviä yöllä",
+  "@partlyCloudyNightDesc": {
+    "description": "Weather symbol description"
+  },
+  "cloudyDesc": "Enimmäkseen tai täysin pilvinen",
+  "@cloudyDesc": {
+    "description": "Weather symbol description"
+  },
+  "rainDesc": "Sademäärä",
+  "@rainDesc": {
+    "description": "Weather symbol description"
+  },
+  "thunderstormDesc": "Myrsky ukkosella ja salamoinnilla",
+  "@thunderstormDesc": {
+    "description": "Weather symbol description"
+  },
+  "thunderstormWithRainDesc": "Myrsky ukkosella, salamoinnilla ja sateella",
+  "@thunderstormWithRainDesc": {
+    "description": "Weather symbol description"
+  },
+  "snowDesc": "Lumisade",
+  "@snowDesc": {
+    "description": "Weather symbol description"
+  },
+  "fogDesc": "Heikentynyt näkyvyys sumun vuoksi",
+  "@fogDesc": {
+    "description": "Weather symbol description"
+  },
+  "windDesc": "Voimakkaat tuulet",
+  "@windDesc": {
+    "description": "Weather symbol description"
+  },
+  "tornadoDesc": "Voimakas pyörivä ilmapatsas",
+  "@tornadoDesc": {
+    "description": "Weather symbol description"
+  },
+  "lineStyleDesc": "Viivatyylinen versio",
+  "@lineStyleDesc": {
+    "description": "Weather symbol description"
+  },
+  "radar": "Sadetutka",
+  "@radar": {
+    "description": "Label for weather radar"
+  },
+  "appSettingsAndPreferences": "Sovelluksen asetukset ja määritykset",
+  "@appSettingsAndPreferences": {
+    "description": "Title for settings page"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  },
+  "finnish": "Suomi",
+  "@finnish": {
+    "description": "Finnish language name"
+  },
+  "celsius": "Celsius",
+  "@celsius": {
+    "description": "Celsius temperature unit"
+  },
+  "fahrenheit": "Fahrenheit",
+  "@fahrenheit": {
+    "description": "Fahrenheit temperature unit"
+  },
+  "enabled": "Käytössä",
+  "@enabled": {
+    "description": "Enabled status"
+  },
+  "geolocation": "Sijainti",
+  "@geolocation": {
+    "description": "Label for geolocation setting"
+  },
+  "disabled": "Pois käytöstä",
+  "@disabled": {
+    "description": "Disabled status"
+  },
+  "theme": "Teema",
+  "@theme": {
+    "description": "Label for theme setting"
+  },
+  "dark": "Tumma",
+  "@dark": {
+    "description": "Dark theme"
+  },
+  "light": "Vaalea",
+  "@light": {
+    "description": "Light theme"
+  },
+  "searchForLocation": "Etsi sijaintia",
+  "@searchForLocation": {
+    "description": "Placeholder for location search"
+  },
+  "searchAndAddFavourites": "Etsi ja lisää suosikkeihin",
+  "@searchAndAddFavourites": {
+    "description": "Label for searching and adding to favourites"
+  },
+  "supportContactNotImplemented": "Yhteydenotto ei ole vielä mahdollista.",
+  "@supportContactNotImplemented": {
+    "description": "Message indicating that support contact feature is not implemented"
+  },
+  "noSavedLocations": "Ei tallennettuja sijainteja",
+  "@noSavedLocations": {
+    "description": "Message indicating that there are no saved locations"
+  },
+  "dataSourcesHeader": "Tietolähteet",
+  "@dataSourcesHeader": {
+    "description": "Header for data sources section"
+  },
+  "openMeteoDescription": "Säädata - Open-Meteo",
+  "@openMeteoDescription": {
+    "description": "Description for Open-Meteo data source"
+  },
+  "fmiDescription": "Havainnot, varoitukset ja tutkakuvat - Ilmatieteenlaitos.",
+  "@fmiDescription": {
+    "description": "Description for Finnish Meteorological Institute data source"
+  },
+  "openStreetMapDescription": "Karttadata - OpenStreetMap",
+  "@openStreetMapDescription": {
+    "description": "Description for OpenStreetMap data source"
+  },
+  "visitWebsite": "Vieraile sivustolla",
+  "@visitWebsite": {
+    "description": "Label for a button to visit the data source website"
+  },
+  "licensesHeader": "Lisenssit",
+  "@licensesHeader": {
+    "description": "Header for the licenses section"
+  },
+  "smartmetAlertClientName": "SmartMet Alert Client",
+  "@smartmetAlertClientName": {
+    "description": "Name of the SmartMet alert client library"
+  },
+  "smartmetAlertClientLicense": "MIT Lisenssi",
+  "@smartmetAlertClientLicense": {
+    "description": "License type for the SmartMet alert client"
+  },
+  "viewLicense": "Näytä lisenssi",
+  "@viewLicense": {
+    "description": "Button text to view the license"
+  },
+  "observations": "Havainnot",
+  "@observations": {
+    "description": "Label for observations"
+  },
+  "weatherWarnings": "Varoitukset",
+  "@weatherWarnings": {
+    "description": "Label for weather warnings"
+  }
+}

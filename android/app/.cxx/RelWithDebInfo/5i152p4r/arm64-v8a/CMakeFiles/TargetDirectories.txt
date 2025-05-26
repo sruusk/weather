@@ -1,0 +1,2 @@
+C:/Users/samul/Desktop/weather/android/app/.cxx/RelWithDebInfo/5i152p4r/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/samul/Desktop/weather/android/app/.cxx/RelWithDebInfo/5i152p4r/arm64-v8a/CMakeFiles/rebuild_cache.dir

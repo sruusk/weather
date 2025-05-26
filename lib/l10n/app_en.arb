@@ -1,0 +1,363 @@
+{
+  "@@locale": "en",
+  "appTitle": "Weather",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "noLocationSelected": "No location selected",
+  "@noLocationSelected": {
+    "description": "Message shown when no location is selected"
+  },
+  "error": "Error: {error}",
+  "@error": {
+    "description": "Error message with details",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "noObservationStationsFound": "No observation stations found",
+  "@noObservationStationsFound": {
+    "description": "Message shown when no observation stations are found"
+  },
+  "distance": "Distance: {distance} km",
+  "@distance": {
+    "description": "Distance to the observation station",
+    "placeholders": {
+      "distance": {
+        "type": "String",
+        "example": "5.2"
+      }
+    }
+  },
+  "temperature": "Temperature",
+  "@temperature": {
+    "description": "Label for temperature measurement"
+  },
+  "humidity": "Humidity",
+  "@humidity": {
+    "description": "Label for humidity measurement"
+  },
+  "dewPoint": "Dew Point",
+  "@dewPoint": {
+    "description": "Label for dew point measurement"
+  },
+  "windSpeed": "Wind Speed",
+  "@windSpeed": {
+    "description": "Label for wind speed measurement"
+  },
+  "windDirection": "Wind Direction",
+  "@windDirection": {
+    "description": "Label for wind direction measurement"
+  },
+  "windGust": "Wind Gust",
+  "@windGust": {
+    "description": "Label for wind gust measurement"
+  },
+  "precipitation": "Precipitation",
+  "@precipitation": {
+    "description": "Label for precipitation measurement"
+  },
+  "snowDepth": "Snow Depth",
+  "@snowDepth": {
+    "description": "Label for snow depth measurement"
+  },
+  "pressure": "Pressure",
+  "@pressure": {
+    "description": "Label for pressure measurement"
+  },
+  "cloudBase": "Cloud Base",
+  "@cloudBase": {
+    "description": "Label for cloud base measurement"
+  },
+  "visibility": "Visibility",
+  "@visibility": {
+    "description": "Label for visibility measurement"
+  },
+  "noTemperatureHistoryData": "No temperature history data available",
+  "@noTemperatureHistoryData": {
+    "description": "Message shown when no temperature history data is available"
+  },
+  "temperatureCelsius": "°C",
+  "@temperatureCelsius": {
+    "description": "Temperature in Celsius"
+  },
+  "homePageTitle": "Weather",
+  "@homePageTitle": {
+    "description": "Title for the home page"
+  },
+  "favouritesPageTitle": "Favourites",
+  "@favouritesPageTitle": {
+    "description": "Title for the favourites page"
+  },
+  "warningsPageTitle": "Weather Warnings",
+  "@warningsPageTitle": {
+    "description": "Title for the warnings page"
+  },
+  "weatherSymbolsPageTitle": "Weather Symbols",
+  "@weatherSymbolsPageTitle": {
+    "description": "Title for the weather symbols page"
+  },
+  "settingsPageTitle": "Settings",
+  "@settingsPageTitle": {
+    "description": "Title for the settings page"
+  },
+  "aboutPageTitle": "About",
+  "@aboutPageTitle": {
+    "description": "Title for the about page"
+  },
+  "getCurrentWeather": "Get Current Weather",
+  "@getCurrentWeather": {
+    "description": "Button to get current weather"
+  },
+  "checkForWarnings": "Check for Warnings",
+  "@checkForWarnings": {
+    "description": "Button to check for warnings"
+  },
+  "contactSupport": "Contact Support",
+  "@contactSupport": {
+    "description": "Button to contact support"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Label for language setting"
+  },
+  "temperatureUnit": "Temperature Unit",
+  "@temperatureUnit": {
+    "description": "Label for temperature unit setting"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Label for notifications setting"
+  },
+  "version": "Version",
+  "@version": {
+    "description": "Label for app version"
+  },
+  "appDescription": "A simple weather application that provides current weather conditions, forecasts, and weather warnings.",
+  "@appDescription": {
+    "description": "Description of the application"
+  },
+  "languageSupport": "This app supports both English and Finnish languages.",
+  "@languageSupport": {
+    "description": "Information about language support"
+  },
+  "clearDay": "Clear Day",
+  "@clearDay": {
+    "description": "Weather symbol title"
+  },
+  "clearNight": "Clear Night",
+  "@clearNight": {
+    "description": "Weather symbol title"
+  },
+  "partlyCloudyDay": "Partly Cloudy Day",
+  "@partlyCloudyDay": {
+    "description": "Weather symbol title"
+  },
+  "partlyCloudyNight": "Partly Cloudy Night",
+  "@partlyCloudyNight": {
+    "description": "Weather symbol title"
+  },
+  "cloudy": "Cloudy",
+  "@cloudy": {
+    "description": "Weather symbol title"
+  },
+  "rain": "Rain",
+  "@rain": {
+    "description": "Weather symbol title"
+  },
+  "thunderstorm": "Thunderstorm",
+  "@thunderstorm": {
+    "description": "Weather symbol title"
+  },
+  "thunderstormWithRain": "Thunderstorm with Rain",
+  "@thunderstormWithRain": {
+    "description": "Weather symbol title"
+  },
+  "snow": "Snow",
+  "@snow": {
+    "description": "Weather symbol title"
+  },
+  "fog": "Fog",
+  "@fog": {
+    "description": "Weather symbol title"
+  },
+  "wind": "Wind",
+  "@wind": {
+    "description": "Weather symbol title"
+  },
+  "tornado": "Tornado",
+  "@tornado": {
+    "description": "Weather symbol title"
+  },
+  "thunderstormLine": "Thunderstorm (Line)",
+  "@thunderstormLine": {
+    "description": "Weather symbol title"
+  },
+  "windLine": "Wind (Line)",
+  "@windLine": {
+    "description": "Weather symbol title"
+  },
+  "clearDayDesc": "Clear sky during daytime",
+  "@clearDayDesc": {
+    "description": "Weather symbol description"
+  },
+  "clearNightDesc": "Clear sky during nighttime",
+  "@clearNightDesc": {
+    "description": "Weather symbol description"
+  },
+  "partlyCloudyDayDesc": "Some clouds during daytime",
+  "@partlyCloudyDayDesc": {
+    "description": "Weather symbol description"
+  },
+  "partlyCloudyNightDesc": "Some clouds during nighttime",
+  "@partlyCloudyNightDesc": {
+    "description": "Weather symbol description"
+  },
+  "cloudyDesc": "Mostly or completely cloudy",
+  "@cloudyDesc": {
+    "description": "Weather symbol description"
+  },
+  "rainDesc": "Rainfall",
+  "@rainDesc": {
+    "description": "Weather symbol description"
+  },
+  "thunderstormDesc": "Storm with thunder and lightning",
+  "@thunderstormDesc": {
+    "description": "Weather symbol description"
+  },
+  "thunderstormWithRainDesc": "Storm with thunder, lightning and rain",
+  "@thunderstormWithRainDesc": {
+    "description": "Weather symbol description"
+  },
+  "snowDesc": "Snowfall",
+  "@snowDesc": {
+    "description": "Weather symbol description"
+  },
+  "fogDesc": "Reduced visibility due to fog",
+  "@fogDesc": {
+    "description": "Weather symbol description"
+  },
+  "windDesc": "Strong winds",
+  "@windDesc": {
+    "description": "Weather symbol description"
+  },
+  "tornadoDesc": "Violent rotating column of air",
+  "@tornadoDesc": {
+    "description": "Weather symbol description"
+  },
+  "lineStyleDesc": "Line style version",
+  "@lineStyleDesc": {
+    "description": "Weather symbol description"
+  },
+  "radar": "Weather Radar",
+  "@radar": {
+    "description": "Label for weather radar"
+  },
+  "appSettingsAndPreferences": "App settings and preferences",
+  "@appSettingsAndPreferences": {
+    "description": "Title for settings page"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  },
+  "finnish": "Suomi",
+  "@finnish": {
+    "description": "Finnish language name"
+  },
+  "celsius": "Celsius",
+  "@celsius": {
+    "description": "Celsius temperature unit"
+  },
+  "fahrenheit": "Fahrenheit",
+  "@fahrenheit": {
+    "description": "Fahrenheit temperature unit"
+  },
+  "enabled": "Enabled",
+  "@enabled": {
+    "description": "Enabled status"
+  },
+  "geolocation": "Geolocation",
+  "@geolocation": {
+    "description": "Label for geolocation setting"
+  },
+  "disabled": "Disabled",
+  "@disabled": {
+    "description": "Disabled status"
+  },
+  "dataSourcesHeader": "Data Sources",
+  "@dataSourcesHeader": {
+    "description": "Header for data sources section"
+  },
+  "openMeteoDescription": "Weather data by Open-Meteo.com",
+  "@openMeteoDescription": {
+    "description": "Description for Open-Meteo data source"
+  },
+  "fmiDescription": "Observations, alerts and radar images by \n the Finnish Meteorological Institute.",
+  "@fmiDescription": {
+    "description": "Description for Finnish Meteorological Institute data source"
+  },
+  "openStreetMapDescription": "Map data by OpenStreetMap",
+  "@openStreetMapDescription": {
+    "description": "Description for OpenStreetMap data source"
+  },
+  "visitWebsite": "Visit Website",
+  "@visitWebsite": {
+    "description": "Label for a button to visit the data source website"
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Label for theme setting"
+  },
+  "dark": "Dark",
+  "@dark": {
+    "description": "Dark theme"
+  },
+  "light": "Light",
+  "@light": {
+    "description": "Light theme"
+  },
+  "searchForLocation": "Search for location",
+  "@searchForLocation": {
+    "description": "Placeholder for location search"
+  },
+  "searchAndAddFavourites": "Search and add to favourites",
+  "@searchAndAddFavourites": {
+    "description": "Label for searching and adding to favourites"
+  },
+  "supportContactNotImplemented": "Support contact feature not implemented yet.",
+  "@supportContactNotImplemented": {
+    "description": "Message indicating that support contact feature is not implemented"
+  },
+  "noSavedLocations": "No saved locations",
+  "@noSavedLocations": {
+    "description": "Message indicating that there are no saved locations"
+  },
+  "licensesHeader": "Licenses",
+  "@licensesHeader": {
+    "description": "Header for the licenses section"
+  },
+  "smartmetAlertClientName": "SmartMet Alert Client",
+  "@smartmetAlertClientName": {
+    "description": "Name of the SmartMet alert client library"
+  },
+  "smartmetAlertClientLicense": "MIT License",
+  "@smartmetAlertClientLicense": {
+    "description": "License type for the SmartMet alert client"
+  },
+  "viewLicense": "View License",
+  "@viewLicense": {
+    "description": "Button text to view the license"
+  },
+  "observations": "Observations",
+  "@observations": {
+    "description": "Label for observations"
+  },
+  "weatherWarnings": "Warnings",
+  "@weatherWarnings": {
+    "description": "Label for weather warnings"
+  }
+}

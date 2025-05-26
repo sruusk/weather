@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "E:\\Ohjelmat\\Flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "E:\\Ohjelmat\\AndroidSdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\samul\\Desktop\\weather\\android\\app\\.cxx\\RelWithDebInfo\\5i152p4r\\armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "E:\\Ohjelmat\\AndroidSdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\samul\\Desktop\\weather\\android\\app\\.cxx\\RelWithDebInfo\\5i152p4r\\armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
