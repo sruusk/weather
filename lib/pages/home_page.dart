@@ -36,7 +36,14 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // _loadForecasts();
+    final appState = Provider.of<AppState>(context, listen: false);
+    final locs = appState.favouriteLocations;
+    if(_isLoading) return;
+
+    if(locs.length != _locations.length - (appState.geolocationEnabled ? 1 : 0)) {
+      // If the number of locations has changed, reload forecasts
+      _loadForecasts();
+    }
   }
 
   @override
