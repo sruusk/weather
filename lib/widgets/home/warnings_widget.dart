@@ -17,14 +17,29 @@ class WeatherWarnings extends StatefulWidget {
   State<WeatherWarnings> createState() => _WeatherWarningsState();
 }
 
-class _WeatherWarningsState extends State<WeatherWarnings> {
+class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProviderStateMixin {
   WeatherAlerts? _weatherAlerts;
+  int? _selectedDayIndex;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  // Map to track expansion state of each warning
+  final Map<String, bool> _expandedWarnings = {};
 
   @override
   void initState() {
     super.initState();
 
     if(kDebugMode) print('Initializing WarningsWidget for ${widget.location.name}');
+
+    // Initialize animation controller
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
 
     // Get the singleton instance and load alerts
     final weatherAlertsInstance = WeatherAlerts.instance();
@@ -48,12 +63,18 @@ class _WeatherWarningsState extends State<WeatherWarnings> {
     }
   }
 
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   List<Color> getGradientColors(WeatherAlertSeverity? severity) {
     switch (severity ?? WeatherAlertSeverity.unknown) {
       case WeatherAlertSeverity.minor:
         return [Colors.green, Color(0x0000ff0c)];
       case WeatherAlertSeverity.moderate:
-        return [Color(0xCCFAE500), Color(0x00FFF400)];
+        return [Color(0xCCECD900), Color(0x00FFF400)];
       case WeatherAlertSeverity.severe:
         return [Color(0xCCFFAC40), Color(0x00FF6A00)];
       case WeatherAlertSeverity.extreme:
@@ -76,6 +97,122 @@ class _WeatherWarningsState extends State<WeatherWarnings> {
       default:
         return Colors.lightGreen;
     }
+  }
+
+  // Helper method to build the warnings list for a selected day
+  Widget _buildWarningsList(DateTime selectedDay) {
+    final appState = Provider.of<AppState>(context);
+    final alerts = _weatherAlerts!.alertsForLocation(widget.location, selectedDay);
+
+    if (alerts.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'No warnings for this day',
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: alerts.length,
+      itemBuilder: (context, index) {
+        final alert = alerts[index];
+        // Get the appropriate language version based on app locale
+        final languageCode = appState.locale.languageCode;
+        final WeatherEvent event;
+
+        if (languageCode == 'sv') {
+          event = alert.sv;
+        } else if (languageCode == 'fi') {
+          event = alert.fi;
+        } else {
+          event = alert.en;
+        }
+
+        // Create an expandable warning item
+        return _buildWarningItem(event);
+      },
+    );
+  }
+
+  // Helper method to build an individual warning item
+  Widget _buildWarningItem(WeatherEvent event) {
+    // Use a unique key for this warning based on its content
+    final String warningKey = '${event.event}_${event.headline}';
+    // Initialize if not already in the map
+    _expandedWarnings.putIfAbsent(warningKey, () => false);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      color: Theme.of(context).colorScheme.surfaceDim,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Always visible part (event text)
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () {
+              setState(() {
+                // Toggle the expansion state for this warning
+                _expandedWarnings[warningKey] = !(_expandedWarnings[warningKey] ?? false);
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      event.event,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _expandedWarnings[warningKey] ?? false ? Icons.expand_less : Icons.expand_more,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Expandable part (headline and description)
+          AnimatedCrossFade(
+            firstChild: const SizedBox(height: 0),
+            secondChild: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (event.headline.isNotEmpty) ...[
+                    Text(
+                      event.headline,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  Text(
+                    event.description,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+            crossFadeState: (_expandedWarnings[warningKey] ?? false) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 200),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -118,43 +255,68 @@ class _WeatherWarningsState extends State<WeatherWarnings> {
             localizations.weatherWarnings
           ),
           Row(
-            spacing: 5,
+            spacing: 4,
             children: [
               for(var i = 0; i < days.length; i++)
                 Expanded(
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: getGradientColors(severity[i]),
-                          ),
-                        ),
-                        child:Text(
-                          DateFormat.E(appState.locale.languageCode).format(days[i]),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: getBorderColor(severity[i]),
-                              ),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (_selectedDayIndex == i) {
+                          // If tapping the already selected day, deselect it
+                          _selectedDayIndex = null;
+                          _animationController.reverse();
+                        } else {
+                          // Otherwise, select the new day
+                          _selectedDayIndex = i;
+                          _animationController.forward();
+                        }
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: getGradientColors(severity[i]),
                             ),
                           ),
-                        ],
-                      )
-                    ],
+                          child: Text(
+                            DateFormat.E(appState.locale.languageCode).format(days[i]),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: getBorderColor(severity[i]),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 )
             ],
+          ),
+          // Expandable warnings section
+          SizeTransition(
+            sizeFactor: _animation,
+            child: Container(
+              margin: const EdgeInsets.only(top: 8),
+              child: _selectedDayIndex != null
+                ? _buildWarningsList(days[_selectedDayIndex!])
+                : const SizedBox.shrink(),
+            ),
           )
         ],
       ),

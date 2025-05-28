@@ -42,7 +42,7 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
     _currentTime = getTime();
     _tileProviderFuture = () async {
       // Load PMTiles asset and write to temp file
-      final asset = await rootBundle.load('assets/map/finland-z10.pmtiles');
+      final asset = await rootBundle.load('assets/map/finland-z9.pmtiles');
       final bytes = asset.buffer.asUint8List();
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/finland-z10.pmtiles');
@@ -179,6 +179,12 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                                 }),
                                 theme: ProtomapsThemes.whiteV4(),
                                 showTileDebugInfo: true,
+                                // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
+                                cacheFolder: () {
+                                  return getTemporaryDirectory().then((dir) {
+                                    return Directory('${dir.path}/pmtiles_light_cache');
+                                  });
+                                },
                               )
                             : VectorTileLayer(
                                 key: const Key('protomaps-dark'),

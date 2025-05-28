@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weather/app_state.dart';
-import 'package:weather/l10n/app_localizations.g.dart';
 
 WebViewEnvironment? webViewEnvironment;
 
@@ -17,9 +17,8 @@ class WarningsPage extends StatefulWidget {
 
 class _WarningsPageState extends State<WarningsPage> {
   final GlobalKey webViewKey = GlobalKey();
-
-  final InAppLocalhostServer localhostServer =
-      InAppLocalhostServer(documentRoot: 'assets/smartmet-alert-client');
+  String? theme;
+  String? language;
 
   InAppWebViewController? webViewController;
   InAppWebViewSettings settings = InAppWebViewSettings(
@@ -37,11 +36,6 @@ class _WarningsPageState extends State<WarningsPage> {
   @override
   void initState() {
     super.initState();
-
-    if (!kIsWeb) {
-      // start the localhost server
-      localhostServer.start();
-    }
 
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       InAppWebViewController.setWebContentsDebuggingEnabled(kDebugMode);
@@ -68,11 +62,27 @@ class _WarningsPageState extends State<WarningsPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadContent();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
     final appState = Provider.of<AppState>(context);
-    final lang = appState.locale.languageCode;
-    final theme = Theme.of(context).brightness == Brightness.dark ? ".dark" : "";
+    if(language != appState.locale.languageCode) {
+      setState(() {
+        language = appState.locale.languageCode;
+      });
+    }
+
+    print("Language: $language");
+
+    if(theme != (Theme.of(context).brightness == Brightness.dark ? ".dark" : "")) {
+      setState(() {
+        theme = Theme.of(context).brightness == Brightness.dark ? ".dark" : "";
+      });
+    }
 
     return SafeArea(
         child: Column(children: <Widget>[
@@ -80,13 +90,12 @@ class _WarningsPageState extends State<WarningsPage> {
         child: InAppWebView(
           key: webViewKey,
           webViewEnvironment: webViewEnvironment,
-          initialUrlRequest:
-              URLRequest(url: WebUri("http://localhost:8080/index$theme.html")),
           initialSettings: settings,
-          pullToRefreshController: pullToRefreshController,
-          onWebViewCreated: (controller) {
+          onWebViewCreated: (controller) async {
             webViewController = controller;
+            _loadContent();
           },
+          pullToRefreshController: pullToRefreshController,
           onLoadStart: (controller, url) {
             setState(() {
               this.url = url.toString();
@@ -155,5 +164,27 @@ class _WarningsPageState extends State<WarningsPage> {
         ),
       )
     ]));
+  }
+
+  _loadContent() async {
+    // Determine asset paths
+    final htmlPath = 'assets/smartmet-alert-client/index$theme.html';
+    final jsPath = 'assets/smartmet-alert-client/index.js';
+    // Load template and script
+    String htmlTemplate = await rootBundle.loadString(htmlPath);
+    String jsContent = await rootBundle.loadString(jsPath);
+    // Replace language attribute
+    htmlTemplate = htmlTemplate.replaceAll(
+        RegExp(r'language="[^"]*"'), 'language="$language"');
+    // Inline JS by replacing external script tag
+    final html = htmlTemplate.replaceFirst(
+        RegExp(r'<script[^>]*src="./index\.js"[^>]*></script>'),
+        '<script type="module">$jsContent</script>');
+    // Load data into WebView
+    await webViewController!.loadData(
+      data: html,
+      baseUrl: WebUri('about:blank'),
+      historyUrl: WebUri('about:blank'),
+    );
   }
 }

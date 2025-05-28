@@ -280,7 +280,9 @@ class WeatherAlerts {
     return alerts.where((alert) {
       // Check if the alert is active at the given time
       if (time != null) {
-        if (time.isBefore(alert.onset) || time.isAfter(alert.expires)) {
+        final startTime = DateTime(time.year, time.month, time.day, 23, 59, 59);
+        final endTime = DateTime(time.year, time.month, time.day, 0, 0, 1);
+        if (startTime.isBefore(alert.onset) || endTime.isAfter(alert.expires)) {
           return false;
         }
       }

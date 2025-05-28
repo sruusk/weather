@@ -104,107 +104,83 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const HomePage(),
-    const FavouritesPage(),
-    const WarningsPage(),
-    const WeatherSymbolsPage(),
-    const SettingsPage(),
-    const AboutPage(),
+    const HomePage(key: PageStorageKey('home_page')),
+    const FavouritesPage(key: PageStorageKey('favourites_page')),
+    const WarningsPage(key: PageStorageKey('warnings_page')),
+    const WeatherSymbolsPage(key: PageStorageKey('weather_symbols_page')),
+    const SettingsPage(key: PageStorageKey('settings_page')),
+    const AboutPage(key: PageStorageKey('about_page')),
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    Navigator.pop(context); // Close the drawer
+    setState(() => _selectedIndex = index);
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-
     return Scaffold(
       appBar: _selectedIndex != 0
-          ? AppBar(
-              title: Text(_getTitle(context, _selectedIndex)),
-            )
+          ? AppBar(title: Text(_getTitle(context, _selectedIndex)))
           : null,
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceBright,
-              ),
-              child: Text(
-                localizations.appTitle,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: Text(localizations.homePageTitle),
-              selected: _selectedIndex == 0,
-              onTap: () => _onItemTapped(0),
-            ),
-            ListTile(
-              leading: const Icon(Icons.favorite),
-              title: Text(localizations.favouritesPageTitle),
-              selected: _selectedIndex == 1,
-              onTap: () => _onItemTapped(1),
-            ),
-            ListTile(
-              leading: const Icon(Icons.warning),
-              title: Text(localizations.warningsPageTitle),
-              selected: _selectedIndex == 2,
-              onTap: () => _onItemTapped(2),
-            ),
-            ListTile(
-              leading: const Icon(Icons.cloud),
-              title: Text(localizations.weatherSymbolsPageTitle),
-              selected: _selectedIndex == 3,
-              onTap: () => _onItemTapped(3),
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: Text(localizations.settingsPageTitle),
-              selected: _selectedIndex == 4,
-              onTap: () => _onItemTapped(4),
-            ),
-            ListTile(
-              leading: const Icon(Icons.info),
-              title: Text(localizations.aboutPageTitle),
-              selected: _selectedIndex == 5,
-              onTap: () => _onItemTapped(5),
-            ),
-          ],
+      drawer: _buildDrawer(context),
+      body: SafeArea(
+        child: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
         ),
       ),
-      body: SafeArea(child: _pages[_selectedIndex]),
+    );
+  }
+
+  Drawer _buildDrawer(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration:
+            BoxDecoration(color: Theme.of(context).colorScheme.surfaceBright),
+            child: Text(localizations.appTitle, style: TextStyle(fontSize: 24)),
+          ),
+          _buildTile(Icons.home, localizations.homePageTitle, 0),
+          _buildTile(Icons.favorite, localizations.favouritesPageTitle, 1),
+          _buildTile(Icons.warning, localizations.warningsPageTitle, 2),
+          _buildTile(Icons.cloud, localizations.weatherSymbolsPageTitle, 3),
+          _buildTile(Icons.settings, localizations.settingsPageTitle, 4),
+          _buildTile(Icons.info, localizations.aboutPageTitle, 5),
+        ],
+      ),
+    );
+  }
+
+  ListTile _buildTile(IconData icon, String title, int index) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      selected: _selectedIndex == index,
+      onTap: () => _onItemTapped(index),
     );
   }
 
   String _getTitle(BuildContext context, int index) {
-    final localizations = AppLocalizations.of(context)!;
+    final l = AppLocalizations.of(context)!;
     switch (index) {
       case 0:
-        return localizations.homePageTitle;
+        return l.homePageTitle;
       case 1:
-        return localizations.favouritesPageTitle;
+        return l.favouritesPageTitle;
       case 2:
-        return localizations.warningsPageTitle;
+        return l.warningsPageTitle;
       case 3:
-        return localizations.weatherSymbolsPageTitle;
+        return l.weatherSymbolsPageTitle;
       case 4:
-        return localizations.settingsPageTitle;
+        return l.settingsPageTitle;
       case 5:
-        return localizations.aboutPageTitle;
+        return l.aboutPageTitle;
       default:
-        return localizations.appTitle;
+        return l.appTitle;
     }
   }
 }

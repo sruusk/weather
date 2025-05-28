@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
   final WeatherData _weatherData = WeatherData();
   Forecast? _forecast;
   List<Location> _locations = [];
@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
       // Use a Future to ensure the Provider is ready
       Future.delayed(Duration.zero, () => _loadForecasts());
     });
-
   }
 
   @override
@@ -40,10 +39,13 @@ class _HomePageState extends State<HomePage> {
     // _loadForecasts();
   }
 
+  @override
+  bool get wantKeepAlive => true;
+
   Future<void> _loadForecasts() async {
     final appState = Provider.of<AppState>(context, listen: false);
     final locs = appState.favouriteLocations;
-    print('Favourite locations: ${locs.length}');
+
     if (locs.isEmpty && !appState.geolocationEnabled) {
       setState(() {
         _forecast = null;
@@ -68,7 +70,9 @@ class _HomePageState extends State<HomePage> {
           pos.longitude,
         );
       } catch (e) {
-        print('Error getting current location: $e');
+        if (kDebugMode) {
+          print('Error getting current location: $e');
+        }
         // If geolocation fails, fall back to first favorite
         if (locs.isNotEmpty) {
           locationToLoad = locs.first;
@@ -102,7 +106,9 @@ class _HomePageState extends State<HomePage> {
           appState.setActiveLocation(activeLocation);
         });
       } catch (e) {
-        print('Error getting forecast: $e');
+        if (kDebugMode) {
+          print('Error getting forecast: $e');
+        }
         setState(() {
           _forecast = null;
           _locations = [];
@@ -120,6 +126,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Call super to ensure keep alive works
+
     final appState = Provider.of<AppState>(context);
 
     return Scaffold(
@@ -171,7 +179,9 @@ class _HomePageState extends State<HomePage> {
                                     });
                                   }
                                 } catch (e) {
-                                  print('Error getting forecast: $e');
+                                  if (kDebugMode) {
+                                    print('Error getting forecast: $e');
+                                  }
                                   if (mounted) {
                                     setState(() {
                                       _isLoading = false;
