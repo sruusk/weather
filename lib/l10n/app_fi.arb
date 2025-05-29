@@ -359,5 +359,9 @@
   "weatherWarnings": "Varoitukset",
   "@weatherWarnings": {
     "description": "Label for weather warnings"
+  },
+  "noWeatherWarningsForDay": "Ei säävaroituksia tälle päivälle",
+  "@noWeatherWarningsForDay": {
+    "description": "Message indicating no weather warnings for the day"
   }
 }

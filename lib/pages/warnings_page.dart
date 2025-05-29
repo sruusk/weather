@@ -24,9 +24,7 @@ class _WarningsPageState extends State<WarningsPage> {
   InAppWebViewSettings settings = InAppWebViewSettings(
       isInspectable: kDebugMode,
       mediaPlaybackRequiresUserGesture: false,
-      allowsInlineMediaPlayback: true,
-      iframeAllow: "camera; microphone",
-      iframeAllowFullscreen: true);
+      allowsInlineMediaPlayback: true);
 
   PullToRefreshController? pullToRefreshController;
   String url = "";
@@ -75,8 +73,6 @@ class _WarningsPageState extends State<WarningsPage> {
         language = appState.locale.languageCode;
       });
     }
-
-    print("Language: $language");
 
     if(theme != (Theme.of(context).brightness == Brightness.dark ? ".dark" : "")) {
       setState(() {
@@ -168,6 +164,7 @@ class _WarningsPageState extends State<WarningsPage> {
 
   _loadContent() async {
     // Determine asset paths
+    if(theme == null) return;
     final htmlPath = 'assets/smartmet-alert-client/index$theme.html';
     final jsPath = 'assets/smartmet-alert-client/index.js';
     // Load template and script

@@ -41,6 +41,17 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
       curve: Curves.easeInOut,
     );
 
+    // Listener to reset the selected day when closing completes
+    _animationController.addStatusListener((status) {
+      print('Animation status: $status');
+      if ((status == AnimationStatus.dismissed) && _selectedDayIndex != null) {
+        setState(() {
+          _selectedDayIndex = null;
+        });
+      }
+    });
+
+
     // Get the singleton instance and load alerts
     final weatherAlertsInstance = WeatherAlerts.instance();
     if(weatherAlertsInstance.hasLoaded) {
@@ -108,7 +119,7 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Text(
-          'No warnings for this day',
+          AppLocalizations.of(context)!.noWeatherWarningsForDay,
           style: TextStyle(fontStyle: FontStyle.italic),
         ),
       );
@@ -221,7 +232,9 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
     final localizations = AppLocalizations.of(context)!;
 
     if (_weatherAlerts == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const SizedBox(
+        height: 71,
+        child: Center(child: CircularProgressIndicator()));
     }
 
     final today = DateTime.now();
@@ -263,13 +276,17 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
                     onTap: () {
                       setState(() {
                         if (_selectedDayIndex == i) {
-                          // If tapping the already selected day, deselect it
-                          _selectedDayIndex = null;
+                          // Trigger reverse animation; _selectedDayIndex is reset in the status listener.
                           _animationController.reverse();
                         } else {
-                          // Otherwise, select the new day
-                          _selectedDayIndex = i;
-                          _animationController.forward();
+                          // If no day selected, start forward animation.
+                          if (_selectedDayIndex == null) {
+                            _selectedDayIndex = i;
+                            _animationController.forward();
+                          } else {
+                            // If switching from one day to another, update immediately.
+                            _selectedDayIndex = i;
+                          }
                         }
                       });
                     },

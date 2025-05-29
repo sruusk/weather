@@ -47,6 +47,12 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.location != widget.location) {
       _stationsFuture = _getStations();
+      _stationsFuture.then((_) {
+        // Reset the page controller to the first page when location changes
+        if (_pageController.hasClients) {
+          _pageController.jumpToPage(0);
+        }
+      });
       _pageController.jumpToPage(0); // Reset to first page when location changes
     }
   }

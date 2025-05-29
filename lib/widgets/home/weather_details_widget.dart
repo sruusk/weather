@@ -33,8 +33,8 @@ class _WeatherDetailsState extends State<WeatherDetails> {
   late final WeatherRadarController _radarCtrl;
 
   // Arrays of country codes that define if radar and observations should be shown
-  final List<String> _radarEnabledCountries = ['FI'];
-  final List<String> _observationsEnabledCountries = ['FI'];
+  final List<String> _radarEnabledCountries = ['FI', 'AX']; // Finland and Åland Islands
+  final List<String> _observationsEnabledCountries = ['FI', 'AX'];
 
   void _handleLocationChanged(int index) {
     if (widget.selectedIndex != index) {

@@ -619,6 +619,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Warnings'**
   String get weatherWarnings;
+
+  /// Message indicating no weather warnings for the current day
+  ///
+  /// In en, this message translates to:
+  /// **'No weather warnings for today'**
+  String get noWeatherWarningsForDay;
 }
 
 class _AppLocalizationsDelegate

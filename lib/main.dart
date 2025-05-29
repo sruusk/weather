@@ -22,6 +22,7 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => {
     PointerDeviceKind.touch,
     PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
     PointerDeviceKind.stylus,
     PointerDeviceKind.invertedStylus,
   };

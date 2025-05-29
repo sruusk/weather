@@ -359,5 +359,9 @@
   "weatherWarnings": "Warnings",
   "@weatherWarnings": {
     "description": "Label for weather warnings"
+  },
+  "noWeatherWarningsForDay": "No weather warnings for today",
+  "@noWeatherWarningsForDay": {
+    "description": "Message indicating no weather warnings for the current day"
   }
 }

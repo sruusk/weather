@@ -278,4 +278,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get weatherWarnings => 'Varoitukset';
+
+  @override
+  String get noWeatherWarningsForDay => 'Ei säävaroituksia tälle päivälle';
 }
