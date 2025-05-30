@@ -1,19 +1,16 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:pmtiles/pmtiles.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../app_state.dart';
 
 class WeatherRadarWidget extends StatefulWidget {
   final WeatherRadarController controller;
@@ -117,8 +114,6 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
   @override
   Widget build(BuildContext context) {
     debugPrint('🌐 WeatherRadarWidget.build called');
-
-    final appState = Provider.of<AppState>(context);
 
     return Column(
       children: [

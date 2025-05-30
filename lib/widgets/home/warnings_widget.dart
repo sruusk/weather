@@ -42,8 +42,9 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
     );
 
     // Listener to reset the selected day when closing completes
+    // _selectedDayIndex  needs to be reset only after the animation completes
+    // otherwise the animation will not play correctly.
     _animationController.addStatusListener((status) {
-      print('Animation status: $status');
       if ((status == AnimationStatus.dismissed) && _selectedDayIndex != null) {
         setState(() {
           _selectedDayIndex = null;
@@ -110,7 +111,6 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
     }
   }
 
-  // Helper method to build the warnings list for a selected day
   Widget _buildWarningsList(DateTime selectedDay) {
     final appState = Provider.of<AppState>(context);
     final alerts = _weatherAlerts!.alertsForLocation(widget.location, selectedDay);
@@ -131,7 +131,7 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
       itemCount: alerts.length,
       itemBuilder: (context, index) {
         final alert = alerts[index];
-        // Get the appropriate language version based on app locale
+
         final languageCode = appState.locale.languageCode;
         final WeatherEvent event;
 
@@ -143,7 +143,6 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
           event = alert.en;
         }
 
-        // Create an expandable warning item
         return _buildWarningItem(event);
       },
     );

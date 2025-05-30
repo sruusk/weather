@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weather/data/location.dart';
 import 'package:weather/widgets/home/sunrise_sunset_widget.dart';
-import 'package:intl/intl.dart';
 
 void main() {
   group('SunriseSunsetWidget', () {

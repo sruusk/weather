@@ -1,6 +1,6 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:xml/xml.dart' as xml;
 
 import 'location.dart';
@@ -32,7 +32,7 @@ class ObservationData {
 
   /// Clears all cached data
   void clearCache() {
-    print('Clearing all cached data');
+    if(kDebugMode) print('Clearing all cached data');
     _allStationsCache = null;
     _observationsCache.clear();
     _stationObservationsCache.clear();
@@ -40,7 +40,7 @@ class ObservationData {
 
   /// Clears cached data for a specific location
   void clearCacheForLocation(Location location) {
-    print('Clearing cached data for location ${location.lat},${location.lon}');
+    if(kDebugMode) print('Clearing cached data for location ${location.lat},${location.lon}');
     // We don't need to clear location-specific caches anymore since we're not using coordinates as keys
   }
   static const String baseUrl = 'https://opendata.fmi.fi/wfs?request=getFeature';
@@ -90,7 +90,7 @@ class ObservationData {
           if (result.length >= 5) break;
         }
       } catch (e) {
-        print('Error getting observations for station ${station.name}: $e');
+        if(kDebugMode) print('Error getting observations for station ${station.name}: $e');
         // Continue to the next station
       }
     }
@@ -103,7 +103,7 @@ class ObservationData {
   Future<List<ObservationStationLocation>> _getObservationStations(double lat, double lon) async {
     // Check if we have cached all stations
     if (_allStationsCache != null) {
-      print('Using cached stations data');
+      if(kDebugMode) print('Using cached stations data');
 
       // Calculate distances for all stations
       final stations = _allStationsCache!.map((station) {
@@ -124,7 +124,7 @@ class ObservationData {
       return stations;
     }
 
-    print('Fetching new stations data');
+    if(kDebugMode) print('Fetching new stations data');
     final url = '$baseUrl&storedquery_id=fmi::ef::stations';
     final response = await http.get(Uri.parse(url));
 
@@ -156,7 +156,7 @@ class ObservationData {
         if (!isWeatherStation) continue;
 
         // Get station identifier
-        final identifier = facility.findElements('gml:identifier').first.text;
+        final identifier = facility.findElements('gml:identifier').first.innerText;
 
         // Get station name, region, and country
         final nameElements = facility.findElements('gml:name');
@@ -165,7 +165,7 @@ class ObservationData {
 
         for (final nameElement in nameElements) {
           final codeSpace = nameElement.getAttribute('codeSpace') ?? '';
-          final text = nameElement.text;
+          final text = nameElement.innerText;
 
           if (codeSpace.endsWith('name')) {
             name = text;
@@ -180,7 +180,7 @@ class ObservationData {
 
         // Get station coordinates
         final point = facility.findAllElements('gml:Point').first;
-        final pos = point.findElements('gml:pos').first.text.trim().split(' ');
+        final pos = point.findElements('gml:pos').first.innerText.trim().split(' ');
         final stationLat = double.parse(pos[0]);
         final stationLon = double.parse(pos[1]);
 
@@ -198,7 +198,7 @@ class ObservationData {
           distance: distance,
         ));
       } catch (e) {
-        print('Error parsing station: $e');
+        if(kDebugMode) print('Error parsing station: $e');
       }
     }
 
@@ -224,11 +224,11 @@ class ObservationData {
 
     // Check if we have cached data for this station
     if (_observationsCache.containsKey(cacheKey)) {
-      print('Using cached observations data for station ${station.name}');
+      if(kDebugMode) print('Using cached observations data for station ${station.name}');
       return _observationsCache[cacheKey]!;
     }
 
-    print('Fetching new observations data for station ${station.name}');
+    if(kDebugMode) print('Fetching new observations data for station ${station.name}');
     final url = '$baseUrl&fmisid=${station.identifier}&storedquery_id=fmi::observations::weather::timevaluepair&parameters=${observationStationParameters.join(',')}';
     final response = await http.get(Uri.parse(url));
 
@@ -255,7 +255,7 @@ class ObservationData {
     if (timeElements.isEmpty) {
       throw Exception('No time data for station ${station.name}');
     }
-    final time = DateTime.parse(timeElements.first.text);
+    final time = DateTime.parse(timeElements.first.innerText);
 
     // Safely get temperature and precipitation history
     List<TimeSeries> temperatureHistory = [];
@@ -281,7 +281,7 @@ class ObservationData {
     final pressure = timeSeriesData.length > 8 ? _lastObservation(timeSeriesData[8])?.value : null;
     final cloudBase = timeSeriesData.length > 9 ? _lastObservation(timeSeriesData[9])?.value : null;
     final visibility = timeSeriesData.length > 10 ? _lastObservation(timeSeriesData[10])?.value : null;
-    final weather = timeSeriesData.length > 11 ? _lastObservation(timeSeriesData[11])?.value : null;
+    //final weather = timeSeriesData.length > 11 ? _lastObservation(timeSeriesData[11])?.value : null;
 
     final result = ObservationStation(
       location: station,
@@ -314,7 +314,6 @@ class ObservationData {
 
     for (final point in points) {
       try {
-        final test = point.childElements.first;
         final timeElements = point.childElements.first.findElements('wml2:time');
         final valueElements = point.childElements.first.findElements('wml2:value');
 
@@ -325,8 +324,8 @@ class ObservationData {
         final timeElement = timeElements.first;
         final valueElement = valueElements.first;
 
-        final time = DateTime.parse(timeElement.text);
-        final value = double.tryParse(valueElement.text) ?? double.nan;
+        final time = DateTime.parse(timeElement.innerText);
+        final value = double.tryParse(valueElement.innerText) ?? double.nan;
 
         if(value.isNaN) {
           continue; // Skip this point if the value is not a number
@@ -334,7 +333,7 @@ class ObservationData {
 
         result.add(TimeSeries(time: time, value: value));
       } catch (e) {
-        print('Error parsing time series point: $e');
+        if(kDebugMode) print('Error parsing time series point: $e');
         // Continue to the next point if there's an error
       }
     }
