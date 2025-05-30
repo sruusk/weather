@@ -255,13 +255,13 @@ class WeatherData {
     );
   }
 
-  Future<List<Location>> getAutoCompleteResults(String query) async {
+  Future<List<Location>> getAutoCompleteResults(String query, { lang = 'fi' }) async {
     if (kDebugMode) {
       print('Getting autocomplete results for $query...');
     }
     final url = Uri.parse(
       'https://geocoding-api.open-meteo.com/v1/search'
-      '?name=$query&language=fi&count=50&format=json', // TODO: add language dynamically
+      '?name=$query&language=$lang&count=50&format=json',
     );
     final response = await get(url);
     if (response.statusCode != 200) {

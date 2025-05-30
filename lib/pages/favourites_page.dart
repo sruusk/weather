@@ -41,7 +41,8 @@ class _FavouritesPageState extends State<FavouritesPage> {
     });
 
     try {
-      final results = await _weatherData.getAutoCompleteResults(query);
+      final lang = Provider.of<AppState>(context, listen: false).locale.languageCode;
+      final results = await _weatherData.getAutoCompleteResults(query, lang: lang);
       setState(() {
         _searchResults = results;
         _isSearching = false;

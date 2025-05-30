@@ -60,6 +60,7 @@ class MyApp extends StatelessWidget {
       builder: (context, appState, child) {
         return MaterialApp(
           title: 'Weather App',
+          debugShowCheckedModeBanner: true,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.blue,
