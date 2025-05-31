@@ -4,11 +4,59 @@ import 'package:weather/pages/about_page.dart';
 import 'package:weather/pages/settings_page.dart';
 import 'package:weather/pages/weather_symbols_page.dart';
 
+const String _listViewRoute = '/'; // Route for the list of cards view
+
 class OtherPage extends StatelessWidget {
-  const OtherPage({super.key});
+  final GlobalKey<NavigatorState>? navigatorKey; // Add this
+
+  const OtherPage({super.key, this.navigatorKey}); // Modify constructor
+
+  // Route names for sub-pages, accessible for navigation
+  static const String settingsRoute = '/settings';
+  static const String weatherSymbolsRoute = '/weather-symbols';
+  static const String aboutRoute = '/about';
 
   @override
   Widget build(BuildContext context) {
+    return Navigator(
+      key: navigatorKey, // Use the passed key
+      initialRoute: _listViewRoute, // Display the list view by default
+      onGenerateRoute: (RouteSettings settings) {
+        Widget pageContent;
+        switch (settings.name) {
+          case _listViewRoute:
+            pageContent = const _OtherPageListView();
+            break;
+          case settingsRoute:
+            pageContent = const SettingsPage();
+            break;
+          case weatherSymbolsRoute:
+            pageContent = const WeatherSymbolsPage();
+            break;
+          case aboutRoute:
+            pageContent = const AboutPage();
+            break;
+          default:
+            // Fallback to the list view if route is unknown
+            pageContent = const _OtherPageListView();
+            break;
+        }
+        return MaterialPageRoute<dynamic>(
+          builder: (context) => pageContent,
+          settings: settings,
+        );
+      },
+    );
+  }
+}
+
+// Private widget for displaying the list of navigation cards within OtherPage
+class _OtherPageListView extends StatelessWidget {
+  const _OtherPageListView();
+
+  @override
+  Widget build(BuildContext context) {
+    // This context is a descendant of OtherPage's Navigator.
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -20,7 +68,7 @@ class OtherPage extends StatelessWidget {
             children: [
               Text(
                 localizations.otherPageTitle,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               _buildNavigationCard(
@@ -28,11 +76,8 @@ class OtherPage extends StatelessWidget {
                 Icons.settings,
                 localizations.settingsPageTitle,
                 localizations.settingsPageDescription,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsPage(),
-                  ),
-                ),
+                // Navigate using OtherPage's Navigator to the defined sub-route
+                () => Navigator.of(context).pushNamed(OtherPage.settingsRoute),
               ),
               const SizedBox(height: 12),
               _buildNavigationCard(
@@ -40,11 +85,7 @@ class OtherPage extends StatelessWidget {
                 Icons.cloud,
                 localizations.weatherSymbolsPageTitle,
                 localizations.weatherSymbolsPageDescription,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const WeatherSymbolsPage(),
-                  ),
-                ),
+                () => Navigator.of(context).pushNamed(OtherPage.weatherSymbolsRoute),
               ),
               const SizedBox(height: 12),
               _buildNavigationCard(
@@ -52,11 +93,7 @@ class OtherPage extends StatelessWidget {
                 Icons.info,
                 localizations.aboutPageTitle,
                 localizations.aboutPageDescription,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const AboutPage(),
-                  ),
-                ),
+                () => Navigator.of(context).pushNamed(OtherPage.aboutRoute),
               ),
             ],
           ),
@@ -65,6 +102,7 @@ class OtherPage extends StatelessWidget {
     );
   }
 
+  // Helper method to build navigation cards, now part of _OtherPageListView
   Widget _buildNavigationCard(
     BuildContext context,
     IconData icon,

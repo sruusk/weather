@@ -14,7 +14,7 @@ class FavouritesPage extends StatefulWidget {
   State<FavouritesPage> createState() => _FavouritesPageState();
 }
 
-class _FavouritesPageState extends State<FavouritesPage> {
+class _FavouritesPageState extends State<FavouritesPage> with AutomaticKeepAliveClientMixin<FavouritesPage> {
   final TextEditingController _searchController = TextEditingController();
   final WeatherData _weatherData = WeatherData();
   List<Location> _searchResults = [];
@@ -25,6 +25,9 @@ class _FavouritesPageState extends State<FavouritesPage> {
     _searchController.dispose();
     super.dispose();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   // Search for locations as the user types
   void _onSearchChanged(String query) async {
@@ -78,6 +81,8 @@ class _FavouritesPageState extends State<FavouritesPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Call super to ensure keep alive works
+
     final localizations = AppLocalizations.of(context)!;
     final appState = Provider.of<AppState>(context);
     final favouriteLocations = appState.favouriteLocations;

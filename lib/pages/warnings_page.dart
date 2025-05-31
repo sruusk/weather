@@ -15,7 +15,7 @@ class WarningsPage extends StatefulWidget {
   State<WarningsPage> createState() => _WarningsPageState();
 }
 
-class _WarningsPageState extends State<WarningsPage> {
+class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClientMixin<WarningsPage> {
   final GlobalKey webViewKey = GlobalKey();
   String? theme;
   String? language;
@@ -60,6 +60,9 @@ class _WarningsPageState extends State<WarningsPage> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadContent();
@@ -67,6 +70,8 @@ class _WarningsPageState extends State<WarningsPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Call super to ensure keep alive works
+
     final appState = Provider.of<AppState>(context);
     if(language != appState.locale.languageCode) {
       setState(() {

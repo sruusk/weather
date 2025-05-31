@@ -9,24 +9,33 @@ import 'package:weather/l10n/app_localizations.g.dart';
 
 // Import app state
 import 'app_state.dart';
-import 'pages/about_page.dart';
 import 'pages/favourites_page.dart';
 // Import pages
 import 'pages/home_page.dart';
 import 'pages/other_page.dart';
-import 'pages/settings_page.dart';
 import 'pages/warnings_page.dart';
-import 'pages/weather_symbols_page.dart';
+
+// Define route names
+class MainRoutes {
+  static const String home = '/';
+  static const String favourites = '/favourites';
+  static const String warnings = '/warnings';
+  static const String other = '/other';
+  // Routes for pages under 'OtherPage'
+  static const String settings = '/other/settings';
+  static const String weatherSymbols = '/other/weather_symbols';
+  static const String about = '/other/about';
+}
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.trackpad,
-    PointerDeviceKind.stylus,
-    PointerDeviceKind.invertedStylus,
-  };
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+      };
 }
 
 void main() async {
@@ -89,7 +98,30 @@ class MyApp extends StatelessWidget {
             Locale('fi'), // Finnish
           ],
           scrollBehavior: MyCustomScrollBehavior(),
-          home: const MainScreen(),
+          initialRoute: MainRoutes.home,
+          onGenerateRoute: (settings) {
+            Widget page;
+            // For main routes, always show MainScreen.
+            // MainScreen's internal Navigator will handle displaying the correct page.
+            switch (settings.name) {
+              case MainRoutes.home:
+              case MainRoutes.favourites:
+              case MainRoutes.warnings:
+              case MainRoutes.other:
+                page =
+                    const MainScreen(); // MainScreen will use the route from 'settings'
+                break;
+              // Sub-routes like MainRoutes.settings, .weatherSymbols, .about
+              // are handled by the Navigator within OtherPage, so they are not cased here.
+              default:
+                // Fallback to MainScreen, which will likely show its default page (e.g., home)
+                page = const MainScreen();
+            }
+            return MaterialPageRoute(builder: (_) => page, settings: settings);
+          },
+          routes: {
+            // Routes are handled by onGenerateRoute
+          },
         );
       },
     );
@@ -104,54 +136,123 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  PageController? _pageController; // Changed to nullable
+  int _currentDisplayIndex = 0;
+  bool _dependenciesInitialized = false; // Flag to run initialization once
+  final GlobalKey<NavigatorState> _otherPageNavigatorKey =
+      GlobalKey<NavigatorState>(); // Key for OtherPage's Navigator
 
-  // Main navigation pages
-  final List<Widget> _mainPages = [
-    const HomePage(key: PageStorageKey('home_page')),
-    const FavouritesPage(key: PageStorageKey('favourites_page')),
-    const WarningsPage(key: PageStorageKey('warnings_page')),
-    const OtherPage(key: PageStorageKey('other_page')),
-  ];
+  // Define the main pages directly in a list for PageView
+  late final List<Widget> _mainPages; // Make it late final
+
+  @override
+  void initState() {
+    super.initState();
+    _mainPages = [
+      const HomePage(key: PageStorageKey('home_page')),
+      const FavouritesPage(key: PageStorageKey('favourites_page')),
+      const WarningsPage(key: PageStorageKey('warnings_page')),
+      OtherPage(
+          key: PageStorageKey('other_page'),
+          navigatorKey: _otherPageNavigatorKey), // Pass the key
+    ];
+    // _pageController will be initialized in didChangeDependencies
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_dependenciesInitialized) {
+      final String? initialRouteName = ModalRoute.of(context)?.settings.name;
+      _currentDisplayIndex = _getSelectedIndex(initialRouteName);
+      _pageController = PageController(initialPage: _currentDisplayIndex);
+      _dependenciesInitialized = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController?.dispose();
+    super.dispose();
+  }
 
   void _onItemTapped(int index) {
-    // Simply update the selected index to navigate to the new tab
-    // No need to handle sub-page navigation as it's now handled in OtherPage
-    setState(() => _selectedIndex = index);
+    if (_currentDisplayIndex != index) {
+      _pageController?.jumpToPage(index);
+      // If we are moving away from the 'Other' page, reset its navigator
+      if (_currentDisplayIndex == 3 && index != 3) {
+        _otherPageNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+      }
+    } else if (index == 3 && _currentDisplayIndex == 3) {
+      // If we are on the 'Other' page and tap it again, reset its navigator
+      _otherPageNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    }
+  }
+
+  int _getSelectedIndex(String? currentRouteName) {
+    if (currentRouteName == MainRoutes.home) return 0;
+    if (currentRouteName == MainRoutes.favourites) return 1;
+    if (currentRouteName == MainRoutes.warnings) return 2;
+    if (currentRouteName == MainRoutes.other) return 3;
+    // If MainScreen is loaded via a sub-route of OtherPage initially (e.g. deep link)
+    // we might want to default to the 'Other' tab.
+    if (currentRouteName == MainRoutes.settings ||
+        currentRouteName == MainRoutes.weatherSymbols ||
+        currentRouteName == MainRoutes.about) {
+      return 3;
+    }
+    return 0; // Default to home
   }
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
     final isWideScreen = MediaQuery.of(context).size.width > 600;
+
+    if (!_dependenciesInitialized || _pageController == null) {
+      // Return a loading indicator or an empty container if not initialized yet
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       body: Row(
         children: [
-          // Navigation Rail for wide screens
-          if (isWideScreen) _buildNavigationRail(context),
-
-          // Main content
+          if (isWideScreen) _buildNavigationRail(context, _currentDisplayIndex),
           Expanded(
             child: SafeArea(
-              child: IndexedStack(
-                index: _selectedIndex,
-                children: _mainPages,
+              child: PageView.builder(
+                controller:
+                    _pageController!, // Use null assertion as it's checked
+                itemCount: _mainPages.length,
+                itemBuilder: (context, index) {
+                  return _mainPages[index];
+                },
+                onPageChanged: (index) {
+                  int previousIndex = _currentDisplayIndex;
+                  setState(() {
+                    _currentDisplayIndex = index;
+                  });
+                  // If we swiped away from the 'Other' page, reset its navigator
+                  if (previousIndex == 3 && index != 3) {
+                    _otherPageNavigatorKey.currentState
+                        ?.popUntil((route) => route.isFirst);
+                  }
+                },
               ),
             ),
           ),
         ],
       ),
-      // Bottom Navigation Bar for narrow screens
-      bottomNavigationBar: isWideScreen ? null : _buildBottomNavigationBar(context),
+      bottomNavigationBar: isWideScreen
+          ? null
+          : _buildBottomNavigationBar(context, _currentDisplayIndex),
     );
   }
 
-  Widget _buildNavigationRail(BuildContext context) {
+  Widget _buildNavigationRail(BuildContext context, int selectedIndex) {
     final localizations = AppLocalizations.of(context)!;
 
     return NavigationRail(
-      selectedIndex: _selectedIndex,
+      selectedIndex: selectedIndex,
       onDestinationSelected: _onItemTapped,
       labelType: NavigationRailLabelType.all,
       destinations: [
@@ -175,11 +276,11 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildBottomNavigationBar(BuildContext context) {
+  Widget _buildBottomNavigationBar(BuildContext context, int selectedIndex) {
     final localizations = AppLocalizations.of(context)!;
 
     return BottomNavigationBar(
-      currentIndex: _selectedIndex,
+      currentIndex: selectedIndex,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
       items: [
