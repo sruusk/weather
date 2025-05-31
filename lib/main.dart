@@ -13,6 +13,7 @@ import 'pages/about_page.dart';
 import 'pages/favourites_page.dart';
 // Import pages
 import 'pages/home_page.dart';
+import 'pages/other_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/warnings_page.dart';
 import 'pages/weather_symbols_page.dart';
@@ -105,84 +106,100 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
+  // Main navigation pages
+  final List<Widget> _mainPages = [
     const HomePage(key: PageStorageKey('home_page')),
     const FavouritesPage(key: PageStorageKey('favourites_page')),
     const WarningsPage(key: PageStorageKey('warnings_page')),
-    const WeatherSymbolsPage(key: PageStorageKey('weather_symbols_page')),
-    const SettingsPage(key: PageStorageKey('settings_page')),
-    const AboutPage(key: PageStorageKey('about_page')),
+    const OtherPage(key: PageStorageKey('other_page')),
   ];
 
   void _onItemTapped(int index) {
+    // Simply update the selected index to navigate to the new tab
+    // No need to handle sub-page navigation as it's now handled in OtherPage
     setState(() => _selectedIndex = index);
-    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _selectedIndex != 0
-          ? AppBar(title: Text(_getTitle(context, _selectedIndex)))
-          : null,
-      drawer: _buildDrawer(context),
-      body: SafeArea(
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
-      ),
-    );
-  }
-
-  Drawer _buildDrawer(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
+    return Scaffold(
+      body: Row(
         children: [
-          DrawerHeader(
-            decoration:
-            BoxDecoration(color: Theme.of(context).colorScheme.surfaceBright),
-            child: Text(localizations.appTitle, style: TextStyle(fontSize: 24)),
+          // Navigation Rail for wide screens
+          if (isWideScreen) _buildNavigationRail(context),
+
+          // Main content
+          Expanded(
+            child: SafeArea(
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _mainPages,
+              ),
+            ),
           ),
-          _buildTile(Icons.home, localizations.homePageTitle, 0),
-          _buildTile(Icons.favorite, localizations.favouritesPageTitle, 1),
-          _buildTile(Icons.warning, localizations.warningsPageTitle, 2),
-          _buildTile(Icons.cloud, localizations.weatherSymbolsPageTitle, 3),
-          _buildTile(Icons.settings, localizations.settingsPageTitle, 4),
-          _buildTile(Icons.info, localizations.aboutPageTitle, 5),
         ],
       ),
+      // Bottom Navigation Bar for narrow screens
+      bottomNavigationBar: isWideScreen ? null : _buildBottomNavigationBar(context),
     );
   }
 
-  ListTile _buildTile(IconData icon, String title, int index) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      selected: _selectedIndex == index,
-      onTap: () => _onItemTapped(index),
+  Widget _buildNavigationRail(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    return NavigationRail(
+      selectedIndex: _selectedIndex,
+      onDestinationSelected: _onItemTapped,
+      labelType: NavigationRailLabelType.all,
+      destinations: [
+        NavigationRailDestination(
+          icon: const Icon(Icons.home),
+          label: Text(localizations.homePageTitle),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.favorite),
+          label: Text(localizations.favouritesPageTitle),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.warning),
+          label: Text(localizations.warningsPageTitle),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.more_horiz),
+          label: Text(localizations.otherPageTitle),
+        ),
+      ],
     );
   }
 
-  String _getTitle(BuildContext context, int index) {
-    final l = AppLocalizations.of(context)!;
-    switch (index) {
-      case 0:
-        return l.homePageTitle;
-      case 1:
-        return l.favouritesPageTitle;
-      case 2:
-        return l.warningsPageTitle;
-      case 3:
-        return l.weatherSymbolsPageTitle;
-      case 4:
-        return l.settingsPageTitle;
-      case 5:
-        return l.aboutPageTitle;
-      default:
-        return l.appTitle;
-    }
+  Widget _buildBottomNavigationBar(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    return BottomNavigationBar(
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+      type: BottomNavigationBarType.fixed,
+      items: [
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.home),
+          label: localizations.homePageTitle,
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.favorite),
+          label: localizations.favouritesPageTitle,
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.warning),
+          label: localizations.warningsPageTitle,
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.more_horiz),
+          label: localizations.otherPageTitle,
+        ),
+      ],
+    );
   }
 }

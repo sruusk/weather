@@ -281,4 +281,18 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get noWeatherWarningsForDay => 'Ei säävaroituksia tälle päivälle';
+
+  @override
+  String get otherPageTitle => 'Muut';
+
+  @override
+  String get settingsPageDescription =>
+      'Määritä sovelluksen asetukset ja määritykset';
+
+  @override
+  String get weatherSymbolsPageDescription =>
+      'Katso ja opi sovelluksessa käytetyistä sääsymboleista';
+
+  @override
+  String get aboutPageDescription => 'Tietoa tietolähteistä ja lisensseistä';
 }

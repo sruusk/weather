@@ -625,6 +625,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No weather warnings for today'**
   String get noWeatherWarningsForDay;
+
+  /// Title for the other page
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get otherPageTitle;
+
+  /// Description for the settings page in the other page
+  ///
+  /// In en, this message translates to:
+  /// **'Configure app settings and preferences'**
+  String get settingsPageDescription;
+
+  /// Description for the weather symbols page in the other page
+  ///
+  /// In en, this message translates to:
+  /// **'View and learn about weather symbols used in the app'**
+  String get weatherSymbolsPageDescription;
+
+  /// Description for the about page in the other page
+  ///
+  /// In en, this message translates to:
+  /// **'Information about data sources and licenses'**
+  String get aboutPageDescription;
 }
 
 class _AppLocalizationsDelegate

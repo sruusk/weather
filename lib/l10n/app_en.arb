@@ -363,5 +363,21 @@
   "noWeatherWarningsForDay": "No weather warnings for today",
   "@noWeatherWarningsForDay": {
     "description": "Message indicating no weather warnings for the current day"
+  },
+  "otherPageTitle": "Other",
+  "@otherPageTitle": {
+    "description": "Title for the other page"
+  },
+  "settingsPageDescription": "Configure app settings and preferences",
+  "@settingsPageDescription": {
+    "description": "Description for the settings page in the other page"
+  },
+  "weatherSymbolsPageDescription": "View and learn about weather symbols used in the app",
+  "@weatherSymbolsPageDescription": {
+    "description": "Description for the weather symbols page in the other page"
+  },
+  "aboutPageDescription": "Information about data sources and licenses",
+  "@aboutPageDescription": {
+    "description": "Description for the about page in the other page"
   }
 }

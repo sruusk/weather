@@ -363,5 +363,21 @@
   "noWeatherWarningsForDay": "Ei säävaroituksia tälle päivälle",
   "@noWeatherWarningsForDay": {
     "description": "Message indicating no weather warnings for the day"
+  },
+  "otherPageTitle": "Muut",
+  "@otherPageTitle": {
+    "description": "Title for the other page"
+  },
+  "settingsPageDescription": "Määritä sovelluksen asetukset ja määritykset",
+  "@settingsPageDescription": {
+    "description": "Description for the settings page in the other page"
+  },
+  "weatherSymbolsPageDescription": "Katso ja opi sovelluksessa käytetyistä sääsymboleista",
+  "@weatherSymbolsPageDescription": {
+    "description": "Description for the weather symbols page in the other page"
+  },
+  "aboutPageDescription": "Tietoa tietolähteistä ja lisensseistä",
+  "@aboutPageDescription": {
+    "description": "Description for the about page in the other page"
   }
 }

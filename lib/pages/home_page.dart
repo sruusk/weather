@@ -138,16 +138,6 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
     final appState = Provider.of<AppState>(context);
 
     return Scaffold(
-      appBar: _forecast == null || _locations.isEmpty
-          ? AppBar(
-              title: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
-            )
-          : null,
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -197,16 +187,6 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                                 }
                               },
                             ),
-                            Positioned(
-                              top: 10,
-                              left: 10,
-                              child: IconButton(
-                                icon: const Icon(Icons.menu),
-                                onPressed: () {
-                                  Scaffold.of(context).openDrawer();
-                                },
-                              )
-                            )
                           ],
                         ),
                       ],

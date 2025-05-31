@@ -281,4 +281,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noWeatherWarningsForDay => 'No weather warnings for today';
+
+  @override
+  String get otherPageTitle => 'Other';
+
+  @override
+  String get settingsPageDescription =>
+      'Configure app settings and preferences';
+
+  @override
+  String get weatherSymbolsPageDescription =>
+      'View and learn about weather symbols used in the app';
+
+  @override
+  String get aboutPageDescription =>
+      'Information about data sources and licenses';
 }
