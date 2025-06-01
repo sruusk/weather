@@ -6,26 +6,133 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
+import 'package:go_router/go_router.dart';
 
 // Import app state
 import 'app_state.dart';
-import 'pages/favourites_page.dart';
 // Import pages
+import 'pages/favourites_page.dart';
 import 'pages/home_page.dart';
-import 'pages/other_page.dart';
+import 'pages/settings_page.dart';
+import 'pages/weather_symbols_page.dart';
+import 'pages/about_page.dart';
 import 'pages/warnings_page.dart';
+import 'pages/other_page.dart'; // Added import for OtherPageListView
+import 'routes.dart'; // Added import for AppRoutes
 
-// Define route names
-class MainRoutes {
-  static const String home = '/';
-  static const String favourites = '/favourites';
-  static const String warnings = '/warnings';
-  static const String other = '/other';
-  // Routes for pages under 'OtherPage'
-  static const String settings = '/other/settings';
-  static const String weatherSymbols = '/other/weather_symbols';
-  static const String about = '/other/about';
+class NoTransitionPage<T> extends CustomTransitionPage<T> {
+  const NoTransitionPage({
+    required super.child,
+    super.name,
+    super.arguments,
+    super.restorationId,
+    super.key,
+  }) : super(
+          transitionsBuilder: _transitionsBuilder,
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        );
+
+  static Widget _transitionsBuilder(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  }
 }
+
+// Helper for creating branches for StatefulShellRoute
+StatefulShellBranch _buildStatefulBranch(AppRouteInfo routeInfo, Widget childWidget, {GlobalKey<NavigatorState>? navigatorKey}) {
+  return StatefulShellBranch(
+    navigatorKey: navigatorKey,
+    routes: <RouteBase>[
+      GoRoute(
+        path: routeInfo.path,
+        name: routeInfo.name,
+        pageBuilder: (context, state) => NoTransitionPage(
+          key: state.pageKey,
+          child: childWidget,
+        ),
+      ),
+    ],
+  );
+}
+
+late final GoRouter _router = GoRouter(
+  initialLocation: AppRoutes.home.path,
+  routes: <RouteBase>[
+    ShellRoute(
+      builder: (BuildContext context, GoRouterState state, Widget child) {
+        // This child is either the StatefulNavigationShell (for Home/Fav/Warn/Other)
+        // or the actual page widget for 'Other' routes.
+        return MainScreen(child: child);
+      },
+      routes: <RouteBase>[
+        // StatefulShellRoute for Home, Favourites, Warnings, Other
+        StatefulShellRoute.indexedStack(
+          builder: (BuildContext context, GoRouterState state,
+              StatefulNavigationShell navigationShell) {
+            // This navigationShell is the widget that manages and displays
+            // the current active branch (Home, Favourites, Warnings, or Other).
+            // It becomes the 'child' for the parent ShellRoute's builder (MainScreen).
+            return navigationShell;
+          },
+          branches: <StatefulShellBranch>[
+            _buildStatefulBranch(AppRoutes.home, const HomePage(key: PageStorageKey('home_page'))),
+            _buildStatefulBranch(AppRoutes.favourites, const FavouritesPage(key: PageStorageKey('favourites_page'))),
+            _buildStatefulBranch(AppRoutes.warnings, const WarningsPage(key: PageStorageKey('warnings_page'))),
+            // Added 'Other' as a stateful branch with its nested children
+            StatefulShellBranch(
+              navigatorKey: GlobalKey<NavigatorState>(),
+              routes: <RouteBase>[
+                GoRoute(
+                  path: AppRoutes.other.path,
+                  name: AppRoutes.other.name,
+                  pageBuilder: (context, state) => NoTransitionPage(
+                    key: state.pageKey,
+                    child: const OtherPageListView(key: PageStorageKey('other_links_page')),
+                  ),
+                  routes: <RouteBase>[
+                    GoRoute(
+                      path: AppRoutes.settings.path,
+                      name: AppRoutes.settings.name,
+                      pageBuilder: (context, state) => NoTransitionPage(
+                        key: state.pageKey,
+                        child: const SettingsPage(key: PageStorageKey('settings_page')),
+                      ),
+                    ),
+                    GoRoute(
+                      path: AppRoutes.weatherSymbols.path,
+                      name: AppRoutes.weatherSymbols.name,
+                      pageBuilder: (context, state) => NoTransitionPage(
+                        key: state.pageKey,
+                        child: const WeatherSymbolsPage(key: PageStorageKey('weather_symbols_page')),
+                      ),
+                    ),
+                    GoRoute(
+                      path: AppRoutes.about.path,
+                      name: AppRoutes.about.name,
+                      pageBuilder: (context, state) => NoTransitionPage(
+                        key: state.pageKey,
+                        child: const AboutPage(key: PageStorageKey('about_page')),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+  errorBuilder: (context, state) => Scaffold(
+    appBar: AppBar(title: const Text('Error')),
+    body: Center(child: Text('Page not found: ${state.error}')),
+  ),
+);
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -45,8 +152,6 @@ void main() async {
     final availableVersion = await WebViewEnvironment.getAvailableVersion();
     assert(availableVersion != null,
         'Failed to find an installed WebView2 Runtime or non-stable Microsoft Edge installation.');
-
-    webViewEnvironment = await WebViewEnvironment.create();
   }
 
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
@@ -68,7 +173,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
-        return MaterialApp(
+        return MaterialApp.router(
           title: 'Weather App',
           debugShowCheckedModeBanner: true,
           theme: ThemeData(
@@ -94,34 +199,11 @@ class MyApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [
-            Locale('en'), // English
-            Locale('fi'), // Finnish
+            Locale('en'),
+            Locale('fi'),
           ],
           scrollBehavior: MyCustomScrollBehavior(),
-          initialRoute: MainRoutes.home,
-          onGenerateRoute: (settings) {
-            Widget page;
-            // For main routes, always show MainScreen.
-            // MainScreen's internal Navigator will handle displaying the correct page.
-            switch (settings.name) {
-              case MainRoutes.home:
-              case MainRoutes.favourites:
-              case MainRoutes.warnings:
-              case MainRoutes.other:
-                page =
-                    const MainScreen(); // MainScreen will use the route from 'settings'
-                break;
-              // Sub-routes like MainRoutes.settings, .weatherSymbols, .about
-              // are handled by the Navigator within OtherPage, so they are not cased here.
-              default:
-                // Fallback to MainScreen, which will likely show its default page (e.g., home)
-                page = const MainScreen();
-            }
-            return MaterialPageRoute(builder: (_) => page, settings: settings);
-          },
-          routes: {
-            // Routes are handled by onGenerateRoute
-          },
+          routerConfig: _router,
         );
       },
     );
@@ -129,122 +211,76 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final Widget child;
+
+  const MainScreen({super.key, required this.child});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  PageController? _pageController; // Changed to nullable
-  int _currentDisplayIndex = 0;
-  bool _dependenciesInitialized = false; // Flag to run initialization once
-  final GlobalKey<NavigatorState> _otherPageNavigatorKey =
-      GlobalKey<NavigatorState>(); // Key for OtherPage's Navigator
+  int _calculateSelectedIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.toString();
 
-  // Define the main pages directly in a list for PageView
-  late final List<Widget> _mainPages; // Make it late final
+    if (location.startsWith(AppRoutes.other.path)) return 3;
+    if (location.startsWith(AppRoutes.warnings.path)) return 2;
+    if (location.startsWith(AppRoutes.favourites.path)) return 1;
+    if (location.startsWith(AppRoutes.home.path)) return 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _mainPages = [
-      const HomePage(key: PageStorageKey('home_page')),
-      const FavouritesPage(key: PageStorageKey('favourites_page')),
-      const WarningsPage(key: PageStorageKey('warnings_page')),
-      OtherPage(
-          key: PageStorageKey('other_page'),
-          navigatorKey: _otherPageNavigatorKey), // Pass the key
-    ];
-    // _pageController will be initialized in didChangeDependencies
+    return 0; // Default
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_dependenciesInitialized) {
-      final String? initialRouteName = ModalRoute.of(context)?.settings.name;
-      _currentDisplayIndex = _getSelectedIndex(initialRouteName);
-      _pageController = PageController(initialPage: _currentDisplayIndex);
-      _dependenciesInitialized = true;
-    }
-  }
+  void _onItemTapped(int index, BuildContext context) {
+    final currentChild = widget.child;
+    // Assuming Home, Favourites, Warnings, Other are the first 4 tabs (indices 0, 1, 2, 3)
+    // and these are the ones managed by StatefulNavigationShell.
+    const int statefulBranchCount = 4;
 
-  @override
-  void dispose() {
-    _pageController?.dispose();
-    super.dispose();
-  }
-
-  void _onItemTapped(int index) {
-    if (_currentDisplayIndex != index) {
-      _pageController?.jumpToPage(index);
-      // If we are moving away from the 'Other' page, reset its navigator
-      if (_currentDisplayIndex == 3 && index != 3) {
-        _otherPageNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    if (currentChild is StatefulNavigationShell && index >= 0 && index < statefulBranchCount) {
+      // We are on a stateful tab, and a stateful tab (0, 1, 2, or 3) was tapped.
+      // Use goBranch to navigate, preserving state.
+      currentChild.goBranch(index, initialLocation: index == currentChild.currentIndex);
+    } else {
+      // This block handles:
+      // 1. currentChild is not StatefulNavigationShell (e.g., on "Other" page or its sub-routes).
+      //    In this case, any tap (0, 1, 2, or 3) should use goNamed.
+      switch (index) {
+        case 0: // Home
+          context.goNamed(AppRoutes.home.name);
+          break;
+        case 1: // Favourites
+          context.goNamed(AppRoutes.favourites.name);
+          break;
+        case 2: // Warnings
+          context.goNamed(AppRoutes.warnings.name);
+          break;
+        case 3: // Other
+          context.goNamed(AppRoutes.other.name);
+          break;
       }
-    } else if (index == 3 && _currentDisplayIndex == 3) {
-      // If we are on the 'Other' page and tap it again, reset its navigator
-      _otherPageNavigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
-  }
-
-  int _getSelectedIndex(String? currentRouteName) {
-    if (currentRouteName == MainRoutes.home) return 0;
-    if (currentRouteName == MainRoutes.favourites) return 1;
-    if (currentRouteName == MainRoutes.warnings) return 2;
-    if (currentRouteName == MainRoutes.other) return 3;
-    // If MainScreen is loaded via a sub-route of OtherPage initially (e.g. deep link)
-    // we might want to default to the 'Other' tab.
-    if (currentRouteName == MainRoutes.settings ||
-        currentRouteName == MainRoutes.weatherSymbols ||
-        currentRouteName == MainRoutes.about) {
-      return 3;
-    }
-    return 0; // Default to home
   }
 
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
-
-    if (!_dependenciesInitialized || _pageController == null) {
-      // Return a loading indicator or an empty container if not initialized yet
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    final int currentIndex = _calculateSelectedIndex(context);
 
     return Scaffold(
       body: Row(
         children: [
-          if (isWideScreen) _buildNavigationRail(context, _currentDisplayIndex),
+          if (isWideScreen) _buildNavigationRail(context, currentIndex),
           Expanded(
             child: SafeArea(
-              child: PageView.builder(
-                controller:
-                    _pageController!, // Use null assertion as it's checked
-                itemCount: _mainPages.length,
-                itemBuilder: (context, index) {
-                  return _mainPages[index];
-                },
-                onPageChanged: (index) {
-                  int previousIndex = _currentDisplayIndex;
-                  setState(() {
-                    _currentDisplayIndex = index;
-                  });
-                  // If we swiped away from the 'Other' page, reset its navigator
-                  if (previousIndex == 3 && index != 3) {
-                    _otherPageNavigatorKey.currentState
-                        ?.popUntil((route) => route.isFirst);
-                  }
-                },
-              ),
+              child: widget.child,
             ),
           ),
         ],
       ),
       bottomNavigationBar: isWideScreen
           ? null
-          : _buildBottomNavigationBar(context, _currentDisplayIndex),
+          : _buildBottomNavigationBar(context, currentIndex),
     );
   }
 
@@ -253,7 +289,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return NavigationRail(
       selectedIndex: selectedIndex,
-      onDestinationSelected: _onItemTapped,
+      onDestinationSelected: (index) => _onItemTapped(index, context),
       labelType: NavigationRailLabelType.all,
       destinations: [
         NavigationRailDestination(
@@ -281,7 +317,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return BottomNavigationBar(
       currentIndex: selectedIndex,
-      onTap: _onItemTapped,
+      onTap: (index) => _onItemTapped(index, context),
       type: BottomNavigationBarType.fixed,
       items: [
         BottomNavigationBarItem(
@@ -304,3 +340,4 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+

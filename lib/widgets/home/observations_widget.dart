@@ -127,166 +127,170 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
   Widget _buildStationCard(BuildContext context, ObservationStation station) {
     final localizations = AppLocalizations.of(context)!;
 
-    return Card(
-      margin: const EdgeInsets.all(0),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "${station.location.name} (${station.time.toLocal().hour}:${station.time.toLocal().minute.toString().padLeft(2, '0')})",
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Text(
-              localizations.distance(
-                  station.location.distance?.toStringAsFixed(1) ?? "0.0"),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 16, // horizontal space between items
-              runSpacing: 8, // vertical space between lines
-              children: [
-                if (station.temperature != null)
-                  _buildInfoItem(context, localizations.temperature,
-                      '${station.temperature!.toStringAsFixed(1)}${localizations.temperatureCelsius}'),
-                if (station.humidity != null)
-                  _buildInfoItem(context, localizations.humidity,
-                      '${station.humidity!.toStringAsFixed(0)}%'),
-                if (station.dewPoint != null)
-                  _buildInfoItem(context, localizations.dewPoint,
-                      '${station.dewPoint!.toStringAsFixed(1)}${localizations.temperatureCelsius}'),
-                if (station.windSpeed != null)
-                  _buildInfoItem(context, localizations.windSpeed,
-                      '${station.windSpeed!.toStringAsFixed(1)} m/s'),
-                if (station.windDirection != null)
-                  _buildInfoItem(context, localizations.windDirection,
-                      '${station.windDirection!.toStringAsFixed(0)}°'),
-                if (station.windGust != null)
-                  _buildInfoItem(context, localizations.windGust,
-                      '${station.windGust!.toStringAsFixed(1)} m/s'),
-                if (station.precipitation != null)
-                  _buildInfoItem(context, localizations.precipitation,
-                      '${station.precipitation!.toStringAsFixed(1)} mm'),
-                if (station.snowDepth != null)
-                  _buildInfoItem(context, localizations.snowDepth,
-                      '${station.snowDepth!.toStringAsFixed(0)} cm'),
-                if (station.pressure != null)
-                  _buildInfoItem(context, localizations.pressure,
-                      '${station.pressure!.toStringAsFixed(0)} hPa'),
-                if (station.cloudBase != null)
-                  _buildInfoItem(context, localizations.cloudBase,
-                      '${station.cloudBase!.toStringAsFixed(0)} m'),
-                if (station.visibility != null)
-                  _buildInfoItem(context, localizations.visibility,
-                      '${station.visibility! >= 50000 ? '>' : ''}${(station.visibility! / 1000).toStringAsFixed(1)} km'),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-                child: station.temperatureHistory == null ||
-                        station.temperatureHistory!.isEmpty
-                    ? Center(
-                        child: Text(localizations.noTemperatureHistoryData))
-                    : Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                  child: Stack(
+    return Builder(
+        builder: (BuildContext context) {
+          return Container(
+            margin: const EdgeInsets.all(0),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${station.location.name} (${station.time.toLocal().hour}:${station.time.toLocal().minute.toString().padLeft(2, '0')})",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    localizations.distance(
+                        station.location.distance?.toStringAsFixed(1) ?? "0.0"),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 16, // horizontal space between items
+                    runSpacing: 8, // vertical space between lines
                     children: [
-                      LineChart(
-                        LineChartData(
-                          gridData: FlGridData(
-                            show: true,
-                          ),
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (value, meta) {
-                                  // Convert milliseconds to DateTime
-                                  final dateTime =
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                      value.toInt());
-                                  // Format as HH:mm
-                                  final formattedTime =
-                                      '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-                                  return Padding(
-                                    padding:
-                                    const EdgeInsets.only(top: 8.0),
-                                    child: Text(formattedTime,
-                                        style:
-                                        const TextStyle(fontSize: 10)),
-                                  );
-                                },
-                                // Show fewer labels to avoid overcrowding
-                                reservedSize: 30,
-                                interval: 3600000 *
-                                    2, // Show a label every 2 hours
-                              ),
-                            ),
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 40,
-                              ),
-                            ),
-                          ),
-                          borderData: FlBorderData(
-                            show: true,
-                            border: Border.all(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
-                          ),
-                          minX: _getMinX(station.temperatureHistory!),
-                          maxX: _getMaxX(station.temperatureHistory!),
-                          minY: _getMinY(station.temperatureHistory!),
-                          maxY: _getMaxY(station.temperatureHistory!),
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: _getTemperatureSpots(
-                                  station.temperatureHistory!),
-                              isCurved: true,
-                              color: Colors.blue,
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.blue,
-                                  Colors.deepPurple,
-                                  Colors.purple,
+                      if (station.temperature != null)
+                        _buildInfoItem(context, localizations.temperature,
+                            '${station.temperature!.toStringAsFixed(1)}${localizations.temperatureCelsius}'),
+                      if (station.humidity != null)
+                        _buildInfoItem(context, localizations.humidity,
+                            '${station.humidity!.toStringAsFixed(0)}%'),
+                      if (station.dewPoint != null)
+                        _buildInfoItem(context, localizations.dewPoint,
+                            '${station.dewPoint!.toStringAsFixed(1)}${localizations.temperatureCelsius}'),
+                      if (station.windSpeed != null)
+                        _buildInfoItem(context, localizations.windSpeed,
+                            '${station.windSpeed!.toStringAsFixed(1)} m/s'),
+                      if (station.windDirection != null)
+                        _buildInfoItem(context, localizations.windDirection,
+                            '${station.windDirection!.toStringAsFixed(0)}°'),
+                      if (station.windGust != null)
+                        _buildInfoItem(context, localizations.windGust,
+                            '${station.windGust!.toStringAsFixed(1)} m/s'),
+                      if (station.precipitation != null)
+                        _buildInfoItem(context, localizations.precipitation,
+                            '${station.precipitation!.toStringAsFixed(1)} mm'),
+                      if (station.snowDepth != null)
+                        _buildInfoItem(context, localizations.snowDepth,
+                            '${station.snowDepth!.toStringAsFixed(0)} cm'),
+                      if (station.pressure != null)
+                        _buildInfoItem(context, localizations.pressure,
+                            '${station.pressure!.toStringAsFixed(0)} hPa'),
+                      if (station.cloudBase != null)
+                        _buildInfoItem(context, localizations.cloudBase,
+                            '${station.cloudBase!.toStringAsFixed(0)} m'),
+                      if (station.visibility != null)
+                        _buildInfoItem(context, localizations.visibility,
+                            '${station.visibility! >= 50000 ? '>' : ''}${(station.visibility! / 1000).toStringAsFixed(1)} km'),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                      child: station.temperatureHistory == null ||
+                          station.temperatureHistory!.isEmpty
+                          ? Center(
+                          child: Text(localizations.noTemperatureHistoryData))
+                          : Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: Stack(
+                          children: [
+                            LineChart(
+                              LineChartData(
+                                gridData: FlGridData(
+                                  show: true,
+                                ),
+                                titlesData: FlTitlesData(
+                                  show: true,
+                                  topTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  rightTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      getTitlesWidget: (value, meta) {
+                                        // Convert milliseconds to DateTime
+                                        final dateTime =
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                            value.toInt());
+                                        // Format as HH:mm
+                                        final formattedTime =
+                                            '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+                                        return Padding(
+                                          padding:
+                                          const EdgeInsets.only(top: 8.0),
+                                          child: Text(formattedTime,
+                                              style:
+                                              const TextStyle(fontSize: 10)),
+                                        );
+                                      },
+                                      // Show fewer labels to avoid overcrowding
+                                      reservedSize: 30,
+                                      interval: 3600000 *
+                                          2, // Show a label every 2 hours
+                                    ),
+                                  ),
+                                  leftTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      reservedSize: 40,
+                                    ),
+                                  ),
+                                ),
+                                borderData: FlBorderData(
+                                  show: true,
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1,
+                                  ),
+                                ),
+                                minX: _getMinX(station.temperatureHistory!),
+                                maxX: _getMaxX(station.temperatureHistory!),
+                                minY: _getMinY(station.temperatureHistory!),
+                                maxY: _getMaxY(station.temperatureHistory!),
+                                lineBarsData: [
+                                  LineChartBarData(
+                                    spots: _getTemperatureSpots(
+                                        station.temperatureHistory!),
+                                    isCurved: true,
+                                    color: Colors.blue,
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.blue,
+                                        Colors.deepPurple,
+                                        Colors.purple,
+                                      ],
+                                    ),
+                                    barWidth: 4,
+                                    belowBarData: BarAreaData(show: false),
+                                    dotData: FlDotData(show: false),
+                                  ),
                                 ],
                               ),
-                              barWidth: 4,
-                              belowBarData: BarAreaData(show: false),
-                              dotData: FlDotData(show: false),
+                            ),
+                            Positioned(
+                              top: 0,
+                              left: 50,
+                              child: Center(
+                                child: Text(localizations.temperatureCelsius,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(color: Colors.green)),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        left: 50,
-                        child: Center(
-                          child: Text(localizations.temperatureCelsius,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(color: Colors.green)),
-                        ),
-                      ),
-                    ],
+                      )
                   ),
-                )
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
+          );
+        }
     );
   }
 

@@ -3,11 +3,20 @@ import 'package:weather/l10n/app_localizations.g.dart';
 
 import '../widgets/weather_symbol_widget.dart';
 
-class WeatherSymbolsPage extends StatelessWidget {
+class WeatherSymbolsPage extends StatefulWidget {
   const WeatherSymbolsPage({super.key});
 
   @override
+  State<WeatherSymbolsPage> createState() => _WeatherSymbolsPageState();
+}
+
+class _WeatherSymbolsPageState extends State<WeatherSymbolsPage> with AutomaticKeepAliveClientMixin<WeatherSymbolsPage> {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(

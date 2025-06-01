@@ -3,11 +3,20 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
 
   @override
+  State<AboutPage> createState() => _AboutPageState();
+}
+
+class _AboutPageState extends State<AboutPage> with AutomaticKeepAliveClientMixin<AboutPage> {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -74,8 +83,14 @@ class AboutPage extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Image.asset('assets/about/fmiodata.webp',
-                              width: 200, height: 50),
+                          SvgPicture.asset(
+                            'assets/about/fmiodata.svg',
+                            height: 30,
+                            colorFilter: ColorFilter.mode(
+                              Theme.of(context).colorScheme.onSurface,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.8, // Constrain width to 80% of screen width

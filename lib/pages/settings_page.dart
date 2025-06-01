@@ -4,11 +4,20 @@ import 'package:weather/l10n/app_localizations.g.dart';
 
 import '../app_state.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> with AutomaticKeepAliveClientMixin<SettingsPage> {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
 
