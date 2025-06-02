@@ -60,7 +60,7 @@ StatefulShellBranch _buildStatefulBranch(AppRouteInfo routeInfo, Widget childWid
   );
 }
 
-late final GoRouter _router = GoRouter(
+final GoRouter _router = GoRouter(
   initialLocation: AppRoutes.home.path,
   routes: <RouteBase>[
     ShellRoute(

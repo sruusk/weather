@@ -18,6 +18,7 @@ class _OtherPageListViewState extends State<OtherPageListView> with AutomaticKee
   @override
   Widget build(BuildContext context) {
     super.build(context); // Important for AutomaticKeepAliveClientMixin
+
     final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
