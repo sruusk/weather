@@ -206,6 +206,10 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                               otherParameters: {
                                 'time': _currentTime.toIso8601String(),
                               }),
+                          evictErrorTileStrategy: EvictErrorTileStrategy.dispose,
+                          errorTileCallback: (TileImage image, Object error, StackTrace? stackTrace) {
+                            if(kDebugMode) print('Error loading tile: $error');
+                          },
                         ),
                         MarkerLayer(markers: [
                           Marker(
@@ -276,10 +280,13 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
   // Return the latest quarter hour time in UTC
   DateTime getTime() {
     final now = DateTime.now().toUtc();
-    int minutes = now.minute;
-    if (minutes % 15 < 2) minutes -= 2;
-    minutes = (minutes ~/ 15) * 15;
-    return DateTime.utc(now.year, now.month, now.day, now.hour, minutes);
+    DateTime roundedTime = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
+    if(roundedTime.minute % 15 < 3) {
+      roundedTime = roundedTime.subtract(Duration(minutes: (roundedTime.minute % 15) + 15));
+    } else {
+      roundedTime = roundedTime.subtract(Duration(minutes: roundedTime.minute % 15));
+    }
+    return roundedTime;
   }
 }
 
