@@ -33,6 +33,14 @@ class WeatherSymbolWidget extends StatelessWidget {
             width: size,
             height: size,
             fit: BoxFit.contain,
+            colorFilter: ColorFilter.matrix(
+              <double>[
+                0.9, 0, 0, 0, 0,
+                0, 0.9, 0, 0, 0,
+                0, 0, 0.9, 0, 0,
+                0, 0, 0, 1.5, 0,
+              ],
+            ),
             errorBuilder: (context, error, stackTrace) {
               debugPrint('Error loading SVG: $error');
               return const Icon(Icons.error, size: 24, color: Colors.red);

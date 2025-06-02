@@ -180,8 +180,13 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.blue,
               brightness: Brightness.light,
+              surfaceDim: Colors.white,
             ),
-            useMaterial3: true,
+            scaffoldBackgroundColor: Colors.blueGrey[50],
+            cardTheme: CardThemeData(
+              color: Colors.white,
+              surfaceTintColor: Colors.white,
+            ),
           ),
           darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSeed(

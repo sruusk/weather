@@ -100,12 +100,12 @@ class CurrentForecast extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Bottom info bar
-          Container(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceDim,
+          Card(
+              margin: const EdgeInsets.all(0),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
+              color: Theme.of(context).colorScheme.surfaceContainer,
               child: IntrinsicHeight(
                   child: Row(
                 children: [
