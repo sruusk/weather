@@ -1,0 +1,34 @@
+name: Deploy PMTiles
+
+on:
+  push:
+    paths:
+      - 'assets/map/finland-z9.pmtiles'
+  workflow_dispatch:
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Prepare artifact
+        run: |
+          mkdir -p out
+          cp assets/map/finland-z9.pmtiles out/finland-z9.pmtiles
+      - name: Upload for Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/deploy-pages@v1

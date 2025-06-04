@@ -74,7 +74,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favouritesPageTitle => 'Favourites';
 
   @override
-  String get warningsPageTitle => 'Weather Warnings';
+  String get warningsPageTitle => 'Warnings';
 
   @override
   String get weatherSymbolsPageTitle => 'Weather Symbols';
@@ -296,4 +296,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutPageDescription =>
       'Information about data sources and licenses';
+
+  @override
+  String get locating => 'Locating your position...';
+
+  @override
+  String get loadingForecasts => 'Loading forecasts...';
 }

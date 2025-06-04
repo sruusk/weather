@@ -150,7 +150,7 @@ class WeatherData {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('Error getting forecast: $e');
+        print('Error getting forecast data: $e');
       }
       rethrow;
     }

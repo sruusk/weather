@@ -26,7 +26,6 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
       mediaPlaybackRequiresUserGesture: false,
       allowsInlineMediaPlayback: true);
 
-  PullToRefreshController? pullToRefreshController;
   String url = "";
   double progress = 0;
   final urlController = TextEditingController();
@@ -38,25 +37,6 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       InAppWebViewController.setWebContentsDebuggingEnabled(kDebugMode);
     }
-
-    pullToRefreshController = kIsWeb ||
-            ![TargetPlatform.iOS, TargetPlatform.android]
-                .contains(defaultTargetPlatform)
-        ? null
-        : PullToRefreshController(
-            settings: PullToRefreshSettings(
-              color: Colors.blue,
-            ),
-            onRefresh: () async {
-              if (defaultTargetPlatform == TargetPlatform.android) {
-                webViewController?.reload();
-              } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-                webViewController?.loadUrl(
-                    urlRequest:
-                        URLRequest(url: await webViewController?.getUrl()));
-              }
-            },
-          );
   }
 
   @override
@@ -96,7 +76,6 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
             webViewController = controller;
             _loadContent();
           },
-          pullToRefreshController: pullToRefreshController,
           onLoadStart: (controller, url) {
             setState(() {
               this.url = url.toString();
@@ -133,19 +112,15 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
             return NavigationActionPolicy.ALLOW;
           },
           onLoadStop: (controller, url) async {
-            pullToRefreshController?.endRefreshing();
             setState(() {
               this.url = url.toString();
               urlController.text = this.url;
             });
           },
           onReceivedError: (controller, request, error) {
-            pullToRefreshController?.endRefreshing();
+            if(kDebugMode) print('Error: $error');
           },
           onProgressChanged: (controller, progress) {
-            if (progress == 100) {
-              pullToRefreshController?.endRefreshing();
-            }
             setState(() {
               this.progress = progress / 100;
               urlController.text = url;
@@ -168,6 +143,9 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
   }
 
   _loadContent() async {
+    if(kDebugMode) {
+      print("Loading warnings page content, theme: $theme, language: $language");
+    }
     // Determine asset paths
     if(theme == null) return;
     final htmlPath = 'assets/smartmet-alert-client/index$theme.html';

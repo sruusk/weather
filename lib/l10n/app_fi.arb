@@ -379,5 +379,13 @@
   "aboutPageDescription": "Tietoa tietolähteistä ja lisensseistä",
   "@aboutPageDescription": {
     "description": "Description for the about page in the other page"
+  },
+  "locating": "Paikannetaan...",
+  "@locating": {
+    "description": "Message shown while locating the user's position"
+  },
+  "loadingForecasts": "Ladataan ennusteita...",
+  "@loadingForecasts": {
+    "description": "Message shown while loading weather forecasts"
   }
 }

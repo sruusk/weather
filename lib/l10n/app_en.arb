@@ -92,7 +92,7 @@
   "@favouritesPageTitle": {
     "description": "Title for the favourites page"
   },
-  "warningsPageTitle": "Weather Warnings",
+  "warningsPageTitle": "Warnings",
   "@warningsPageTitle": {
     "description": "Title for the warnings page"
   },
@@ -379,5 +379,13 @@
   "aboutPageDescription": "Information about data sources and licenses",
   "@aboutPageDescription": {
     "description": "Description for the about page in the other page"
+  },
+  "locating": "Locating your position...",
+  "@locating": {
+    "description": "Message shown when the app is trying to locate the user's position"
+  },
+  "loadingForecasts": "Loading forecasts...",
+  "@loadingForecasts": {
+    "description": "Message shown when the app is loading weather forecasts"
   }
 }

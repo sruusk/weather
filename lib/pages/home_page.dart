@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,11 +18,13 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin<HomePage> {
   final WeatherData _weatherData = WeatherData();
   Forecast? _forecast;
   List<Location> _locations = [];
   bool _isLoading = true;
+  bool _isGeolocating = false;
   int _selectedLocationIndex = 0;
 
   @override
@@ -38,9 +42,10 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
     super.didChangeDependencies();
     final appState = Provider.of<AppState>(context, listen: false);
     final locs = appState.favouriteLocations;
-    if(_isLoading) return;
+    if (_isLoading) return;
 
-    if(locs.length != _locations.length - (appState.geolocationEnabled ? 1 : 0)) {
+    if (locs.length !=
+        _locations.length - (appState.geolocationEnabled ? 1 : 0)) {
       // If the number of locations has changed, reload forecasts
       _loadForecasts();
     }
@@ -52,6 +57,11 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
   Future<void> _loadForecasts() async {
     final appState = Provider.of<AppState>(context, listen: false);
     final locs = appState.favouriteLocations;
+
+    if (kDebugMode) {
+      print(
+          "_loadForecasts(), geolocationEnabled: ${appState.geolocationEnabled}, locations: ${locs.length}");
+    }
 
     if (locs.isEmpty && !appState.geolocationEnabled) {
       setState(() {
@@ -70,17 +80,34 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
     // If geolocation is enabled, try to get current location
     if (appState.geolocationEnabled) {
       try {
-        final pos = await determinePosition();
+        setState(() {
+          _isGeolocating = true;
+        });
+        final pos =
+            await determinePosition().timeout(const Duration(seconds: 10));
         // Use reverse geocoding to get location information
         locationToLoad = await _weatherData.reverseGeocoding(
           pos.latitude,
           pos.longitude,
         );
-      } catch (e) {
+        setState(() {
+          _isGeolocating = false;
+        });
+      } on TimeoutException {
+        // Handle timeout specifically
         if (kDebugMode) {
-          print('Error getting current location: $e');
+          print('Geolocation timed out, using first favorite location');
         }
-        // If geolocation fails, fall back to first favorite
+        // If geolocation times out, fall back to first favorite
+        if (locs.isNotEmpty) {
+          locationToLoad = locs.first;
+        }
+      } on Exception {
+        // Handle any other exceptions
+        if (kDebugMode) {
+          print('Geolocation failed, using first favorite location');
+        }
+        // If geolocation fails for any reason, fall back to first favorite
         if (locs.isNotEmpty) {
           locationToLoad = locs.first;
         }
@@ -136,11 +163,25 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
     super.build(context); // Call super to ensure keep alive works
 
     final appState = Provider.of<AppState>(context);
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text(
+                    _isGeolocating
+                        ? localizations.locating
+                        : localizations.loadingForecasts,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ))
             : _forecast == null || _locations.isEmpty
                 ? Center(
                     child: Text(AppLocalizations.of(context)!.noSavedLocations))
@@ -166,7 +207,8 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
 
                                 // Load the forecast for the selected location
                                 try {
-                                  final forecast = await _weatherData.getForecast(location);
+                                  final forecast =
+                                      await _weatherData.getForecast(location);
 
                                   if (mounted) {
                                     setState(() {
@@ -177,7 +219,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                                   }
                                 } catch (e) {
                                   if (kDebugMode) {
-                                    print('Error getting forecast: $e');
+                                    print('Error getting selected forecast: $e');
                                   }
                                   if (mounted) {
                                     setState(() {

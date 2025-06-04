@@ -221,7 +221,7 @@ abstract class AppLocalizations {
   /// Title for the warnings page
   ///
   /// In en, this message translates to:
-  /// **'Weather Warnings'**
+  /// **'Warnings'**
   String get warningsPageTitle;
 
   /// Title for the weather symbols page
@@ -649,6 +649,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Information about data sources and licenses'**
   String get aboutPageDescription;
+
+  /// Message shown when the app is trying to locate the user's position
+  ///
+  /// In en, this message translates to:
+  /// **'Locating your position...'**
+  String get locating;
+
+  /// Message shown when the app is loading weather forecasts
+  ///
+  /// In en, this message translates to:
+  /// **'Loading forecasts...'**
+  String get loadingForecasts;
 }
 
 class _AppLocalizationsDelegate

@@ -38,14 +38,21 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
     super.initState();
     _currentTime = getTime();
     _tileProviderFuture = () async {
-      // Load PMTiles asset and write to temp file
-      final asset = await rootBundle.load('assets/map/finland-z9.pmtiles');
-      final bytes = asset.buffer.asUint8List();
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/finland-z10.pmtiles');
-      await file.writeAsBytes(bytes, flush: true);
-      final archive = await PmTilesArchive.fromFile(file);
-      return PmTilesVectorTileProvider.fromArchive(archive);
+      if(kIsWeb) {
+        // For web, use http tile provider
+        return PmTilesVectorTileProvider.fromSource(
+          'https://sruusk.github.io/weather/finland-z9.pmtiles'
+        );
+      } else {
+        // Load PMTiles asset and write to temp file
+        final asset = await rootBundle.load('assets/map/finland-z9.pmtiles');
+        final bytes = asset.buffer.asUint8List();
+        final dir = await getTemporaryDirectory();
+        final file = File('${dir.path}/finland-z10.pmtiles');
+        await file.writeAsBytes(bytes, flush: true);
+        final archive = await PmTilesArchive.fromFile(file);
+        return PmTilesVectorTileProvider.fromArchive(archive);
+      }
     }();
   }
 

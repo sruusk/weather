@@ -295,4 +295,10 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get aboutPageDescription => 'Tietoa tietolähteistä ja lisensseistä';
+
+  @override
+  String get locating => 'Paikannetaan...';
+
+  @override
+  String get loadingForecasts => 'Ladataan ennusteita...';
 }
