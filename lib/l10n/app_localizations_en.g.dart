@@ -302,4 +302,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadingForecasts => 'Loading forecasts...';
+
+  @override
+  String get geolocationTimeout =>
+      'Geolocation request timed out. Please check your device settings.';
+
+  @override
+  String get retry => 'Retry';
 }

@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage>
   List<Location> _locations = [];
   bool _isLoading = true;
   bool _isGeolocating = false;
+  bool _geolocationTimedOut = false;
   int _selectedLocationIndex = 0;
 
   @override
@@ -84,7 +85,7 @@ class _HomePageState extends State<HomePage>
           _isGeolocating = true;
         });
         final pos =
-            await determinePosition().timeout(const Duration(seconds: 10));
+            await determinePosition().timeout(const Duration(seconds: 1));
         // Use reverse geocoding to get location information
         locationToLoad = await _weatherData.reverseGeocoding(
           pos.latitude,
@@ -98,15 +99,22 @@ class _HomePageState extends State<HomePage>
         if (kDebugMode) {
           print('Geolocation timed out, using first favorite location');
         }
+        setState(() {
+          _isGeolocating = false;
+          _geolocationTimedOut = true;
+        });
         // If geolocation times out, fall back to first favorite
         if (locs.isNotEmpty) {
           locationToLoad = locs.first;
         }
-      } on Exception {
+      } catch (e) {
         // Handle any other exceptions
         if (kDebugMode) {
-          print('Geolocation failed, using first favorite location');
+          print('Geolocation failed, using first favorite location: $e');
         }
+        setState(() {
+          _isGeolocating = false;
+        });
         // If geolocation fails for any reason, fall back to first favorite
         if (locs.isNotEmpty) {
           locationToLoad = locs.first;
@@ -164,6 +172,23 @@ class _HomePageState extends State<HomePage>
 
     final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
+
+    if(_geolocationTimedOut) {
+      // Show a message if geolocation timed out
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(localizations.geolocationTimeout),
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                  label: localizations.retry,
+                  onPressed: _loadForecasts
+              )
+          ),
+        );
+      });
+      _geolocationTimedOut = false; // Reset the flag after showing the message
+    }
 
     return Scaffold(
       body: SafeArea(

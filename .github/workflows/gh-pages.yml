@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'assets/map/finland-z9.pmtiles'
+      - '.github/workflows/gh-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -18,10 +19,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
+
       - name: Prepare artifact
         run: |
           mkdir -p out
           cp assets/map/finland-z9.pmtiles out/finland-z9.pmtiles
+
       - name: Upload for Pages
         uses: actions/upload-pages-artifact@v3
         with:

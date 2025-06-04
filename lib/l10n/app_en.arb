@@ -387,5 +387,13 @@
   "loadingForecasts": "Loading forecasts...",
   "@loadingForecasts": {
     "description": "Message shown when the app is loading weather forecasts"
+  },
+  "geolocationTimeout": "Geolocation request timed out. Please check your device settings.",
+  "@geolocationTimeout": {
+    "description": "Message shown when geolocation request times out"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button text to retry an action"
   }
 }

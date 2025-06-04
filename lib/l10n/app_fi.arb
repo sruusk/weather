@@ -387,5 +387,13 @@
   "loadingForecasts": "Ladataan ennusteita...",
   "@loadingForecasts": {
     "description": "Message shown while loading weather forecasts"
+  },
+  "geolocationTimeout": "Sijainnin haku epäonnistui.",
+  "@geolocationTimeout": {
+    "description": "Message shown when geolocation times out"
+  },
+  "retry": "Yritä uudelleen",
+  "@retry": {
+    "description": "Button text to retry the action"
   }
 }

@@ -661,6 +661,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading forecasts...'**
   String get loadingForecasts;
+
+  /// Message shown when geolocation request times out
+  ///
+  /// In en, this message translates to:
+  /// **'Geolocation request timed out. Please check your device settings.'**
+  String get geolocationTimeout;
+
+  /// Button text to retry an action
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate

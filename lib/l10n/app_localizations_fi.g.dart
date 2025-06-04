@@ -301,4 +301,10 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get loadingForecasts => 'Ladataan ennusteita...';
+
+  @override
+  String get geolocationTimeout => 'Sijainnin haku epäonnistui.';
+
+  @override
+  String get retry => 'Yritä uudelleen';
 }
