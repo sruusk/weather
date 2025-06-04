@@ -672,9 +672,11 @@ packages:
   open_meteo:
     dependency: "direct main"
     description:
-      path: "C:\\Users\\samul\\IdeaProjects\\open-meteo-dart"
-      relative: false
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: a37b6e7d0962e2c6b9a75ac79fb0bcd0237d911a
+      url: "git@github.com:sruusk/open-meteo-dart.git"
+    source: git
     version: "2.0.3"
   package_config:
     dependency: transitive

@@ -41,8 +41,7 @@ dependencies:
   provider: ^6.1.5
   shared_preferences: ^2.5.3
   open_meteo:
-    path: C:\Users\samul\IdeaProjects\open-meteo-dart
-    #git: git@github.com:sruusk/open-meteo-dart.git
+    git: git@github.com:sruusk/open-meteo-dart.git
   xml: ^6.5.0
   smooth_page_indicator: ^1.2.1
   lottie: ^3.3.1

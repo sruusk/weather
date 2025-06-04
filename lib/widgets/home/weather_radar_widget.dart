@@ -38,7 +38,7 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
     super.initState();
     _currentTime = getTime();
     _tileProviderFuture = () async {
-      if(kIsWeb) {
+      if(kIsWeb || kIsWasm) {
         // For web, use http tile provider
         return PmTilesVectorTileProvider.fromSource(
           'https://sruusk.github.io/weather/finland-z9.pmtiles'
@@ -161,19 +161,20 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                       ),
                       children: [
                         // Raster layer not used for now
-                        // TileLayer(
-                        //   urlTemplate: 'https://a32.fi/osm/tile/{z}/{x}/{y}.png',
-                        //   userAgentPackageName: 'com.sruusk.weather',
-                        //   tileSize: 256,
-                        //   zoomOffset: 0,
-                        //   // Add constraints to prevent NaN/Infinity values
-                        //   tileProvider: NetworkTileProvider(),
-                        //   maxNativeZoom: 12,
-                        //   minNativeZoom: 7,
-                        //   keepBuffer: 5,
-                        //   errorImage: NetworkImage('https://a32.fi/osm/tile/10/588/282.png'), // Fallback image
-                        // ),
-                        Theme.of(context).brightness == Brightness.light
+                        if(kIsWeb || kIsWasm)
+                          TileLayer(
+                            urlTemplate: 'https://a32.fi/osm/tile/{z}/{x}/{y}.png',
+                            userAgentPackageName: 'com.sruusk.weather',
+                            tileSize: 256,
+                            zoomOffset: 0,
+                            // Add constraints to prevent NaN/Infinity values
+                            tileProvider: NetworkTileProvider(),
+                            maxNativeZoom: 12,
+                            minNativeZoom: 7,
+                            keepBuffer: 5,
+                            errorImage: NetworkImage('https://a32.fi/osm/tile/10/588/282.png'), // Fallback image
+                          )
+                        else Theme.of(context).brightness == Brightness.light
                             ? VectorTileLayer(
                                 key: const Key('protomaps-light'),
                                 tileProviders: TileProviders({

@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage>
           _isGeolocating = true;
         });
         final pos =
-            await determinePosition().timeout(const Duration(seconds: 1));
+            await determinePosition().timeout(const Duration(seconds: 10));
         // Use reverse geocoding to get location information
         locationToLoad = await _weatherData.reverseGeocoding(
           pos.latitude,
