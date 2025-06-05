@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/services.dart' show rootBundle;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pmtiles/pmtiles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
-import 'package:path_provider/path_provider.dart';
-
 
 class WeatherRadarWidget extends StatefulWidget {
   final WeatherRadarController controller;
@@ -25,7 +25,7 @@ class WeatherRadarWidget extends StatefulWidget {
 }
 
 class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
-  late final Future<PmTilesVectorTileProvider> _tileProviderFuture;
+  late final Future<PmTilesVectorTileProvider?> _tileProviderFuture;
   late DateTime _currentTime;
   double _sliderValue =
       5; // 5 represents the latest time, 0 represents 75 minutes ago
@@ -38,17 +38,14 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
     super.initState();
     _currentTime = getTime();
     _tileProviderFuture = () async {
-      if(kIsWeb || kIsWasm) {
-        // For web, use http tile provider
-        return PmTilesVectorTileProvider.fromSource(
-          'https://sruusk.github.io/weather/finland-z9.pmtiles'
-        );
+      if (kIsWeb) {
+        return null;
       } else {
         // Load PMTiles asset and write to temp file
         final asset = await rootBundle.load('assets/map/finland-z9.pmtiles');
         final bytes = asset.buffer.asUint8List();
         final dir = await getTemporaryDirectory();
-        final file = File('${dir.path}/finland-z10.pmtiles');
+        final file = File('${dir.path}/finland-z9.pmtiles');
         await file.writeAsBytes(bytes, flush: true);
         final archive = await PmTilesArchive.fromFile(file);
         return PmTilesVectorTileProvider.fromArchive(archive);
@@ -136,7 +133,12 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
-                    final tileProvider = snapshot.data!;
+                    final tileProvider = snapshot.data;
+
+                    if (kDebugMode && tileProvider == null && !kIsWeb) {
+                      // ignore: avoid_print
+                      print('Tile provider is null, using web tile provider');
+                    }
                     // Use provided location or default to Helsinki
 
                     return FlutterMap(
@@ -148,9 +150,9 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                         minZoom: 7,
                         keepAlive: true,
                         interactionOptions: InteractionOptions(
-                          flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                          rotationWinGestures: MultiFingerGesture.none
-                        ),
+                            flags:
+                                InteractiveFlag.all & ~InteractiveFlag.rotate,
+                            rotationWinGestures: MultiFingerGesture.none),
                         onMapReady: () {
                           // Notify controller that map is ready
                           if (!_isMapInitialized) {
@@ -160,10 +162,11 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                         },
                       ),
                       children: [
-                        // Raster layer not used for now
-                        if(kIsWeb || kIsWasm)
+                        // Use raster layer for web, vector layer for mobile
+                        if (kIsWeb)
                           TileLayer(
-                            urlTemplate: 'https://a32.fi/osm/tile/{z}/{x}/{y}.png',
+                            urlTemplate:
+                                'https://a32.fi/osm/tile/{z}/{x}/{y}.png',
                             userAgentPackageName: 'com.sruusk.weather',
                             tileSize: 256,
                             zoomOffset: 0,
@@ -172,31 +175,34 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                             maxNativeZoom: 12,
                             minNativeZoom: 7,
                             keepBuffer: 5,
-                            errorImage: NetworkImage('https://a32.fi/osm/tile/10/588/282.png'), // Fallback image
+                            errorImage: NetworkImage(
+                                'https://a32.fi/osm/tile/10/588/282.png'), // Fallback image
                           )
-                        else Theme.of(context).brightness == Brightness.light
-                            ? VectorTileLayer(
-                                key: const Key('protomaps-light'),
-                                tileProviders: TileProviders({
-                                  'protomaps': tileProvider,
-                                }),
-                                theme: ProtomapsThemes.whiteV4(),
-                                showTileDebugInfo: true,
-                                // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
-                                cacheFolder: () {
-                                  return getTemporaryDirectory().then((dir) {
-                                    return Directory('${dir.path}/pmtiles_light_cache');
-                                  });
-                                },
-                              )
-                            : VectorTileLayer(
-                                key: const Key('protomaps-dark'),
-                                tileProviders: TileProviders({
-                                  'protomaps': tileProvider,
-                                }),
-                                theme: ProtomapsThemes.blackV4(),
-                                showTileDebugInfo: true,
-                              ),
+                        else
+                          Theme.of(context).brightness == Brightness.light
+                              ? VectorTileLayer(
+                                  key: const Key('protomaps-light'),
+                                  tileProviders: TileProviders({
+                                    'protomaps': tileProvider!,
+                                  }),
+                                  theme: ProtomapsThemes.whiteV4(),
+                                  showTileDebugInfo: true,
+                                  // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
+                                  cacheFolder: () {
+                                    return getTemporaryDirectory().then((dir) {
+                                      return Directory(
+                                          '${dir.path}/pmtiles_light_cache');
+                                    });
+                                  },
+                                )
+                              : VectorTileLayer(
+                                  key: const Key('protomaps-dark'),
+                                  tileProviders: TileProviders({
+                                    'protomaps': tileProvider!,
+                                  }),
+                                  theme: ProtomapsThemes.blackV4(),
+                                  showTileDebugInfo: true,
+                                ),
                         TileLayer(
                           tileSize: 256,
                           // Add constraints to prevent NaN/Infinity values
@@ -214,9 +220,11 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                               otherParameters: {
                                 'time': _currentTime.toIso8601String(),
                               }),
-                          evictErrorTileStrategy: EvictErrorTileStrategy.dispose,
-                          errorTileCallback: (TileImage image, Object error, StackTrace? stackTrace) {
-                            if(kDebugMode) print('Error loading tile: $error');
+                          evictErrorTileStrategy:
+                              EvictErrorTileStrategy.dispose,
+                          errorTileCallback: (TileImage image, Object error,
+                              StackTrace? stackTrace) {
+                            if (kDebugMode) print('Error loading tile: $error');
                           },
                         ),
                         MarkerLayer(markers: [
@@ -225,7 +233,9 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                             alignment: Alignment.topCenter,
                             child: Icon(
                               Icons.location_on,
-                              color: Theme.of(context).colorScheme.onSurface,
+                              color: kIsWeb
+                                  ? Colors.black
+                                  : Theme.of(context).colorScheme.onSurface,
                               size: 40,
                             ),
                           ),
@@ -288,11 +298,14 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
   // Return the latest quarter hour time in UTC
   DateTime getTime() {
     final now = DateTime.now().toUtc();
-    DateTime roundedTime = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
-    if(roundedTime.minute % 15 < 3) {
-      roundedTime = roundedTime.subtract(Duration(minutes: (roundedTime.minute % 15) + 15));
+    DateTime roundedTime =
+        DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
+    if (roundedTime.minute % 15 < 3) {
+      roundedTime = roundedTime
+          .subtract(Duration(minutes: (roundedTime.minute % 15) + 15));
     } else {
-      roundedTime = roundedTime.subtract(Duration(minutes: roundedTime.minute % 15));
+      roundedTime =
+          roundedTime.subtract(Duration(minutes: roundedTime.minute % 15));
     }
     return roundedTime;
   }
