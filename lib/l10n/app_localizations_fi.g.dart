@@ -249,6 +249,9 @@ class AppLocalizationsFi extends AppLocalizations {
   String get light => 'Vaalea';
 
   @override
+  String get system => 'Järjestelmä';
+
+  @override
   String get searchForLocation => 'Etsi sijaintia';
 
   @override

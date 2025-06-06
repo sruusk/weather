@@ -560,6 +560,12 @@ abstract class AppLocalizations {
   /// **'Light'**
   String get light;
 
+  /// System theme, follows the device's theme setting
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get system;
+
   /// Placeholder for location search
   ///
   /// In en, this message translates to:

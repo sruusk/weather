@@ -249,6 +249,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get light => 'Light';
 
   @override
+  String get system => 'System';
+
+  @override
   String get searchForLocation => 'Search for location';
 
   @override

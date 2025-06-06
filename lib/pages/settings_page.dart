@@ -11,7 +11,8 @@ class SettingsPage extends StatefulWidget {
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> with AutomaticKeepAliveClientMixin<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage>
+    with AutomaticKeepAliveClientMixin<SettingsPage> {
   @override
   bool get wantKeepAlive => true;
 
@@ -20,6 +21,115 @@ class _SettingsPageState extends State<SettingsPage> with AutomaticKeepAliveClie
     super.build(context);
     final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
+
+    final settingsItems = <Widget>[
+      // Language setting
+      ValueListenableBuilder<Locale>(
+        valueListenable: appState.localeNotifier,
+        builder: (context, locale, child) {
+          return ListTile(
+              leading: const Icon(Icons.language),
+              title: Text(localizations.language),
+              trailing: SegmentedButton<Locale>(
+                  segments: [
+                    ButtonSegment<Locale>(
+                      value: const Locale('en'),
+                      label: Text(localizations.english),
+                    ),
+                    ButtonSegment<Locale>(
+                      value: const Locale('fi'),
+                      label: Text(localizations.finnish),
+                    ),
+                  ],
+                  selected: {
+                    locale
+                  },
+                  onSelectionChanged: (Set<Locale> newSelection) {
+                    if (newSelection.isNotEmpty) {
+                      appState.setLocale(newSelection.first);
+                    }
+                  }));
+        },
+      ),
+
+      // Geolocation setting
+      ValueListenableBuilder<bool>(
+        valueListenable: appState.geolocationEnabledNotifier,
+        builder: (context, geolocationEnabled, child) {
+          return ListTile(
+            leading: const Icon(Icons.my_location),
+            title: Text(localizations.geolocation),
+            subtitle: Text(geolocationEnabled
+                ? localizations.enabled
+                : localizations.disabled),
+            trailing: Switch(
+              value: geolocationEnabled,
+              onChanged: (bool value) {
+                appState.setGeolocationEnabled(value);
+              },
+            ),
+          );
+        },
+      ),
+
+      // Theme mode setting
+      ValueListenableBuilder<ThemeMode>(
+        valueListenable: appState.themeModeNotifier,
+        builder: (context, themeMode, child) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final tilePadding =
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0);
+
+          return Padding(
+            padding: tilePadding,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8.0,
+              runSpacing: 10.0,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(isDark ? Icons.dark_mode : Icons.light_mode),
+                    SizedBox(width: 16),
+                    Text(localizations.theme,
+                        style: const TextStyle(fontSize: 16)),
+                  ],
+                ),
+                SegmentedButton<ThemeMode>(
+                  direction: Axis.horizontal,
+                  segments: [
+                    ButtonSegment<ThemeMode>(
+                        value: ThemeMode.system,
+                        label: Text(localizations.system),
+                        icon: Icon(Icons.settings)),
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.light,
+                      label: Text(localizations.light),
+                      icon:
+                          Icon(Icons.light_mode, color: Colors.yellow.shade700),
+                    ),
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.dark,
+                      label: Text(localizations.dark),
+                      icon: Icon(Icons.dark_mode,
+                          color: Colors.blueGrey.shade700),
+                    ),
+                  ],
+                  selected: {themeMode},
+                  onSelectionChanged: (Set<ThemeMode> newSelection) {
+                    if (newSelection.isNotEmpty) {
+                      appState.setThemeMode(newSelection.first);
+                    }
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -40,127 +150,16 @@ class _SettingsPageState extends State<SettingsPage> with AutomaticKeepAliveClie
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Column(
-                children: [
-                  // Language setting
-                  ValueListenableBuilder<Locale>(
-                    valueListenable: appState.localeNotifier,
-                    builder: (context, locale, child) {
-                      return ListTile(
-                        leading: const Icon(Icons.language),
-                        title: Text(localizations.language),
-                        subtitle: Text(locale.languageCode == 'en'
-                            ? localizations.english
-                            : localizations.finnish),
-                        trailing: DropdownButton<String>(
-                          value: locale.languageCode,
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              appState.setLocale(Locale(newValue));
-                            }
-                          },
-                          items: [
-                            DropdownMenuItem(
-                              value: 'en',
-                              child: Text(localizations.english),
-                            ),
-                            DropdownMenuItem(
-                              value: 'fi',
-                              child: Text(localizations.finnish),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-
-                  // Temperature unit setting
-                  // ValueListenableBuilder<String>(
-                  //   valueListenable: appState.temperatureUnitNotifier,
-                  //   builder: (context, temperatureUnit, child) {
-                  //     return ListTile(
-                  //       leading: const Icon(Icons.thermostat),
-                  //       title: Text(localizations.temperatureUnit),
-                  //       subtitle: Text(temperatureUnit == 'celsius'
-                  //           ? localizations.celsius
-                  //           : localizations.fahrenheit),
-                  //       trailing: Switch(
-                  //         value: temperatureUnit == 'celsius',
-                  //         onChanged: (bool value) {
-                  //           appState.setTemperatureUnit(
-                  //               value ? 'celsius' : 'fahrenheit');
-                  //         },
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-
-                  // Notifications setting
-                  // ValueListenableBuilder<bool>(
-                  //   valueListenable: appState.notificationsEnabledNotifier,
-                  //   builder: (context, notificationsEnabled, child) {
-                  //     return ListTile(
-                  //       leading: const Icon(Icons.notifications),
-                  //       title: Text(localizations.notifications),
-                  //       subtitle: Text(notificationsEnabled
-                  //           ? localizations.enabled
-                  //           : localizations.disabled),
-                  //       trailing: Switch(
-                  //         value: notificationsEnabled,
-                  //         onChanged: (bool value) {
-                  //           appState.setNotificationsEnabled(value);
-                  //         },
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-
-                  // Geolocation setting
-                  ValueListenableBuilder<bool>(
-                    valueListenable: appState.geolocationEnabledNotifier,
-                    builder: (context, geolocationEnabled, child) {
-                      return ListTile(
-                        leading: const Icon(Icons.my_location),
-                        title: Text(localizations.geolocation),
-                        subtitle: Text(geolocationEnabled
-                            ? localizations.enabled
-                            : localizations.disabled),
-                        trailing: Switch(
-                          value: geolocationEnabled,
-                          onChanged: (bool value) {
-                            appState.setGeolocationEnabled(value);
-                          },
-                        ),
-                      );
-                    },
-                  ),
-
-                  // Theme mode setting
-                  ValueListenableBuilder<ThemeMode>(
-                    valueListenable: appState.themeModeNotifier,
-                    builder: (context, themeMode, child) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
-                      return ListTile(
-                        leading: Icon(isDark
-                            ? Icons.dark_mode
-                            : Icons.light_mode),
-                        title: Text(localizations.theme),
-                        subtitle: Text(isDark
-                            ? localizations.dark
-                            : localizations.light),
-                        trailing: Switch(
-                          value: isDark,
-                          onChanged: (bool value) {
-                            appState.setThemeMode(
-                                value ? ThemeMode.dark : ThemeMode.light);
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: ListView.separated(
+                  itemCount: settingsItems.length,
+                  itemBuilder: (context, index) {
+                    return settingsItems[index];
+                  },
+                  separatorBuilder: (context, index) => const Divider(),
+                ),
               ),
             ),
           ],
