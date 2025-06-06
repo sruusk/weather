@@ -23,7 +23,6 @@ class WindArrow extends StatefulWidget {
 
 class _WindArrowState extends State<WindArrow>
     with SingleTickerProviderStateMixin {
-
   _windRadians() {
     return (widget.degrees - 180).abs() * (pi / 180);
   }
@@ -32,10 +31,7 @@ class _WindArrowState extends State<WindArrow>
   Widget build(BuildContext context) {
     return Transform.translate(
       offset: Offset(
-          0,
-          widget.autoCenter
-              ? (widget.size / 10) * cos(_windRadians())
-              : 0),
+          0, widget.autoCenter ? (widget.size / 10) * cos(_windRadians()) : 0),
       child: Stack(
         children: [
           Transform.rotate(
@@ -44,6 +40,12 @@ class _WindArrowState extends State<WindArrow>
               'assets/symbols/wind.svg',
               width: widget.size,
               height: widget.size,
+              colorFilter: ColorFilter.mode(
+                Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Color(0xFF0062B8),
+                BlendMode.srcIn,
+              ),
             ),
           ),
           Positioned.fill(
@@ -52,7 +54,6 @@ class _WindArrowState extends State<WindArrow>
                 widget.windSpeed.toStringAsFixed(0),
                 style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
