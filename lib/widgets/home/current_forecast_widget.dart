@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:weather/app_state.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
+import 'package:weather/widgets/home/precipitation.dart';
 import 'package:weather/widgets/home/sunrise_sunset_widget.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
+import 'package:weather/widgets/home/wind_arrow.dart';
 
 class CurrentForecast extends StatelessWidget {
   final Forecast forecast;
@@ -45,12 +47,15 @@ class CurrentForecast extends StatelessWidget {
                     value: i,
                     child: Row(
                       children: [
-                        Icon(i == 0 && appState.geolocationEnabled ? Icons.my_location : Icons.place),
+                        Icon(i == 0 && appState.geolocationEnabled
+                            ? Icons.my_location
+                            : Icons.place),
                         SizedBox(width: 8),
-                        Text(locations[i].name +
-                            (locations[i].region != null
-                                ? ', ${locations[i].region}'
-                                : ''),
+                        Text(
+                          locations[i].name +
+                              (locations[i].region != null
+                                  ? ', ${locations[i].region}'
+                                  : ''),
                         ),
                       ],
                     ),
@@ -111,29 +116,7 @@ class CurrentForecast extends StatelessWidget {
                 children: [
                   Expanded(
                     flex: 1,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Transform.translate(
-                              offset: const Offset(0, 1),
-                              child: WeatherSymbolWidget(
-                                  symbolName: 'raindrop', size: 30),
-                            ),
-                            Text(
-                              '${p.probabilityOfPrecipitation?.toStringAsFixed(0) ?? '–'}%',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          '${p.precipitation?.toStringAsFixed(1) ?? '-'} mm',
-                        ),
-                      ],
-                    ),
+                    child: Precipitation(p: p),
                   ),
                   const VerticalDivider(
                       thickness: 1,
@@ -154,12 +137,10 @@ class CurrentForecast extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '${p.windSpeed?.toStringAsFixed(0) ?? '–'} m/s',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${p.windDirection?.toStringAsFixed(0) ?? '–'}°',
+                        WindArrow(
+                          degrees: p.windDirection ?? 0,
+                          windSpeed: p.windSpeed ?? 0,
+                          size: 55,
                         ),
                       ],
                     ),

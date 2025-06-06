@@ -182,7 +182,7 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
                             '${station.cloudBase!.toStringAsFixed(0)} m'),
                       if (station.visibility != null)
                         _buildInfoItem(context, localizations.visibility,
-                            '${station.visibility! >= 50000 ? '>' : ''}${(station.visibility! / 1000).toStringAsFixed(1)} km'),
+                            '${(station.visibility! / 1000).toStringAsFixed(1)} km'),
                     ],
                   ),
                   const SizedBox(height: 20),

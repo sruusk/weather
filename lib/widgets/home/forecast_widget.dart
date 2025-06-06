@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:weather/app_state.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/forecast_point.dart';
+import 'package:weather/widgets/home/precipitation.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
+import 'package:weather/widgets/home/wind_arrow.dart';
 
 class ForecastWidget extends StatelessWidget {
   final Forecast? forecast;
@@ -41,15 +43,17 @@ class ForecastWidget extends StatelessWidget {
           return (p.weatherSymbol!, p.temperature?.toStringAsFixed(0) ?? 'N/A');
         }
       }
-      return (points.first.weatherSymbol!,
-              points.first.temperature?.toStringAsFixed(0) ?? 'N/A');
+      return (
+        points.first.weatherSymbol!,
+        points.first.temperature?.toStringAsFixed(0) ?? 'N/A'
+      );
     }
 
     final grouped = groupByDay(forecast!.forecast);
     final days = grouped.keys.toList();
 
     return SizedBox(
-      height: 300,
+      height: 330,
       child: DefaultTabController(
         length: days.length,
         child: Column(
@@ -75,7 +79,7 @@ class ForecastWidget extends StatelessWidget {
                         child: Stack(
                           children: [
                             Transform.translate(
-                              offset: const Offset(0, -5),
+                              offset: const Offset(0, -8),
                               child: WeatherSymbolWidget(
                                 symbolName: symbol,
                                 useFilled: false,
@@ -83,20 +87,18 @@ class ForecastWidget extends StatelessWidget {
                               ),
                             ),
                             Positioned(
-                              bottom: 0,
-                              right: 5,
-                              child: Text(
-                                '$temp°C',
-                                style: const TextStyle(fontSize: 16),
-                              )
-                            )
+                                bottom: 0,
+                                right: 5,
+                                child: Text(
+                                  '$temp°C',
+                                  style: const TextStyle(fontSize: 16),
+                                ))
                           ],
                         ),
                       ),
                     ],
                   );
-                })
-                    .toList(),
+                }).toList(),
                 labelColor: Theme.of(context).colorScheme.primary,
                 unselectedLabelColor: Colors.grey,
               ),
@@ -121,7 +123,7 @@ class ForecastWidget extends StatelessWidget {
                             top: 10, left: 2, right: 2, bottom: 2),
                         color: Theme.of(context).colorScheme.surfaceDim,
                         child: SizedBox(
-                          width: 70,
+                          width: 71,
                           child: Padding(
                             padding: const EdgeInsets.all(4),
                             child: Column(
@@ -142,22 +144,12 @@ class ForecastWidget extends StatelessWidget {
                                     symbolName: data.weatherSymbol!,
                                     useFilled: false,
                                     size: 60),
-                                Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        WeatherSymbolWidget(symbolName: 'raindrop', size: 25),
-                                        Text(
-                                            '${data.probabilityOfPrecipitation?.toStringAsFixed(0) ?? 0}%'),
-                                      ],
-                                    ),
-                                    Text(
-                                        '${(data.precipitation ?? 0) > 0 ? data.precipitation?.toStringAsFixed(1) ?? 0 : 0} mm',
-                                        softWrap: true),
-                                  ],
-                                )
+                                if (data.windSpeed != null)
+                                  WindArrow(
+                                    degrees: data.windDirection ?? 0,
+                                    windSpeed: data.windSpeed ?? 0,
+                                  ),
+                                Precipitation(p: data, compact: true),
                               ],
                             ),
                           ),

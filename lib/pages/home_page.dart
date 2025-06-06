@@ -223,7 +223,6 @@ class _HomePageState extends State<HomePage>
                               onLocationChanged: (index) async {
                                 setState(() {
                                   _selectedLocationIndex = index;
-                                  _isLoading = true;
                                 });
 
                                 // Get the location for the selected index
@@ -239,7 +238,6 @@ class _HomePageState extends State<HomePage>
                                     setState(() {
                                       // Update the forecast
                                       _forecast = forecast;
-                                      _isLoading = false;
                                     });
                                   }
                                 } catch (e) {
@@ -256,6 +254,7 @@ class _HomePageState extends State<HomePage>
                             ),
                           ],
                         ),
+                        SizedBox(height: 10,),
                       ],
                     ),
                   ),
