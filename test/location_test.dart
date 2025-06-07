@@ -11,10 +11,11 @@ void main() {
         region: 'Uusimaa',
         countryCode: 'FI',
         country: 'Finland',
+        index: 0
       );
 
       final result = location.toString();
-      expect(result, '60.1695|24.9354|Helsinki|FI|Uusimaa|Finland');
+      expect(result, '60.1695|24.9354|Helsinki|FI|Uusimaa|Finland|0');
     });
 
     test('toString should handle null region', () {
@@ -27,11 +28,11 @@ void main() {
       );
 
       final result = location.toString();
-      expect(result, '60.1695|24.9354|Helsinki|FI||');
+      expect(result, '60.1695|24.9354|Helsinki|FI|||');
     });
 
     test('fromString should parse a valid string correctly', () {
-      final str = '60.1695|24.9354|Helsinki|FI|Uusimaa|Finland';
+      final str = '60.1695|24.9354|Helsinki|FI|Uusimaa|Finland|0';
       final location = Location.fromString(str);
 
       expect(location.lat, 60.1695);
@@ -83,7 +84,7 @@ void main() {
       );
 
       final result = location.toDebugString();
-      expect(result, 'Location(name: Helsinki, lat: 60.1695, lon: 24.9354, region: Uusimaa, countryCode: FI, country: null)');
+      expect(result, 'Location(name: Helsinki, lat: 60.1695, lon: 24.9354, region: Uusimaa, countryCode: FI, country: null, index: null)');
     });
   });
 }

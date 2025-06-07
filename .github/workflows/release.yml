@@ -1,0 +1,92 @@
+name: "Release"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pubspec.yaml'
+
+  workflow_dispatch:
+
+jobs:
+  check-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      exists: ${{ steps.check.outputs.exists }}
+      version: ${{ steps.extract_version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from pubspec.yaml
+        id: extract_version
+        run: |
+          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: check
+        uses: mukunku/tag-exists-action@v1.6.0
+        with:
+          tag: v${{ steps.extract_version.outputs.version }}
+
+  build-and-release:
+    needs: check-tag
+    if: ${{ needs.check-tag.outputs.exists == 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.2'
+          channel: 'stable'
+          cache: true
+
+      - name: Setup Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > /tmp/keystore.jks
+
+      - name: Create key.properties
+        run: |
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=/tmp/keystore.jks" >> android/key.properties
+
+      - name: Create credentials.dart
+        run: |
+          echo "const String openWeatherMapApiKey = '${{ secrets.OPENWEATHER_KEY }}';" >> lib/data/credentials.dart
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Test
+        run: flutter test
+
+      - run: flutter build apk
+      - run: flutter build appbundle
+      - run: flutter build web --base-href=/weather/
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Releases
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+
+      - name: Upload web build to gh-pages
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: build/app/outputs/flutter-apk/app-release.apk,build/app/outputs/bundle/release/app-release.aab
+          tag: v${{ needs.check-tag.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
