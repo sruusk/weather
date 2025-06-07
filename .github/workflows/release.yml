@@ -33,7 +33,7 @@ jobs:
   build-and-release:
     needs: check-tag
     if: ${{ needs.check-tag.outputs.exists == 'false' }}
-    runs-on: [ self-hosted, windows ]
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
