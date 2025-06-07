@@ -731,7 +731,7 @@ packages:
       path: "."
       ref: HEAD
       resolved-ref: a37b6e7d0962e2c6b9a75ac79fb0bcd0237d911a
-      url: "git@github.com:sruusk/open-meteo-dart.git"
+      url: "https://github.com/sruusk/open-meteo-dart.git"
     source: git
     version: "2.0.3"
   package_config:
