@@ -33,7 +33,10 @@ jobs:
   build-and-release:
     needs: check-tag
     if: ${{ needs.check-tag.outputs.exists == 'false' }}
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, windows ]
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
