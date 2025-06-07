@@ -224,6 +224,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disabled => 'Disabled';
 
   @override
+  String get settingsSync => 'Preferences Sync';
+
+  @override
+  String get settingsSyncDesc =>
+      'Synchronize your app preferences and favourites across devices';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get logoutConfirmationTitle => 'Logout?';
+
+  @override
+  String get logoutConfirmationMessage =>
+      'Are you sure you want to logout? Your preferences and favourites will not be lost.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
   String get dataSourcesHeader => 'Data Sources';
 
   @override
@@ -312,4 +335,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
+
+  @override
+  String get syncFavourites => 'Favourites';
+
+  @override
+  String get syncFavouritesDesc => 'Synchronize your favourites';
+
+  @override
+  String get syncToAppwrite => 'Sync';
+
+  @override
+  String get syncFavouritesSuccess => 'Favourites synchronized successfully.';
+
+  @override
+  String syncFavouritesError(String error) {
+    return 'Error synchronizing favourites: $error';
+  }
 }

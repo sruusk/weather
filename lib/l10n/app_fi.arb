@@ -288,6 +288,34 @@
   "@disabled": {
     "description": "Disabled status"
   },
+  "settingsSync": "Synkronointi",
+  "@settingsSync": {
+    "description": "Label for settings synchronization"
+  },
+  "settingsSyncDesc": "Synkronoi sovelluksen asetukset ja suosikit laitteiden välillä.",
+  "@settingsSyncDesc": {
+    "description": "Description for settings synchronization feature"
+  },
+  "login": "Kirjaudu sisään",
+  "@login": {
+    "description": "Button text for logging in"
+  },
+  "logout": "Kirjaudu ulos",
+  "@logout": {
+    "description": "Button text for logging out"
+  },
+  "logoutConfirmationTitle": "Kirjaudu ulos?",
+  "@logoutConfirmationTitle": {
+    "description": "Title for logout confirmation dialog"
+  },
+  "logoutConfirmationMessage": "Haluatko varmasti kirjautua ulos?",
+  "@logoutConfirmationMessage": {
+    "description": "Message for logout confirmation dialog"
+  },
+  "cancel": "Peruuta",
+  "@cancel": {
+    "description": "Button text to cancel an action"
+  },
   "theme": "Teema",
   "@theme": {
     "description": "Label for theme setting"
@@ -399,5 +427,32 @@
   "retry": "Yritä uudelleen",
   "@retry": {
     "description": "Button text to retry the action"
+  },
+  "syncFavourites": "Suosikit",
+  "@syncFavourites": {
+    "description": "Label for synchronizing favourites"
+  },
+  "syncFavouritesDesc": "Synkronoi suosikit laitteiden välillä.",
+  "@syncFavouritesDesc": {
+    "description": "Description for synchronizing favourites feature"
+  },
+  "syncToAppwrite" : "Synkronoi",
+  "@syncToAppwrite": {
+    "description": "Button text to sync data to Appwrite"
+  },
+  "syncFavouritesSuccess": "Suosikkien synkronointi onnistui.",
+  "@syncFavouritesSuccess": {
+    "description": "Message shown when favourites are synchronized successfully"
+  },
+  "syncFavouritesError": "Synkronointi epäonnistui: {error}",
+  "@syncFavouritesError": {
+    "description": "Error message shown when there is an issue synchronizing favourites",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
   }
 }
+

@@ -224,6 +224,28 @@ class AppLocalizationsFi extends AppLocalizations {
   String get disabled => 'Pois käytöstä';
 
   @override
+  String get settingsSync => 'Synkronointi';
+
+  @override
+  String get settingsSyncDesc =>
+      'Synkronoi sovelluksen asetukset ja suosikit laitteiden välillä.';
+
+  @override
+  String get login => 'Kirjaudu sisään';
+
+  @override
+  String get logout => 'Kirjaudu ulos';
+
+  @override
+  String get logoutConfirmationTitle => 'Kirjaudu ulos?';
+
+  @override
+  String get logoutConfirmationMessage => 'Haluatko varmasti kirjautua ulos?';
+
+  @override
+  String get cancel => 'Peruuta';
+
+  @override
   String get dataSourcesHeader => 'Tietolähteet';
 
   @override
@@ -310,4 +332,21 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get retry => 'Yritä uudelleen';
+
+  @override
+  String get syncFavourites => 'Suosikit';
+
+  @override
+  String get syncFavouritesDesc => 'Synkronoi suosikit laitteiden välillä.';
+
+  @override
+  String get syncToAppwrite => 'Synkronoi';
+
+  @override
+  String get syncFavouritesSuccess => 'Suosikkien synkronointi onnistui.';
+
+  @override
+  String syncFavouritesError(String error) {
+    return 'Synkronointi epäonnistui: $error';
+  }
 }

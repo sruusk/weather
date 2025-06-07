@@ -8,17 +8,19 @@ import 'package:provider/provider.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:go_router/go_router.dart';
 
-// Import app state
+import 'appwrite_client.dart';
 import 'app_state.dart';
+
 // Import pages
 import 'pages/favourites_page.dart';
 import 'pages/home_page.dart';
+import 'pages/login_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/weather_symbols_page.dart';
 import 'pages/about_page.dart';
 import 'pages/warnings_page.dart';
-import 'pages/other_page.dart'; // Added import for OtherPageListView
-import 'routes.dart'; // Added import for AppRoutes
+import 'pages/other_page.dart';
+import 'routes.dart';
 
 class NoTransitionPage<T> extends CustomTransitionPage<T> {
   const NoTransitionPage({
@@ -83,6 +85,7 @@ final GoRouter _router = GoRouter(
             _buildStatefulBranch(AppRoutes.home, const HomePage(key: PageStorageKey('home_page'))),
             _buildStatefulBranch(AppRoutes.favourites, const FavouritesPage(key: PageStorageKey('favourites_page'))),
             _buildStatefulBranch(AppRoutes.warnings, const WarningsPage(key: PageStorageKey('warnings_page'))),
+            // _buildStatefulBranch(AppRoutes.login, const LoginPage(key: PageStorageKey('login_page'))),
             // Added 'Other' as a stateful branch with its nested children
             StatefulShellBranch(
               navigatorKey: GlobalKey<NavigatorState>(),
@@ -119,6 +122,14 @@ final GoRouter _router = GoRouter(
                         child: const AboutPage(key: PageStorageKey('about_page')),
                       ),
                     ),
+                    GoRoute(
+                      path: AppRoutes.login.path,
+                      name: AppRoutes.login.name,
+                      pageBuilder: (context, state) => NoTransitionPage(
+                        key: state.pageKey,
+                        child: const LoginPage(key: PageStorageKey('login_page')),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -148,6 +159,9 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Appwrite Client
+  AppwriteClient();
+
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     final availableVersion = await WebViewEnvironment.getAvailableVersion();
     assert(availableVersion != null,
@@ -160,7 +174,7 @@ void main() async {
 
   runApp(
     ChangeNotifierProvider(
-      create: (context) => AppState(),
+      create: (context) => AppState(), // Pass account from singleton // Removed account argument
       child: const MyApp(),
     ),
   );
@@ -345,4 +359,3 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
-

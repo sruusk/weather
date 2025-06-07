@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:weather/app_state.dart';
+import 'package:weather/appwrite_client.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
-
-import '../app_state.dart';
+import 'package:weather/routes.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -16,39 +18,51 @@ class _SettingsPageState extends State<SettingsPage>
   @override
   bool get wantKeepAlive => true;
 
+  bool? _isLoggedIn;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
+    AppwriteClient().isLoggedIn().then((val) {
+      if(val != _isLoggedIn) {
+        setState(() {
+          _isLoggedIn = val;
+        });
+      }
+    });
 
     final settingsItems = <Widget>[
       // Language setting
       ValueListenableBuilder<Locale>(
         valueListenable: appState.localeNotifier,
         builder: (context, locale, child) {
-          return ListTile(
-              leading: const Icon(Icons.language),
-              title: Text(localizations.language),
-              trailing: SegmentedButton<Locale>(
-                  segments: [
-                    ButtonSegment<Locale>(
-                      value: const Locale('en'),
-                      label: Text(localizations.english),
-                    ),
-                    ButtonSegment<Locale>(
-                      value: const Locale('fi'),
-                      label: Text(localizations.finnish),
-                    ),
-                  ],
-                  selected: {
-                    locale
-                  },
-                  onSelectionChanged: (Set<Locale> newSelection) {
-                    if (newSelection.isNotEmpty) {
-                      appState.setLocale(newSelection.first);
-                    }
-                  }));
+          return Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: ListTile(
+                leading: const Icon(Icons.language),
+                title: Text(localizations.language),
+                trailing: SegmentedButton<Locale>(
+                    segments: [
+                      ButtonSegment<Locale>(
+                        value: const Locale('en'),
+                        label: Text(localizations.english),
+                      ),
+                      ButtonSegment<Locale>(
+                        value: const Locale('fi'),
+                        label: Text(localizations.finnish),
+                      ),
+                    ],
+                    selected: {
+                      locale
+                    },
+                    onSelectionChanged: (Set<Locale> newSelection) {
+                      if (newSelection.isNotEmpty) {
+                        appState.setLocale(newSelection.first);
+                      }
+                    })),
+          );
         },
       ),
 
@@ -129,6 +143,110 @@ class _SettingsPageState extends State<SettingsPage>
           );
         },
       ),
+
+      // Settings Sync
+      if (_isLoggedIn == null)
+        ListTile(
+          leading: const Icon(Icons.sync_disabled),
+          title: Text(localizations.settingsSync),
+          subtitle: Text(localizations.settingsSyncDesc),
+          trailing: const CircularProgressIndicator(),
+        ),
+      if (_isLoggedIn != null && !_isLoggedIn!)
+        ListTile(
+          leading: const Icon(Icons.sync_disabled),
+          title: Text(localizations.settingsSync),
+          subtitle: Text(localizations.settingsSyncDesc),
+          trailing: ElevatedButton(
+            onPressed: () {
+              context.goNamed(AppRoutes.login.name);
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.login),
+                const SizedBox(width: 8),
+                Text(localizations.login),
+              ],
+            ),
+          ),
+        ),
+      if (_isLoggedIn != null && _isLoggedIn!)
+        Column(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.sync),
+              title: Text(localizations.settingsSync),
+              subtitle: Text(localizations.settingsSyncDesc),
+              trailing: ElevatedButton(
+                onPressed: () {
+                  // Confirm logout using a dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text(localizations.logoutConfirmationTitle),
+                        content: Text(localizations.logoutConfirmationMessage),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(localizations.cancel),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                              final account = AppwriteClient().getAccount;
+                              await account.deleteSession(sessionId: 'current');
+                              // Refresh the state
+                              setState(() {});
+                            },
+                            child: Text(localizations.logout),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.logout),
+                    const SizedBox(width: 8),
+                    Text(localizations.logout),
+                  ],
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite),
+              title: Text(localizations.syncFavourites),
+              subtitle: Text(localizations.syncFavouritesDesc),
+              trailing: Switch(
+                value: appState.syncFavouritesToAppwrite,
+                onChanged: (bool value) async {
+                  appState.setSyncFavouritesToAppwrite(value);
+                  if (value) {
+                    try {
+                      await AppwriteClient().syncFavourites(appState,
+                          direction: SyncDirection.fromAppwrite);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(localizations.syncFavouritesSuccess),
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(localizations.syncFavouritesError(e.toString())),
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
     ];
 
     return Scaffold(
@@ -140,29 +258,16 @@ class _SettingsPageState extends State<SettingsPage>
         title: Text(localizations.settingsPageTitle),
       ),
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              localizations.appSettingsAndPreferences,
-              style: const TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: ListView.separated(
-                  itemCount: settingsItems.length,
-                  itemBuilder: (context, index) {
-                    return settingsItems[index];
-                  },
-                  separatorBuilder: (context, index) => const Divider(),
-                ),
-              ),
-            ),
-          ],
+        child: ListView.separated(
+          itemCount: settingsItems.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: settingsItems[index],
+            );
+          },
+          separatorBuilder: (context, index) =>
+              const Divider(indent: 40, endIndent: 40),
         ),
       ),
     );

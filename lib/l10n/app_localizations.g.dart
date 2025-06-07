@@ -512,6 +512,48 @@ abstract class AppLocalizations {
   /// **'Disabled'**
   String get disabled;
 
+  /// Label for settings synchronization
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences Sync'**
+  String get settingsSync;
+
+  /// Description for settings synchronization feature
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronize your app preferences and favourites across devices'**
+  String get settingsSyncDesc;
+
+  /// Button text for logging in
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
+  /// Button text for logging out
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// Title for logout confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Logout?'**
+  String get logoutConfirmationTitle;
+
+  /// Message for logout confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout? Your preferences and favourites will not be lost.'**
+  String get logoutConfirmationMessage;
+
+  /// Button text to cancel an action
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
   /// Header for data sources section
   ///
   /// In en, this message translates to:
@@ -679,6 +721,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
+
+  /// Label for synchronizing favourites
+  ///
+  /// In en, this message translates to:
+  /// **'Favourites'**
+  String get syncFavourites;
+
+  /// Description for synchronizing favourites feature
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronize your favourites'**
+  String get syncFavouritesDesc;
+
+  /// Button text to sync data to Appwrite
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get syncToAppwrite;
+
+  /// Message shown when favourites are synchronized successfully
+  ///
+  /// In en, this message translates to:
+  /// **'Favourites synchronized successfully.'**
+  String get syncFavouritesSuccess;
+
+  /// Error message shown when there is an issue synchronizing favourites
+  ///
+  /// In en, this message translates to:
+  /// **'Error synchronizing favourites: {error}'**
+  String syncFavouritesError(String error);
 }
 
 class _AppLocalizationsDelegate

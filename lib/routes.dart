@@ -8,6 +8,7 @@ class AppRouteInfo {
 
 class AppRoutes {
   static const AppRouteInfo home = AppRouteInfo(path: '/', name: 'home');
+  static const AppRouteInfo login = AppRouteInfo(path: '/login', name: 'login'); // Added login route
   static const AppRouteInfo favourites = AppRouteInfo(path: '/favourites', name: 'favourites');
   static const AppRouteInfo warnings = AppRouteInfo(path: '/warnings', name: 'warnings');
   static const AppRouteInfo other = AppRouteInfo(path: '/other', name: 'other_root'); // Path for the list view, name for the root of this section

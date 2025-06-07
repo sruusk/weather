@@ -159,11 +159,16 @@ class _FavouritesPageState extends State<FavouritesPage> with AutomaticKeepAlive
                             style: const TextStyle(fontSize: 16),
                           ),
                         )
-                      : ListView.builder(
+                      : ReorderableListView.builder(
+                          buildDefaultDragHandles: false,
                           itemCount: favouriteLocations.length,
+                          onReorder: (oldIndex, newIndex) {
+                            appState.reorderFavouriteLocations(oldIndex, newIndex);
+                          },
                           itemBuilder: (context, index) {
                             final location = favouriteLocations[index];
                             return Card(
+                              key: ValueKey(location.toString()),
                               margin: const EdgeInsets.symmetric(vertical: 5.0),
                               child: ListTile(
                                 title: Text(
@@ -180,15 +185,19 @@ class _FavouritesPageState extends State<FavouritesPage> with AutomaticKeepAlive
                                       location.country!,
                                   ].join(', '),
                                 ),
+                                leading: ReorderableDragStartListener(
+                                  index: index,
+                                  child: const Icon(Icons.drag_handle),
+                                ),
                                 trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () =>
                                       _removeFromFavorites(location),
                                 ),
-                                onTap: () {
-                                  // Set as active location
-                                  appState.setActiveLocation(location);
-                                },
+                                // onTap: () {
+                                //   // Set as active location
+                                //   appState.setActiveLocation(location);
+                                // },
                               ),
                             );
                           },

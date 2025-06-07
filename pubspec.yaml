@@ -60,6 +60,7 @@ dependencies:
   flutter_svg: ^2.1.0
   fl_chart: ^1.0.0
   go_router: ^15.1.2
+  appwrite: 15.0.2
 
 dev_dependencies:
   flutter_test:
@@ -100,6 +101,7 @@ flutter:
     - assets/map/
     - assets/smartmet-alert-client/
     - assets/about/
+    - assets/icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

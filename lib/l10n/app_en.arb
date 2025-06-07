@@ -288,6 +288,34 @@
   "@disabled": {
     "description": "Disabled status"
   },
+  "settingsSync": "Preferences Sync",
+  "@settingsSync": {
+    "description": "Label for settings synchronization"
+  },
+  "settingsSyncDesc": "Synchronize your app preferences and favourites across devices",
+  "@settingsSyncDesc": {
+    "description": "Description for settings synchronization feature"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Button text for logging in"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Button text for logging out"
+  },
+  "logoutConfirmationTitle": "Logout?",
+  "@logoutConfirmationTitle": {
+    "description": "Title for logout confirmation dialog"
+  },
+  "logoutConfirmationMessage": "Are you sure you want to logout? Your preferences and favourites will not be lost.",
+  "@logoutConfirmationMessage": {
+    "description": "Message for logout confirmation dialog"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Button text to cancel an action"
+  },
   "dataSourcesHeader": "Data Sources",
   "@dataSourcesHeader": {
     "description": "Header for data sources section"
@@ -399,5 +427,32 @@
   "retry": "Retry",
   "@retry": {
     "description": "Button text to retry an action"
+  },
+  "syncFavourites": "Favourites",
+  "@syncFavourites": {
+    "description": "Label for synchronizing favourites"
+  },
+  "syncFavouritesDesc": "Synchronize your favourites",
+  "@syncFavouritesDesc": {
+    "description": "Description for synchronizing favourites feature"
+  },
+  "syncToAppwrite" : "Sync",
+  "@syncToAppwrite": {
+    "description": "Button text to sync data to Appwrite"
+  },
+  "syncFavouritesSuccess": "Favourites synchronized successfully.",
+  "@syncFavouritesSuccess": {
+    "description": "Message shown when favourites are synchronized successfully"
+  },
+  "syncFavouritesError": "Error synchronizing favourites: {error}",
+  "@syncFavouritesError": {
+    "description": "Error message shown when there is an issue synchronizing favourites",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
   }
 }
+

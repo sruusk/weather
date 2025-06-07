@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:weather/appwrite_client.dart';
 
 import 'data/location.dart';
 import 'preferences.dart';
@@ -13,6 +14,7 @@ class AppState extends ChangeNotifier {
   static const String _themeModeKey = 'themeMode';
   static const String _favouriteLocationsKey = 'favouriteLocations';
   static const String _geolocationEnabledKey = 'geolocationEnabled';
+  static const String _syncFavouritesToAppwriteKey = 'syncFavouritesToAppwrite';
 
   // PreferencesNotifier for storing settings
   final PreferencesNotifier _preferencesNotifier = PreferencesNotifier();
@@ -32,6 +34,8 @@ class AppState extends ChangeNotifier {
       ValueNotifier<Location?>(null);
   final ValueNotifier<bool> _geolocationEnabledNotifier =
       ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _syncFavouritesToAppwriteNotifier =
+      ValueNotifier<bool>(false);
 
   // Getters for ValueNotifiers
   ValueNotifier<Locale> get localeNotifier => _localeNotifier;
@@ -52,6 +56,9 @@ class AppState extends ChangeNotifier {
   ValueNotifier<Location?> get activeLocationNotifier =>
       _activeLocationNotifier;
 
+  ValueNotifier<bool> get syncFavouritesToAppwriteNotifier =>
+      _syncFavouritesToAppwriteNotifier;
+
   // Getters for current values
   Locale get locale => _localeNotifier.value;
 
@@ -63,9 +70,21 @@ class AppState extends ChangeNotifier {
 
   ThemeMode get themeMode => _themeModeNotifier.value;
 
-  List<Location> get favouriteLocations => _favouriteLocationsNotifier.value;
+  List<Location> get favouriteLocations {
+    // Sort by index if available
+    final locations = List<Location>.from(_favouriteLocationsNotifier.value);
+    locations.sort((a, b) {
+      if (a.index == null && b.index == null) return 0;
+      if (a.index == null) return 1;
+      if (b.index == null) return -1;
+      return a.index!.compareTo(b.index!);
+    });
+    return locations;
+  }
 
   Location? get activeLocation => _activeLocationNotifier.value;
+
+  bool get syncFavouritesToAppwrite => _syncFavouritesToAppwriteNotifier.value;
 
   // Getter for preferences notifier
   PreferencesNotifier get preferencesNotifier => _preferencesNotifier;
@@ -73,6 +92,20 @@ class AppState extends ChangeNotifier {
   AppState() {
     _preferencesNotifier.addListener(_updateFromPreferences);
     _updateFromPreferences();
+  }
+
+  @override
+  void dispose() {
+    _preferencesNotifier.removeListener(_updateFromPreferences);
+    _localeNotifier.dispose();
+    _temperatureUnitNotifier.dispose();
+    _notificationsEnabledNotifier.dispose();
+    _themeModeNotifier.dispose();
+    _favouriteLocationsNotifier.dispose();
+    _activeLocationNotifier.dispose();
+    _geolocationEnabledNotifier.dispose();
+    _syncFavouritesToAppwriteNotifier.dispose();
+    super.dispose();
   }
 
   // Update settings from preferences
@@ -117,6 +150,12 @@ class AppState extends ChangeNotifier {
     final String? geolocVal = preferences[_geolocationEnabledKey];
     if (geolocVal != null) {
       _geolocationEnabledNotifier.value = geolocVal == 'true';
+    }
+
+    // Load sync favourites to Appwrite setting
+    final String? syncFavouritesVal = preferences[_syncFavouritesToAppwriteKey];
+    if (syncFavouritesVal != null) {
+      _syncFavouritesToAppwriteNotifier.value = syncFavouritesVal == 'true';
     }
 
     // Load favourite locations
@@ -190,8 +229,15 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSyncFavouritesToAppwrite(bool enabled) {
+    _syncFavouritesToAppwriteNotifier.value = enabled;
+    _preferencesNotifier.setPreference(
+        _syncFavouritesToAppwriteKey, enabled.toString());
+    notifyListeners();
+  }
+
   // Add a location to favourites
-  void addFavouriteLocation(Location location) {
+  void addFavouriteLocation(Location location, {bool sync = true}) {
     final currentLocations =
         List<Location>.from(_favouriteLocationsNotifier.value);
 
@@ -200,45 +246,124 @@ class AppState extends ChangeNotifier {
         loc.lat == location.lat &&
         loc.lon == location.lon &&
         loc.name == location.name)) {
-      currentLocations.add(location);
+      // Create a new location with the next available index
+      final newIndex = currentLocations.isEmpty ? 0 : _getNextIndex(currentLocations);
+      final locationWithIndex = Location(
+        lat: location.lat,
+        lon: location.lon,
+        name: location.name,
+        countryCode: location.countryCode,
+        region: location.region,
+        country: location.country,
+        index: newIndex,
+      );
+
+      currentLocations.add(locationWithIndex);
       _favouriteLocationsNotifier.value = currentLocations;
 
       // If this is the first location, set it as active
       if (_activeLocationNotifier.value == null) {
-        _activeLocationNotifier.value = location;
+        _activeLocationNotifier.value = locationWithIndex;
       }
 
       // Save to preferences
-      _saveFavouriteLocations();
+      _saveFavouriteLocations(); // Save to local preferences
+
+      if (syncFavouritesToAppwrite && sync) {
+        if (kDebugMode) {
+          print("Syncing new favourite to Appwrite...");
+        }
+        _appwriteClient
+            .syncFavourites(this, direction: SyncDirection.toAppwrite)
+            .then((_) {
+          if (kDebugMode) {
+            print("Favourite added and synced to Appwrite.");
+          }
+        }).catchError((e, s) {
+          if (kDebugMode) {
+            print("Error syncing favourite to Appwrite after adding: $e");
+            print("Stack trace: $s");
+          }
+        });
+      }
       notifyListeners();
     }
   }
 
-  // Remove a location from favourites
-  void removeFavouriteLocation(Location location) {
-    final currentLocations =
-        List<Location>.from(_favouriteLocationsNotifier.value);
+  // Get the next available index for a new favourite location
+  int _getNextIndex(List<Location> locations) {
+    if (locations.isEmpty) return 0;
 
-    // Remove the location
-    currentLocations.removeWhere((loc) =>
-        loc.lat == location.lat &&
-        loc.lon == location.lon &&
-        loc.name == location.name);
-
-    _favouriteLocationsNotifier.value = currentLocations;
-
-    // If the active location was removed, set a new active location
-    if (_activeLocationNotifier.value != null &&
-        _activeLocationNotifier.value!.lat == location.lat &&
-        _activeLocationNotifier.value!.lon == location.lon &&
-        _activeLocationNotifier.value!.name == location.name) {
-      _activeLocationNotifier.value =
-          currentLocations.isNotEmpty ? currentLocations.first : null;
+    // Find the highest index and add 1
+    int maxIndex = 0;
+    for (var location in locations) {
+      if (location.index != null && location.index! > maxIndex) {
+        maxIndex = location.index!;
+      }
     }
+    return maxIndex + 1;
+  }
+
+  // Remove all locations from favourites
+  void removeAllLocalFavouriteLocations() {
+    _favouriteLocationsNotifier.value = [];
+    _activeLocationNotifier.value = null;
 
     // Save to preferences
     _saveFavouriteLocations();
+
     notifyListeners();
+  }
+
+  // Remove a location from favourites
+  void removeFavouriteLocation(Location location, {bool sync = true}) {
+    final currentLocations =
+        List<Location>.from(_favouriteLocationsNotifier.value);
+    bool removed = false;
+    currentLocations.removeWhere((loc) {
+      if (loc.lat == location.lat &&
+          loc.lon == location.lon &&
+          loc.name == location.name) {
+        removed = true;
+        return true;
+      }
+      return false;
+    });
+
+    if (removed) {
+      _favouriteLocationsNotifier.value = currentLocations;
+
+      // If the active location was removed, set a new active location
+      if (_activeLocationNotifier.value != null &&
+          _activeLocationNotifier.value!.lat == location.lat &&
+          _activeLocationNotifier.value!.lon == location.lon &&
+          _activeLocationNotifier.value!.name == location.name) {
+        _activeLocationNotifier.value =
+            currentLocations.isNotEmpty ? currentLocations.first : null;
+      }
+
+      // Save to preferences
+      _saveFavouriteLocations(); // Save to local preferences
+
+      if (syncFavouritesToAppwrite && sync) {
+        if (kDebugMode) {
+          print("Syncing favourite removal to Appwrite...");
+        }
+        _appwriteClient
+            .syncFavourites(this, direction: SyncDirection.toAppwrite)
+            .then((_) {
+          if (kDebugMode) {
+            print("Favourite removed and synced to Appwrite.");
+          }
+        }).catchError((e, s) {
+          if (kDebugMode) {
+            print("Error syncing favourite to Appwrite after removing: $e");
+            print("Stack trace: $s");
+          }
+        });
+      }
+      notifyListeners();
+    }
   }
 
   // Set the active location
@@ -254,4 +379,61 @@ class AppState extends ChangeNotifier {
         .join(',');
     _preferencesNotifier.setPreference(_favouriteLocationsKey, locationStrings);
   }
+
+  // Reorder favourite locations
+  void reorderFavouriteLocations(int oldIndex, int newIndex) {
+    final currentLocations = List<Location>.from(_favouriteLocationsNotifier.value);
+
+    // Adjust for removing the item
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Move the item
+    final location = currentLocations.removeAt(oldIndex);
+    currentLocations.insert(newIndex, location);
+
+    // Update indices for all locations
+    final updatedLocations = <Location>[];
+    for (int i = 0; i < currentLocations.length; i++) {
+      final loc = currentLocations[i];
+      updatedLocations.add(Location(
+        lat: loc.lat,
+        lon: loc.lon,
+        name: loc.name,
+        countryCode: loc.countryCode,
+        region: loc.region,
+        country: loc.country,
+        index: i,
+      ));
+    }
+
+    _favouriteLocationsNotifier.value = updatedLocations;
+
+    // Save to preferences
+    _saveFavouriteLocations();
+
+    // Sync to Appwrite if enabled
+    if (syncFavouritesToAppwrite) {
+      if (kDebugMode) {
+        print("Syncing reordered favourites to Appwrite...");
+      }
+      _appwriteClient
+          .syncFavourites(this, direction: SyncDirection.toAppwrite)
+          .then((_) {
+        if (kDebugMode) {
+          print("Reordered favourites synced to Appwrite.");
+        }
+      }).catchError((e, s) {
+        if (kDebugMode) {
+          print("Error syncing reordered favourites to Appwrite: $e");
+          print("Stack trace: $s");
+        }
+      });
+    }
+
+    notifyListeners();
+  }
+
+  final AppwriteClient _appwriteClient = AppwriteClient(); // Initialize Appwrite client
 }

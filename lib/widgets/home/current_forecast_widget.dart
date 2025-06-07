@@ -80,7 +80,7 @@ class CurrentForecast extends StatelessWidget {
                 children: [
                   WeatherSymbolWidget(
                     symbolName: p.weatherSymbol ?? 'error',
-                    size: 120,
+                    size: 150,
                   ),
                   RichText(
                     text: TextSpan(
