@@ -78,7 +78,7 @@ jobs:
 
       - run: flutter build apk
       - run: flutter build appbundle
-      - run: flutter build web --base-href=/weather/ --wasm
+      - run: flutter build web --wasm
 
       - name: Upload web build to gh-pages
         uses: actions/upload-pages-artifact@v3
