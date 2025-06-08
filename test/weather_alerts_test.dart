@@ -117,7 +117,8 @@ void main() {
       expect(alerts.first.fi.event, 'Test Event');
 
       // Future time - should only return the future alert
-      final futureAlerts = weatherAlerts.alertsForLocation(testLocation, tomorrow.add(const Duration(hours: 12)));
+      final futureAlerts = weatherAlerts.alertsForLocation(
+          testLocation, tomorrow.add(const Duration(hours: 24)));
       expect(futureAlerts.length, 1);
       expect(futureAlerts.first.fi.event, 'Future Event');
     });
