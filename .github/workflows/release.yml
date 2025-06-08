@@ -95,11 +95,12 @@ jobs:
           tag: v${{ needs.check-tag.outputs.version }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: r0adkll/upload-google-play@v1
+      - name: Release to Play Store
+        uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.sruusk.weather
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: qa
+          track: internal
           status: draft
 
