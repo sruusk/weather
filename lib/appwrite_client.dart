@@ -7,8 +7,11 @@ enum SyncDirection { toAppwrite, fromAppwrite, both }
 
 class AppwriteClient {
   static final AppwriteClient _instance = AppwriteClient._internal();
-  late Client client;
-  late Account account;
+  late final Client client;
+  late final Account account;
+  late final Realtime realtime;
+  RealtimeSubscription? subscription;
+  AppState? _appState;
 
   factory AppwriteClient() {
     return _instance;
@@ -17,13 +20,18 @@ class AppwriteClient {
   AppwriteClient._internal() {
     client = Client()
         .setEndpoint("https://aw.a32.fi/v1") // Replace with your endpoint
-        .setProject("6843138e001dcb69f2be"); // Replace with your project ID
+        .setProject("6843138e001dcb69f2be"); //// Replace with your project ID
     account = Account(client);
+    realtime = Realtime(client);
   }
 
   Client get getClient => client;
 
   Account get getAccount => account;
+
+  void setAppState(AppState state) {
+    _appState = state;
+  }
 
   Future<bool> isLoggedIn() async {
     try {
@@ -38,7 +46,7 @@ class AppwriteClient {
       {SyncDirection direction = SyncDirection.both}) async {
     final databases = Databases(client);
 
-    if(!await isLoggedIn()) {
+    if (!await isLoggedIn()) {
       appState.setSyncFavouritesToAppwrite(false);
       throw Exception('User is not logged in, disabling sync');
     }
@@ -144,5 +152,48 @@ class AppwriteClient {
       databaseId: 'sync',
       collectionId: 'favourites',
     );
+  }
+
+  Future<void> logout() async {
+    await account.deleteSession(sessionId: 'current');
+    unsubscribe();
+    // account = Account(client); // Reinitialize account to reset state
+  }
+
+  void subscribe() {
+    if (subscription != null || _appState == null) return;
+    subscription = realtime.subscribe([
+      'databases.sync.collections.favourites.documents',
+    ]);
+    subscription!.stream.listen((data) {
+      if (data.payload.isEmpty) return;
+      final item = data.payload;
+
+      final location = Location(
+        lat: item['lat'] as double,
+        lon: item['lon'] as double,
+        name: item['name'] as String,
+        region: item['region'] as String?,
+        countryCode: item['countryCode'] as String,
+        country: item['country'] as String?,
+        index: item['index'] as int,
+      );
+
+      if (data.events.first.endsWith('.create')) {
+        _appState!.addFavouriteLocation(location, sync: false);
+      } else if (data.events.first.endsWith('.update')) {
+        _appState!.removeFavouriteLocation(location, sync: false);
+        _appState!.addFavouriteLocation(location, sync: false);
+      } else if (data.events.first.endsWith('.delete')) {
+        _appState!.removeFavouriteLocation(location, sync: false);
+      }
+    });
+  }
+
+  void unsubscribe() {
+    if (subscription != null) {
+      subscription!.close();
+      subscription = null;
+    }
   }
 }

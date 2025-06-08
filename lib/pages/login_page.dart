@@ -146,8 +146,12 @@ class _LoginPageState extends State<LoginPage> {
   void _finishLogin() {
     final appState = Provider.of<AppState>(context, listen: false);
     if (appState.syncFavouritesToAppwrite) {
-      AppwriteClient()
-          .syncFavourites(appState, direction: SyncDirection.fromAppwrite);
+      final client = AppwriteClient();
+      client
+          .syncFavourites(appState, direction: SyncDirection.fromAppwrite)
+          .then((_) {
+        client.subscribe();
+      });
     }
     context.goNamed('settings');
   }

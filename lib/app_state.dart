@@ -246,8 +246,9 @@ class AppState extends ChangeNotifier {
         loc.lat == location.lat &&
         loc.lon == location.lon &&
         loc.name == location.name)) {
-      // Create a new location with the next available index
-      final newIndex = currentLocations.isEmpty ? 0 : _getNextIndex(currentLocations);
+      // Create a new Location with an index if not provided
+      final newIndex = location.index ??
+          (currentLocations.isEmpty ? 0 : _getNextIndex(currentLocations));
       final locationWithIndex = Location(
         lat: location.lat,
         lon: location.lon,
@@ -366,7 +367,6 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  // Set the active location
   void setActiveLocation(Location location) {
     _activeLocationNotifier.value = location;
     notifyListeners();
@@ -382,7 +382,8 @@ class AppState extends ChangeNotifier {
 
   // Reorder favourite locations
   void reorderFavouriteLocations(int oldIndex, int newIndex) {
-    final currentLocations = List<Location>.from(_favouriteLocationsNotifier.value);
+    final currentLocations =
+        List<Location>.from(_favouriteLocationsNotifier.value);
 
     // Adjust for removing the item
     if (newIndex > oldIndex) {
@@ -435,5 +436,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  final AppwriteClient _appwriteClient = AppwriteClient(); // Initialize Appwrite client
+  final AppwriteClient _appwriteClient =
+      AppwriteClient(); // Initialize Appwrite client
 }

@@ -238,13 +238,16 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  // Flag to ensure _sync is only run once
   bool _syncComplete = false;
 
   void _sync(AppState appState) {
     final client = AppwriteClient();
+    client.setAppState(appState);
     client.isLoggedIn().then((isLoggedIn) {
       if (isLoggedIn) {
         client.syncFavourites(appState, direction: SyncDirection.both);
+        client.subscribe();
       }
     });
   }
@@ -293,11 +296,12 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isWideScreen = MediaQuery.of(context).size.width > 600;
+    final AppState appState = Provider.of<AppState>(context);
+    final bool isWideScreen = MediaQuery.of(context).size.width > 600;
     final int currentIndex = _calculateSelectedIndex(context);
 
     if (!_syncComplete) {
-      _sync(Provider.of<AppState>(context, listen: false));
+      _sync(appState);
       _syncComplete = true;
     }
 

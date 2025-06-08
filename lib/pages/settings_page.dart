@@ -195,10 +195,11 @@ class _SettingsPageState extends State<SettingsPage>
                           TextButton(
                             onPressed: () async {
                               Navigator.of(context).pop();
-                              final account = AppwriteClient().getAccount;
-                              await account.deleteSession(sessionId: 'current');
+                              AppwriteClient().logout();
                               // Refresh the state
-                              setState(() {});
+                              setState(() {
+                                _isLoggedIn = false;
+                              });
                             },
                             child: Text(localizations.logout),
                           ),
