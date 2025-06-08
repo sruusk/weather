@@ -244,12 +244,15 @@ class _MainScreenState extends State<MainScreen> {
   void _sync(AppState appState) {
     final client = AppwriteClient();
     client.setAppState(appState);
-    client.isLoggedIn().then((isLoggedIn) {
-      if (isLoggedIn) {
-        client.syncFavourites(appState, direction: SyncDirection.both);
-        client.subscribe();
-      }
-    });
+    if (appState.syncFavouritesToAppwrite) {
+      client.isLoggedIn().then((isLoggedIn) {
+        if (isLoggedIn) {
+          client.syncFavourites(appState,
+              direction: SyncDirection.fromAppwrite);
+          client.subscribe();
+        }
+      });
+    }
   }
 
   int _calculateSelectedIndex(BuildContext context) {

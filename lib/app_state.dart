@@ -322,9 +322,7 @@ class AppState extends ChangeNotifier {
         List<Location>.from(_favouriteLocationsNotifier.value);
     bool removed = false;
     currentLocations.removeWhere((loc) {
-      if (loc.lat == location.lat &&
-          loc.lon == location.lon &&
-          loc.name == location.name) {
+      if (loc.lat == location.lat && loc.lon == location.lon) {
         removed = true;
         return true;
       }
