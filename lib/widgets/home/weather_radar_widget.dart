@@ -40,7 +40,7 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
     super.initState();
     _currentTime = getTime();
     _tileProviderFuture = () async {
-      if (kIsWeb) {
+      if (kIsWeb || kIsWasm) {
         return null;
       } else {
         // Load PMTiles asset and write to temp file
@@ -139,8 +139,11 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                       } else {
                         final tileProvider = snapshot.data;
 
-                        if (kDebugMode && tileProvider == null && !kIsWeb) {
-                          // ignore: avoid_print
+                      if (kDebugMode &&
+                          tileProvider == null &&
+                          !kIsWeb &&
+                          !kIsWasm) {
+                        // ignore: avoid_print
                           print('Tile provider is null, using web tile provider');
                         }
                         // Use provided location or default to Helsinki
@@ -167,8 +170,8 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                           ),
                           children: [
                             // Use raster layer for web, vector layer for mobile
-                            if (kIsWeb)
-                              TileLayer(
+                          if (kIsWeb || kIsWasm)
+                            TileLayer(
                                 urlTemplate:
                                     'https://a32.fi/osm/tile/{z}/{x}/{y}.png',
                                 userAgentPackageName: 'com.sruusk.weather',
@@ -237,8 +240,8 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                                 alignment: Alignment.topCenter,
                                 child: Icon(
                                   Icons.location_on,
-                                  color: kIsWeb
-                                      ? Colors.black
+                                color: (kIsWeb || kIsWasm)
+                                    ? Colors.black
                                       : Theme.of(context).colorScheme.onSurface,
                                   size: 40,
                                 ),

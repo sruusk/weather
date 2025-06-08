@@ -4,22 +4,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
-import 'package:go_router/go_router.dart';
 
-import 'appwrite_client.dart';
 import 'app_state.dart';
-
+import 'appwrite_client.dart';
+import 'pages/about_page.dart';
 // Import pages
 import 'pages/favourites_page.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page.dart';
-import 'pages/settings_page.dart';
-import 'pages/weather_symbols_page.dart';
-import 'pages/about_page.dart';
-import 'pages/warnings_page.dart';
 import 'pages/other_page.dart';
+import 'pages/settings_page.dart';
+import 'pages/warnings_page.dart';
+import 'pages/weather_symbols_page.dart';
 import 'routes.dart';
 
 class NoTransitionPage<T> extends CustomTransitionPage<T> {
@@ -239,6 +238,17 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  bool _syncComplete = false;
+
+  void _sync(AppState appState) {
+    final client = AppwriteClient();
+    client.isLoggedIn().then((isLoggedIn) {
+      if (isLoggedIn) {
+        client.syncFavourites(appState, direction: SyncDirection.both);
+      }
+    });
+  }
+
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.toString();
 
@@ -285,6 +295,11 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 600;
     final int currentIndex = _calculateSelectedIndex(context);
+
+    if (!_syncComplete) {
+      _sync(Provider.of<AppState>(context, listen: false));
+      _syncComplete = true;
+    }
 
     return Scaffold(
       body: Row(

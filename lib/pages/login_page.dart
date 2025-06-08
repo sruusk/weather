@@ -5,7 +5,11 @@ import 'package:appwrite/enums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:weather/app_state.dart';
 import 'package:weather/appwrite_client.dart';
+import 'package:weather/data/ui_stub.dart' // Stub implementation
+    if (dart.library.ui_web) 'dart:ui_web';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -24,12 +28,12 @@ class _LoginPageState extends State<LoginPage> {
   String? _error;
   bool _isLogin = true;
 
-  late Account account; // Added: Get account from AppwriteClient
+  late Account account;
 
   @override
-  void initState() { // Added initState
+  void initState() {
     super.initState();
-    account = AppwriteClient().getAccount; // Initialize account
+    account = AppwriteClient().getAccount;
   }
 
   Future<void> _login(String email, String password) async {
@@ -43,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
         password: password,
       );
       if (mounted) {
-        context.goNamed('settings');
+        _finishLogin();
       }
     } on AppwriteException catch (e) {
       setState(() {
@@ -64,8 +68,7 @@ class _LoginPageState extends State<LoginPage> {
       _error = null;
     });
     try {
-      // Use the account instance from AppwriteClient
-      await account.create( // Use initialized account
+      await account.create(
         userId: ID.unique(),
         email: email,
         password: password,
@@ -73,8 +76,8 @@ class _LoginPageState extends State<LoginPage> {
       );
       // Log in the user after successful sign-up
       await _login(email, password);
-      if(mounted) {
-        context.goNamed('settings');
+      if (mounted) {
+        _finishLogin();
       }
     } on AppwriteException catch (e) {
       setState(() {
@@ -90,13 +93,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   (String?, String?) _getSuccessFailureUrls() {
-    if (kIsWeb) {
-      return ('${Uri.base.origin}/auth', '${Uri.base.origin}/auth');
-    } else if(Platform.isWindows) {
+    if (kIsWeb || kIsWasm) {
+      final String href = BrowserPlatformLocation().getBaseHref()!;
+      return ('${href}auth', '${href}auth');
+    } else if (Platform.isWindows) {
       // Success and failure paths must match the paths here:
       // https://github.com/appwrite/appwrite/blob/507f8c69555e8f5774199b0b44eb9b4b8dbdf985/app/controllers/api/account.php#L58
-      return ('http://localhost:8080/console/auth/oauth2/success',
-              'http://localhost:8080/console/auth/oauth2/failure');
+      return (
+        'http://localhost:8080/console/auth/oauth2/success',
+        'http://localhost:8080/console/auth/oauth2/failure'
+      );
     } else {
       return (null, null);
     }
@@ -108,27 +114,21 @@ class _LoginPageState extends State<LoginPage> {
       _error = null;
     });
     try {
-      // Use the account instance from AppwriteClient
-      await account.createOAuth2Session( // Use initialized account
+      await account.createOAuth2Session(
         provider: OAuthProvider.google,
         success: _getSuccessFailureUrls().$1,
         failure: _getSuccessFailureUrls().$2,
         scopes: ['email', 'profile'],
       );
       // Appwrite handles redirection. If successful, user session is created.
-      // You might need to check session status and navigate accordingly.
-      // For Flutter web, this might open a new tab/window.
-      // For mobile, you'll need to handle the callback URL.
-      // This example assumes a simple scenario where Appwrite redirects back.
       if (mounted) {
-        // Potentially check session and navigate
-        // Use the account instance from AppwriteClient
-        final session = await account.getSession(sessionId: 'current'); // Use initialized account
+        final session = await account.getSession(sessionId: 'current');
         if (kDebugMode) {
-          print('Signed in with ${session.provider}, user ID: ${session.providerUid}, token: ${session.providerAccessToken}');
+          print(
+              'Signed in with ${session.provider}, user ID: ${session.providerUid}, token: ${session.providerAccessToken}');
         }
-        if (!mounted) return; // Re-check mounted after await
-        context.goNamed('settings');
+        if (!mounted) return;
+        _finishLogin();
       }
     } on AppwriteException catch (e) {
       setState(() {
@@ -143,11 +143,17 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _finishLogin() {
+    final appState = Provider.of<AppState>(context, listen: false);
+    if (appState.syncFavouritesToAppwrite) {
+      AppwriteClient()
+          .syncFavourites(appState, direction: SyncDirection.fromAppwrite);
+    }
+    context.goNamed('settings');
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Access Account instance from AppwriteClient
-    // account = Provider.of<AppState>(context, listen: false).account; // Removed
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -161,17 +167,17 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.all(16.0),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400), // Max width for the content
+              constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  // Add the icon here
                   Padding(
                     padding: const EdgeInsets.only(bottom: 32.0),
-                    child: Image.asset('assets/icon.png', height: 100, width: 100),
+                    child:
+                        Image.asset('assets/icon.png', height: 100, width: 100),
                   ),
                   if (!_isLogin)
-                    TextFormField( // Changed to TextFormField for consistency
+                    TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
                         labelText: 'Name',
@@ -183,8 +189,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       enabled: !_isLoading,
                     ),
-                  if (!_isLogin) const SizedBox(height: 16), // Increased spacing
-                  TextFormField( // Changed to TextFormField
+                  if (!_isLogin) const SizedBox(height: 16),
+                  TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
                       labelText: 'Email',
@@ -197,8 +203,8 @@ class _LoginPageState extends State<LoginPage> {
                     keyboardType: TextInputType.emailAddress,
                     enabled: !_isLoading,
                   ),
-                  const SizedBox(height: 16), // Increased spacing
-                  TextFormField( // Changed to TextFormField
+                  const SizedBox(height: 16),
+                  TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
                       labelText: 'Password',
@@ -217,27 +223,32 @@ class _LoginPageState extends State<LoginPage> {
                   else ...[
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50), // Make button wider and taller
-                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 24.0),
+                        textStyle: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                       ),
                       onPressed: () {
                         if (_isLogin) {
-                          _login(_emailController.text, _passwordController.text);
+                          _login(
+                              _emailController.text, _passwordController.text);
                         } else {
-                          _signUp(_emailController.text, _passwordController.text,
-                              _nameController.text);
+                          _signUp(_emailController.text,
+                              _passwordController.text, _nameController.text);
                         }
                       },
                       child: Text(_isLogin ? 'Login' : 'Sign Up'),
                     ),
-                    const SizedBox(height: 16), // Increased spacing
+                    const SizedBox(height: 16),
                     TextButton(
                       style: TextButton.styleFrom(
-                        textStyle: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.primary),
+                        textStyle: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.primary),
                       ),
                       onPressed: () {
                         setState(() {
@@ -250,23 +261,25 @@ class _LoginPageState extends State<LoginPage> {
                           : 'Have an account? Login'),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Or', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                    const Text('Or',
+                        style: TextStyle(fontSize: 16, color: Colors.grey)),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                      icon: const Icon(Icons.login), // Consider replacing with a Google icon if available
-                      label: const Text('Sign in with Google', style: TextStyle(fontSize: 16)),
+                      icon: const Icon(Icons.login),
+                      label: const Text('Sign in with Google',
+                          style: TextStyle(fontSize: 16)),
                       onPressed: _googleSignIn,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
-                        backgroundColor: Colors.white, // Google's typical button color
-                        foregroundColor: Colors.black87, // Text color for Google button
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black87,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
                           side: BorderSide(color: Colors.grey.shade300),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16) // Increased spacing
+                    const SizedBox(height: 16)
                   ],
                   if (_error != null) ...[
                     const SizedBox(height: 16),
