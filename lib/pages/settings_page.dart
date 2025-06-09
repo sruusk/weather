@@ -26,7 +26,7 @@ class _SettingsPageState extends State<SettingsPage>
     final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
     AppwriteClient().isLoggedIn().then((val) {
-      if(val != _isLoggedIn) {
+      if (val != _isLoggedIn) {
         setState(() {
           _isLoggedIn = val;
         });
@@ -145,190 +145,22 @@ class _SettingsPageState extends State<SettingsPage>
       ),
 
       // Settings Sync
-      if (_isLoggedIn == null)
-        ListTile(
-          leading: const Icon(Icons.sync_disabled),
-          title: Text(localizations.settingsSync),
-          subtitle: Text(localizations.settingsSyncDesc),
-          trailing: const CircularProgressIndicator(),
-        ),
-      if (_isLoggedIn != null && !_isLoggedIn!)
-        ListTile(
-          leading: const Icon(Icons.sync_disabled),
-          title: Text(localizations.settingsSync),
-          subtitle: Text(localizations.settingsSyncDesc),
-          trailing: ElevatedButton(
-            onPressed: () {
-              context.goNamed(AppRoutes.login.name);
-            },
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.login),
-                const SizedBox(width: 8),
-                Text(localizations.login),
-              ],
-            ),
-          ),
-        ),
-      if (_isLoggedIn != null && _isLoggedIn!)
-        Column(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.sync),
-              title: Text(localizations.settingsSync),
-              subtitle: Text(localizations.settingsSyncDesc),
-              trailing: ElevatedButton(
-                onPressed: () {
-                  // Confirm logout using a dialog
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: Text(localizations.logoutConfirmationTitle),
-                        content: Text(localizations.logoutConfirmationMessage),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(localizations.cancel),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              Navigator.of(context).pop();
-                              AppwriteClient().logout();
-                              // Refresh the state
-                              setState(() {
-                                _isLoggedIn = false;
-                              });
-                            },
-                            child: Text(localizations.logout),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.logout),
-                    const SizedBox(width: 8),
-                    Text(localizations.logout),
-                  ],
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.favorite),
-              title: Text(localizations.syncFavourites),
-              subtitle: Text(localizations.syncFavouritesDesc),
-              trailing: Switch(
-                value: appState.syncFavouritesToAppwrite,
-                onChanged: (bool value) async {
-                  appState.setSyncFavouritesToAppwrite(value);
-                  if (value) {
-                    try {
-                      final client = AppwriteClient();
-                      await client.syncFavourites(appState,
-                          direction: SyncDirection.fromAppwrite);
-                      client.subscribe();
-
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(localizations.syncFavouritesSuccess),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(localizations
-                                .syncFavouritesError(e.toString())),
-                          ),
-                        );
-                      }
-                    }
-                  } else {
-                    AppwriteClient().unsubscribe();
-                  }
-                },
-              ),
-            ),
+      Column(
+        children: [
+          _buildLoginLogoutButton(
+              localizations, appState, context, _isLoggedIn),
+          if (_isLoggedIn != null && _isLoggedIn!) ...[
+            _buildSyncSwitch(localizations, appState, context),
             SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 20),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.errorContainer,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    // Confirm logout using a dialog
-                    showDialog(
-                      context: context,
-                      builder: (dialogContext) {
-                        return AlertDialog(
-                          title: Text(
-                              localizations.deleteAccountConfirmationTitle),
-                          content: Text(
-                              localizations.deleteAccountConfirmationMessage),
-                          actions: [
-                            TextButton(
-                              onPressed: () =>
-                                  Navigator.of(dialogContext).pop(),
-                              child: Text(localizations.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                Navigator.of(dialogContext).pop();
-                                final bool success =
-                                    await AppwriteClient().deleteAccount();
-                                if (success && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          localizations.deleteAccountSuccess),
-                                    ),
-                                  );
-                                } else if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          localizations.deleteAccountError),
-                                    ),
-                                  );
-                                }
-                                // Refresh the state
-                                setState(() {
-                                  _isLoggedIn = false;
-                                });
-                              },
-                              child: Text(localizations.deleteAccount),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.delete_forever),
-                      const SizedBox(width: 8),
-                      Text(localizations.deleteAccount),
-                    ],
-                  ),
-                ),
+                _buildAccountDeleteButton(context, localizations),
               ],
             )
-          ],
-        ),
+          ]
+        ],
+      ),
     ];
 
     return Scaffold(
@@ -351,6 +183,178 @@ class _SettingsPageState extends State<SettingsPage>
           separatorBuilder: (context, index) =>
               const Divider(indent: 40, endIndent: 40),
         ),
+      ),
+    );
+  }
+
+  ListTile _buildLoginLogoutButton(AppLocalizations localizations,
+      AppState appState, BuildContext context, bool? isLoggedIn) {
+    return ListTile(
+      leading: (isLoggedIn != null &&
+              isLoggedIn &&
+              appState.syncFavouritesToAppwrite)
+          ? const Icon(Icons.sync)
+          : const Icon(Icons.sync_disabled),
+      title: Text(localizations.settingsSync),
+      subtitle: Text(localizations.settingsSyncDesc),
+      trailing: isLoggedIn == null
+          ? const CircularProgressIndicator()
+          : !isLoggedIn
+              ? ElevatedButton(
+                  onPressed: () {
+                    context.goNamed(AppRoutes.login.name);
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.login),
+                      const SizedBox(width: 8),
+                      Text(localizations.login),
+                    ],
+                  ),
+                )
+              : ElevatedButton(
+                  onPressed: () {
+                    // Confirm logout using a dialog
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text(localizations.logoutConfirmationTitle),
+                          content:
+                              Text(localizations.logoutConfirmationMessage),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text(localizations.cancel),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.of(context).pop();
+                                AppwriteClient().logout();
+                                // Refresh the state
+                                setState(() {
+                                  _isLoggedIn = false;
+                                });
+                              },
+                              child: Text(localizations.logout),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.logout),
+                      const SizedBox(width: 8),
+                      Text(localizations.logout),
+                    ],
+                  ),
+                ),
+    );
+  }
+
+  ListTile _buildSyncSwitch(
+      AppLocalizations localizations, AppState appState, BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.favorite),
+      title: Text(localizations.syncFavourites),
+      subtitle: Text(localizations.syncFavouritesDesc),
+      trailing: Switch(
+        value: appState.syncFavouritesToAppwrite,
+        onChanged: (bool value) async {
+          appState.setSyncFavouritesToAppwrite(value);
+          if (value) {
+            try {
+              final client = AppwriteClient();
+              await client.syncFavourites(appState,
+                  direction: SyncDirection.fromAppwrite);
+              client.subscribe();
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(localizations.syncFavouritesSuccess),
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content:
+                        Text(localizations.syncFavouritesError(e.toString())),
+                  ),
+                );
+              }
+            }
+          } else {
+            AppwriteClient().unsubscribe();
+          }
+        },
+      ),
+    );
+  }
+
+  ElevatedButton _buildAccountDeleteButton(
+      BuildContext context, AppLocalizations localizations) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        foregroundColor: Colors.white,
+      ),
+      onPressed: () {
+        // Confirm logout using a dialog
+        showDialog(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              title: Text(localizations.deleteAccountConfirmationTitle),
+              content: Text(localizations.deleteAccountConfirmationMessage),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(localizations.cancel),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    Navigator.of(dialogContext).pop();
+                    final bool success = await AppwriteClient().deleteAccount();
+                    if (success && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(localizations.deleteAccountSuccess),
+                        ),
+                      );
+                    } else if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(localizations.deleteAccountError),
+                        ),
+                      );
+                    }
+                    // Refresh the state
+                    setState(() {
+                      _isLoggedIn = false;
+                    });
+                  },
+                  child: Text(localizations.deleteAccount),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.delete_forever),
+          const SizedBox(width: 8),
+          Text(localizations.deleteAccount),
+        ],
       ),
     );
   }
