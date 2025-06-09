@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -349,4 +350,20 @@ class AppLocalizationsFi extends AppLocalizations {
   String syncFavouritesError(String error) {
     return 'Synkronointi epäonnistui: $error';
   }
+
+  @override
+  String get deleteAccount => 'Poista tili';
+
+  @override
+  String get deleteAccountConfirmationTitle => 'Vahvista tilin poisto';
+
+  @override
+  String get deleteAccountConfirmationMessage =>
+      'Haluatko varmasti poistaa tilisi? Tämä poistaa kaikki tietosi pysyvästi.';
+
+  @override
+  String get deleteAccountSuccess => 'Tili poistettiin onnistuneesti.';
+
+  @override
+  String get deleteAccountError => 'Tilin poisto epäonnistui.';
 }

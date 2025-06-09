@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -352,4 +353,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncFavouritesError(String error) {
     return 'Error synchronizing favourites: $error';
   }
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountConfirmationTitle => 'Delete Account?';
+
+  @override
+  String get deleteAccountConfirmationMessage =>
+      'Are you sure you want to delete your account? This action cannot be undone and will remove all your data.';
+
+  @override
+  String get deleteAccountSuccess => 'Account deleted successfully.';
+
+  @override
+  String get deleteAccountError => 'Error deleting account.';
 }

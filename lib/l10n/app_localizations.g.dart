@@ -751,6 +751,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error synchronizing favourites: {error}'**
   String syncFavouritesError(String error);
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountConfirmationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account?'**
+  String get deleteAccountConfirmationTitle;
+
+  /// No description provided for @deleteAccountConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete your account? This action cannot be undone and will remove all your data.'**
+  String get deleteAccountConfirmationMessage;
+
+  /// No description provided for @deleteAccountSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted successfully.'**
+  String get deleteAccountSuccess;
+
+  /// No description provided for @deleteAccountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting account.'**
+  String get deleteAccountError;
 }
 
 class _AppLocalizationsDelegate

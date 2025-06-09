@@ -228,24 +228,105 @@ class _SettingsPageState extends State<SettingsPage>
                   appState.setSyncFavouritesToAppwrite(value);
                   if (value) {
                     try {
-                      await AppwriteClient().syncFavourites(appState,
+                      final client = AppwriteClient();
+                      await client.syncFavourites(appState,
                           direction: SyncDirection.fromAppwrite);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(localizations.syncFavouritesSuccess),
-                        ),
-                      );
+                      client.subscribe();
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(localizations.syncFavouritesSuccess),
+                          ),
+                        );
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(localizations.syncFavouritesError(e.toString())),
-                        ),
-                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(localizations
+                                .syncFavouritesError(e.toString())),
+                          ),
+                        );
+                      }
                     }
+                  } else {
+                    AppwriteClient().unsubscribe();
                   }
                 },
               ),
             ),
+            SizedBox(height: 40),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.errorContainer,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    // Confirm logout using a dialog
+                    showDialog(
+                      context: context,
+                      builder: (dialogContext) {
+                        return AlertDialog(
+                          title: Text(
+                              localizations.deleteAccountConfirmationTitle),
+                          content: Text(
+                              localizations.deleteAccountConfirmationMessage),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              child: Text(localizations.cancel),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.of(dialogContext).pop();
+                                final bool success =
+                                    await AppwriteClient().deleteAccount();
+                                if (success && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          localizations.deleteAccountSuccess),
+                                    ),
+                                  );
+                                } else if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          localizations.deleteAccountError),
+                                    ),
+                                  );
+                                }
+                                // Refresh the state
+                                setState(() {
+                                  _isLoggedIn = false;
+                                });
+                              },
+                              child: Text(localizations.deleteAccount),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.delete_forever),
+                      const SizedBox(width: 8),
+                      Text(localizations.deleteAccount),
+                    ],
+                  ),
+                ),
+              ],
+            )
           ],
         ),
     ];

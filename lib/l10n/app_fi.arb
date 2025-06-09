@@ -453,6 +453,11 @@
         "example": "Network error"
       }
     }
-  }
+  },
+  "deleteAccount": "Poista tili",
+  "deleteAccountConfirmationTitle": "Vahvista tilin poisto",
+  "deleteAccountConfirmationMessage": "Haluatko varmasti poistaa tilisi? Tämä poistaa kaikki tietosi pysyvästi.",
+  "deleteAccountSuccess": "Tili poistettiin onnistuneesti.",
+  "deleteAccountError": "Tilin poisto epäonnistui."
 }
 

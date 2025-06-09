@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:weather/app_state.dart';
 import 'package:weather/data/location.dart';
 
@@ -48,6 +49,7 @@ class AppwriteClient {
 
     if (!await isLoggedIn()) {
       appState.setSyncFavouritesToAppwrite(false);
+      unsubscribe();
       throw Exception('User is not logged in, disabling sync');
     }
 
@@ -158,6 +160,36 @@ class AppwriteClient {
     await account.deleteSession(sessionId: 'current');
     unsubscribe();
     // account = Account(client); // Reinitialize account to reset state
+  }
+
+  Future<bool> deleteAccount() async {
+    unsubscribe();
+    final functions = Functions(client);
+    try {
+      final Execution response = await functions.createExecution(
+          functionId: 'delete-account', xasync: false);
+
+      if (response.status == 'completed' &&
+          response.responseStatusCode == 200) {
+        // Logout might not work, since the account has been deleted?
+        // This is probably not needed, but let's try to be safe
+        try {
+          await logout();
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error logging out after account deletion: $e');
+          }
+        }
+        return true;
+      } else {
+        throw Exception('Failed to delete account: ${response.status}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting account: $e');
+      }
+      return false;
+    }
   }
 
   void subscribe() {

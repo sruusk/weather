@@ -453,6 +453,11 @@
         "example": "Network error"
       }
     }
-  }
+  },
+  "deleteAccount": "Delete Account",
+  "deleteAccountConfirmationTitle": "Delete Account?",
+  "deleteAccountConfirmationMessage": "Are you sure you want to delete your account? This action cannot be undone and will remove all your data.",
+  "deleteAccountSuccess": "Account deleted successfully.",
+  "deleteAccountError": "Error deleting account."
 }
 
