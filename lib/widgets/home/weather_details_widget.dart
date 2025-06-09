@@ -15,6 +15,7 @@ class WeatherDetails extends StatefulWidget {
   final int selectedIndex;
   final bool isLoading;
   final Function(int)? onLocationChanged;
+  final Location? geoLocation;
 
   const WeatherDetails({
     super.key,
@@ -23,6 +24,7 @@ class WeatherDetails extends StatefulWidget {
     required this.selectedIndex,
     required this.isLoading,
     this.onLocationChanged,
+    this.geoLocation,
   });
 
   @override
@@ -142,6 +144,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
             locations: widget.locations,
             selectedIndex: widget.selectedIndex,
             onLocationChanged: _handleLocationChanged,
+            geoLocation: widget.geoLocation,
           ),
         ],
       )),

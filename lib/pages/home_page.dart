@@ -23,6 +23,7 @@ class _HomePageState extends State<HomePage>
   final WeatherData _weatherData = WeatherData();
   Forecast? _forecast;
   List<Location> _locations = [];
+  Location? _geoLocation;
   bool _isLoading = true;
   bool _isGeolocating = false;
   bool _geolocationTimedOut = false;
@@ -46,7 +47,8 @@ class _HomePageState extends State<HomePage>
     if (_isLoading) return;
 
     if (locs.length !=
-        _locations.length - (appState.geolocationEnabled ? 1 : 0)) {
+        _locations.length -
+            ((appState.geolocationEnabled && _geoLocation != null) ? 1 : 0)) {
       // If the number of locations has changed, reload forecasts
       _loadForecasts();
     }
@@ -79,7 +81,9 @@ class _HomePageState extends State<HomePage>
     Location? locationToLoad;
 
     // If geolocation is enabled, try to get current location
-    if (appState.geolocationEnabled) {
+    if (appState.geolocationEnabled && _geoLocation != null) {
+      locationToLoad = _geoLocation;
+    } else if (appState.geolocationEnabled) {
       try {
         setState(() {
           _isGeolocating = true;
@@ -92,6 +96,7 @@ class _HomePageState extends State<HomePage>
           pos.longitude,
         );
         setState(() {
+          _geoLocation = locationToLoad;
           _isGeolocating = false;
         });
       } on TimeoutException {
@@ -135,7 +140,7 @@ class _HomePageState extends State<HomePage>
 
         // Create a list of all locations (current location + favorites)
         final allLocations = <Location>[];
-        if (appState.geolocationEnabled) {
+        if (appState.geolocationEnabled && _geoLocation != null) {
           allLocations.add(activeLocation);
         }
         allLocations.addAll(locs);
@@ -173,7 +178,7 @@ class _HomePageState extends State<HomePage>
     final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
 
-    if(_geolocationTimedOut) {
+    if (_geolocationTimedOut) {
       // Show a message if geolocation timed out
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -181,10 +186,7 @@ class _HomePageState extends State<HomePage>
               content: Text(localizations.geolocationTimeout),
               duration: const Duration(seconds: 5),
               action: SnackBarAction(
-                  label: localizations.retry,
-                  onPressed: _loadForecasts
-              )
-          ),
+                  label: localizations.retry, onPressed: _loadForecasts)),
         );
       });
       _geolocationTimedOut = false; // Reset the flag after showing the message
@@ -220,6 +222,7 @@ class _HomePageState extends State<HomePage>
                               locations: _locations,
                               selectedIndex: _selectedLocationIndex,
                               isLoading: _isLoading,
+                              geoLocation: _geoLocation,
                               onLocationChanged: (index) async {
                                 setState(() {
                                   _selectedLocationIndex = index;
@@ -242,7 +245,8 @@ class _HomePageState extends State<HomePage>
                                   }
                                 } catch (e) {
                                   if (kDebugMode) {
-                                    print('Error getting selected forecast: $e');
+                                    print(
+                                        'Error getting selected forecast: $e');
                                   }
                                   if (mounted) {
                                     setState(() {
@@ -254,7 +258,9 @@ class _HomePageState extends State<HomePage>
                             ),
                           ],
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
                       ],
                     ),
                   ),

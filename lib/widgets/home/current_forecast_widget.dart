@@ -5,14 +5,15 @@ import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
 import 'package:weather/widgets/home/precipitation.dart';
 import 'package:weather/widgets/home/sunrise_sunset_widget.dart';
-import 'package:weather/widgets/weather_symbol_widget.dart';
 import 'package:weather/widgets/home/wind_arrow.dart';
+import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class CurrentForecast extends StatelessWidget {
   final Forecast forecast;
   final List<Location> locations;
   final int selectedIndex;
   final Function(int) onLocationChanged;
+  final Location? geoLocation;
 
   const CurrentForecast({
     super.key,
@@ -20,6 +21,7 @@ class CurrentForecast extends StatelessWidget {
     required this.locations,
     required this.selectedIndex,
     required this.onLocationChanged,
+    this.geoLocation,
   });
 
   @override
@@ -47,7 +49,9 @@ class CurrentForecast extends StatelessWidget {
                     value: i,
                     child: Row(
                       children: [
-                        Icon(i == 0 && appState.geolocationEnabled
+                        Icon(i == 0 &&
+                                appState.geolocationEnabled &&
+                                geoLocation != null
                             ? Icons.my_location
                             : Icons.place),
                         SizedBox(width: 8),

@@ -211,6 +211,10 @@ class AppwriteClient {
         index: item['index'] as int,
       );
 
+      if (kDebugMode) {
+        print('Realtime event: ${data.events.first} for location: $location');
+      }
+
       if (data.events.first.endsWith('.create')) {
         _appState!.addFavouriteLocation(location, sync: false);
       } else if (data.events.first.endsWith('.update')) {

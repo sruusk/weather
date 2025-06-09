@@ -45,7 +45,9 @@ class NoTransitionPage<T> extends CustomTransitionPage<T> {
 }
 
 // Helper for creating branches for StatefulShellRoute
-StatefulShellBranch _buildStatefulBranch(AppRouteInfo routeInfo, Widget childWidget, {GlobalKey<NavigatorState>? navigatorKey}) {
+StatefulShellBranch _buildStatefulBranch(
+    AppRouteInfo routeInfo, Widget childWidget,
+    {GlobalKey<NavigatorState>? navigatorKey}) {
   return StatefulShellBranch(
     navigatorKey: navigatorKey,
     routes: <RouteBase>[
@@ -81,9 +83,12 @@ final GoRouter _router = GoRouter(
             return navigationShell;
           },
           branches: <StatefulShellBranch>[
-            _buildStatefulBranch(AppRoutes.home, const HomePage(key: PageStorageKey('home_page'))),
-            _buildStatefulBranch(AppRoutes.favourites, const FavouritesPage(key: PageStorageKey('favourites_page'))),
-            _buildStatefulBranch(AppRoutes.warnings, const WarningsPage(key: PageStorageKey('warnings_page'))),
+            _buildStatefulBranch(AppRoutes.home,
+                const HomePage(key: PageStorageKey('home_page'))),
+            _buildStatefulBranch(AppRoutes.favourites,
+                const FavouritesPage(key: PageStorageKey('favourites_page'))),
+            _buildStatefulBranch(AppRoutes.warnings,
+                const WarningsPage(key: PageStorageKey('warnings_page'))),
             // _buildStatefulBranch(AppRoutes.login, const LoginPage(key: PageStorageKey('login_page'))),
             // Added 'Other' as a stateful branch with its nested children
             StatefulShellBranch(
@@ -94,7 +99,8 @@ final GoRouter _router = GoRouter(
                   name: AppRoutes.other.name,
                   pageBuilder: (context, state) => NoTransitionPage(
                     key: state.pageKey,
-                    child: const OtherPageListView(key: PageStorageKey('other_links_page')),
+                    child: const OtherPageListView(
+                        key: PageStorageKey('other_links_page')),
                   ),
                   routes: <RouteBase>[
                     GoRoute(
@@ -102,7 +108,8 @@ final GoRouter _router = GoRouter(
                       name: AppRoutes.settings.name,
                       pageBuilder: (context, state) => NoTransitionPage(
                         key: state.pageKey,
-                        child: const SettingsPage(key: PageStorageKey('settings_page')),
+                        child: const SettingsPage(
+                            key: PageStorageKey('settings_page')),
                       ),
                     ),
                     GoRoute(
@@ -110,7 +117,8 @@ final GoRouter _router = GoRouter(
                       name: AppRoutes.weatherSymbols.name,
                       pageBuilder: (context, state) => NoTransitionPage(
                         key: state.pageKey,
-                        child: const WeatherSymbolsPage(key: PageStorageKey('weather_symbols_page')),
+                        child: const WeatherSymbolsPage(
+                            key: PageStorageKey('weather_symbols_page')),
                       ),
                     ),
                     GoRoute(
@@ -118,7 +126,8 @@ final GoRouter _router = GoRouter(
                       name: AppRoutes.about.name,
                       pageBuilder: (context, state) => NoTransitionPage(
                         key: state.pageKey,
-                        child: const AboutPage(key: PageStorageKey('about_page')),
+                        child:
+                            const AboutPage(key: PageStorageKey('about_page')),
                       ),
                     ),
                     GoRoute(
@@ -126,7 +135,8 @@ final GoRouter _router = GoRouter(
                       name: AppRoutes.login.name,
                       pageBuilder: (context, state) => NoTransitionPage(
                         key: state.pageKey,
-                        child: const LoginPage(key: PageStorageKey('login_page')),
+                        child:
+                            const LoginPage(key: PageStorageKey('login_page')),
                       ),
                     ),
                   ],
@@ -173,7 +183,8 @@ void main() async {
 
   runApp(
     ChangeNotifierProvider(
-      create: (context) => AppState(), // Pass account from singleton // Removed account argument
+      create: (context) => AppState(),
+      // Pass account from singleton // Removed account argument
       child: const MyApp(),
     ),
   );
@@ -272,10 +283,13 @@ class _MainScreenState extends State<MainScreen> {
     // and these are the ones managed by StatefulNavigationShell.
     const int statefulBranchCount = 4;
 
-    if (currentChild is StatefulNavigationShell && index >= 0 && index < statefulBranchCount) {
+    if (currentChild is StatefulNavigationShell &&
+        index >= 0 &&
+        index < statefulBranchCount) {
       // We are on a stateful tab, and a stateful tab (0, 1, 2, or 3) was tapped.
       // Use goBranch to navigate, preserving state.
-      currentChild.goBranch(index, initialLocation: index == currentChild.currentIndex);
+      currentChild.goBranch(index,
+          initialLocation: index == currentChild.currentIndex);
     } else {
       // This block handles:
       // 1. currentChild is not StatefulNavigationShell (e.g., on "Other" page or its sub-routes).
@@ -304,7 +318,10 @@ class _MainScreenState extends State<MainScreen> {
     final int currentIndex = _calculateSelectedIndex(context);
 
     if (!_syncComplete) {
-      _sync(appState);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Perform the sync operation after the first frame is rendered
+        _sync(appState);
+      });
       _syncComplete = true;
     }
 
