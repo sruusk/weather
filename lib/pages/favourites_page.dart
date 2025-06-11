@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
 
 import '../app_state.dart';
 import '../data/location.dart';
 import '../data/weather_data.dart';
+import '../routes.dart';
 
 class FavouritesPage extends StatefulWidget {
   const FavouritesPage({super.key});
@@ -88,6 +90,13 @@ class _FavouritesPageState extends State<FavouritesPage> with AutomaticKeepAlive
     final favouriteLocations = appState.favouriteLocations;
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.goNamed(AppRoutes.home.name),
+        ),
+        title: Text(localizations.favouritesPageTitle),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

@@ -15,21 +15,21 @@ import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
 import 'package:weather/data/lightning_data.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
 
-class WeatherRadarWidget extends StatefulWidget {
+class WeatherRadar extends StatefulWidget {
   final WeatherRadarController controller;
   final double? height;
 
-  const WeatherRadarWidget({
+  const WeatherRadar({
     super.key,
     required this.controller,
     this.height = 350,
   });
 
   @override
-  State<WeatherRadarWidget> createState() => _WeatherRadarWidgetState();
+  State<WeatherRadar> createState() => _WeatherRadarState();
 }
 
-class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
+class _WeatherRadarState extends State<WeatherRadar> {
   late final Future<PmTilesVectorTileProvider?> _tileProviderFuture;
   late DateTime _currentTime;
   double _sliderValue =
@@ -169,15 +169,6 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                     } else {
                       final tileProvider = snapshot.data;
 
-                      if (kDebugMode &&
-                          tileProvider == null &&
-                          !kIsWeb &&
-                          !kIsWasm) {
-                        // ignore: avoid_print
-                        print('Tile provider is null, using web tile provider');
-                      }
-                      // Use provided location or default to Helsinki
-
                       return FlutterMap(
                         mapController: widget.controller.mapController,
                         options: MapOptions(
@@ -315,7 +306,7 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                                 prependCopyright: true,
                               ),
                               TextSourceAttribution(
-                                'Finnish Meteorological Institute [Radar]',
+                                'Finnish Meteorological Institute [Radar, Lightning]',
                                 onTap: () => launchUrl(Uri.parse(
                                   'https://en.ilmatieteenlaitos.fi/open-data',
                                 )),
@@ -414,3 +405,4 @@ class WeatherRadarController {
     }
   }
 }
+

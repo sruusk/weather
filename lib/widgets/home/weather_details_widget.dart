@@ -4,7 +4,7 @@ import 'package:weather/data/location.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/widgets/home/current_forecast_widget.dart';
 import 'package:weather/widgets/home/warnings_widget.dart';
-import 'package:weather/widgets/home/weather_radar_widget.dart';
+import 'package:weather/widgets/weather_radar_widget.dart';
 
 import 'forecast_widget.dart';
 import 'observations_widget.dart';
@@ -62,7 +62,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
   }
 
   @override
-  void didUpdateWidget(covariant WeatherDetails oldWidget) {
+  void didUpdateWidget(WeatherDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     final oldLoc = oldWidget.locations.isNotEmpty
         ? oldWidget.locations[oldWidget.selectedIndex]
@@ -162,7 +162,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
-              WeatherRadarWidget(controller: _radarCtrl),
+              WeatherRadar(controller: _radarCtrl),
             ],
           ),
         ),

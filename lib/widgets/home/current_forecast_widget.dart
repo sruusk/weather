@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/app_state.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
+import 'package:weather/routes.dart';
 import 'package:weather/widgets/home/precipitation.dart';
 import 'package:weather/widgets/home/sunrise_sunset_widget.dart';
 import 'package:weather/widgets/home/wind_arrow.dart';
@@ -36,40 +38,53 @@ class CurrentForecast extends StatelessWidget {
       height: 300,
       child: Column(
         children: [
-          DropdownButtonHideUnderline(
-            child: DropdownButton<int>(
-              value: selectedIndex,
-              icon: const Icon(Icons.arrow_drop_down),
-              borderRadius: BorderRadius.circular(8),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              alignment: Alignment.center,
-              items: [
-                for (int i = 0; i < locations.length; i++)
-                  DropdownMenuItem<int>(
-                    value: i,
-                    child: Row(
-                      children: [
-                        Icon(i == 0 &&
-                                appState.geolocationEnabled &&
-                                geoLocation != null
-                            ? Icons.my_location
-                            : Icons.place),
-                        SizedBox(width: 8),
-                        Text(
-                          locations[i].name +
-                              (locations[i].region != null
-                                  ? ', ${locations[i].region}'
-                                  : ''),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(width: 20),
+              DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  value: selectedIndex,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  borderRadius: BorderRadius.circular(8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  alignment: Alignment.center,
+                  items: [
+                    for (int i = 0; i < locations.length; i++)
+                      DropdownMenuItem<int>(
+                        value: i,
+                        child: Row(
+                          children: [
+                            Icon(i == 0 &&
+                                    appState.geolocationEnabled &&
+                                    geoLocation != null
+                                ? Icons.my_location
+                                : Icons.place),
+                            SizedBox(width: 8),
+                            Text(
+                              locations[i].name +
+                                  (locations[i].region != null
+                                      ? ', ${locations[i].region}'
+                                      : ''),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-              ],
-              onChanged: (i) {
-                if (i == null) return;
-                onLocationChanged(i);
-              },
-            ),
+                      ),
+                  ],
+                  onChanged: (i) {
+                    if (i == null) return;
+                    onLocationChanged(i);
+                  },
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.favorite),
+                tooltip: 'Favorites',
+                onPressed: () {
+                  context.goNamed(AppRoutes.favourites.name);
+                },
+              ),
+            ],
           ),
 
           const Spacer(),

@@ -18,6 +18,7 @@ import 'pages/login_page.dart';
 import 'pages/other_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/warnings_page.dart';
+import 'pages/weather_radar_page.dart';
 import 'pages/weather_symbols_page.dart';
 import 'routes.dart';
 
@@ -85,10 +86,14 @@ final GoRouter _router = GoRouter(
           branches: <StatefulShellBranch>[
             _buildStatefulBranch(AppRoutes.home,
                 const HomePage(key: PageStorageKey('home_page'))),
-            _buildStatefulBranch(AppRoutes.favourites,
-                const FavouritesPage(key: PageStorageKey('favourites_page'))),
+            _buildStatefulBranch(
+                AppRoutes.weatherRadar,
+                const WeatherRadarPage(
+                    key: PageStorageKey('weather_radar_page'))),
             _buildStatefulBranch(AppRoutes.warnings,
                 const WarningsPage(key: PageStorageKey('warnings_page'))),
+            _buildStatefulBranch(AppRoutes.favourites,
+                const FavouritesPage(key: PageStorageKey('favourites_page'))),
             // _buildStatefulBranch(AppRoutes.login, const LoginPage(key: PageStorageKey('login_page'))),
             // Added 'Other' as a stateful branch with its nested children
             StatefulShellBranch(
@@ -269,9 +274,12 @@ class _MainScreenState extends State<MainScreen> {
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.toString();
 
+    // Check if the location is the favourites page and return 0 (home tab)
+    if (location.startsWith(AppRoutes.favourites.path)) return 0;
+
     if (location.startsWith(AppRoutes.other.path)) return 3;
     if (location.startsWith(AppRoutes.warnings.path)) return 2;
-    if (location.startsWith(AppRoutes.favourites.path)) return 1;
+    if (location.startsWith(AppRoutes.weatherRadar.path)) return 1;
     if (location.startsWith(AppRoutes.home.path)) return 0;
 
     return 0; // Default
@@ -298,8 +306,8 @@ class _MainScreenState extends State<MainScreen> {
         case 0: // Home
           context.goNamed(AppRoutes.home.name);
           break;
-        case 1: // Favourites
-          context.goNamed(AppRoutes.favourites.name);
+        case 1: // Weather Radar
+          context.goNamed(AppRoutes.weatherRadar.name);
           break;
         case 2: // Warnings
           context.goNamed(AppRoutes.warnings.name);
@@ -355,8 +363,8 @@ class _MainScreenState extends State<MainScreen> {
           label: Text(localizations.homePageTitle),
         ),
         NavigationRailDestination(
-          icon: const Icon(Icons.favorite),
-          label: Text(localizations.favouritesPageTitle),
+          icon: const Icon(Icons.radar),
+          label: Text(localizations.radar),
         ),
         NavigationRailDestination(
           icon: const Icon(Icons.warning),
@@ -383,8 +391,8 @@ class _MainScreenState extends State<MainScreen> {
           label: localizations.homePageTitle,
         ),
         BottomNavigationBarItem(
-          icon: const Icon(Icons.favorite),
-          label: localizations.favouritesPageTitle,
+          icon: const Icon(Icons.radar),
+          label: localizations.radar,
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.warning),
