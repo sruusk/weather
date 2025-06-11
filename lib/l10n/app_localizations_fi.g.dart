@@ -323,6 +323,10 @@ class AppLocalizationsFi extends AppLocalizations {
   String get aboutPageDescription => 'Tietoa tietolähteistä ja lisensseistä';
 
   @override
+  String get favouritesPageDescription =>
+      'Tarkastele ja muokkaa tallennettuja sijainteja';
+
+  @override
   String get locating => 'Paikannetaan...';
 
   @override

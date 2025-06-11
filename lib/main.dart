@@ -64,6 +64,8 @@ StatefulShellBranch _buildStatefulBranch(
   );
 }
 
+const favouritesPage = FavouritesPage(key: PageStorageKey('favourites_page'));
+
 final GoRouter _router = GoRouter(
   initialLocation: AppRoutes.home.path,
   routes: <RouteBase>[
@@ -84,16 +86,35 @@ final GoRouter _router = GoRouter(
             return navigationShell;
           },
           branches: <StatefulShellBranch>[
-            _buildStatefulBranch(AppRoutes.home,
-                const HomePage(key: PageStorageKey('home_page'))),
+            StatefulShellBranch(
+              navigatorKey: GlobalKey<NavigatorState>(),
+              routes: <RouteBase>[
+                GoRoute(
+                  path: AppRoutes.home.path,
+                  name: AppRoutes.home.name,
+                  pageBuilder: (context, state) => NoTransitionPage(
+                    key: state.pageKey,
+                    child: const HomePage(key: PageStorageKey('home_page')),
+                  ),
+                  routes: <RouteBase>[
+                    GoRoute(
+                      path: AppRoutes.favourites.path,
+                      name: AppRoutes.favourites.name,
+                      pageBuilder: (context, state) => NoTransitionPage(
+                        key: state.pageKey,
+                        child: favouritesPage,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             _buildStatefulBranch(
                 AppRoutes.weatherRadar,
                 const WeatherRadarPage(
                     key: PageStorageKey('weather_radar_page'))),
             _buildStatefulBranch(AppRoutes.warnings,
                 const WarningsPage(key: PageStorageKey('warnings_page'))),
-            _buildStatefulBranch(AppRoutes.favourites,
-                const FavouritesPage(key: PageStorageKey('favourites_page'))),
             // _buildStatefulBranch(AppRoutes.login, const LoginPage(key: PageStorageKey('login_page'))),
             // Added 'Other' as a stateful branch with its nested children
             StatefulShellBranch(
@@ -142,6 +163,14 @@ final GoRouter _router = GoRouter(
                         key: state.pageKey,
                         child:
                             const LoginPage(key: PageStorageKey('login_page')),
+                      ),
+                    ),
+                    GoRoute(
+                      path: AppRoutes.favourites.path,
+                      name: 'other-${AppRoutes.favourites.name}',
+                      pageBuilder: (context, state) => NoTransitionPage(
+                        key: state.pageKey,
+                        child: favouritesPage,
                       ),
                     ),
                   ],
@@ -275,7 +304,7 @@ class _MainScreenState extends State<MainScreen> {
     final String location = GoRouterState.of(context).uri.toString();
 
     // Check if the location is the favourites page and return 0 (home tab)
-    if (location.startsWith(AppRoutes.favourites.path)) return 0;
+    if (location.contains('/' + AppRoutes.favourites.path)) return 0;
 
     if (location.startsWith(AppRoutes.other.path)) return 3;
     if (location.startsWith(AppRoutes.warnings.path)) return 2;

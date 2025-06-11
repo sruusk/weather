@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/app_state.dart';
 import 'package:weather/data/location.dart';
-import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/widgets/weather_radar_widget.dart';
 
 class WeatherRadarPage extends StatefulWidget {
@@ -41,30 +40,30 @@ class _WeatherRadarPageState extends State<WeatherRadarPage>
   Widget build(BuildContext context) {
     super.build(context); // Call super to ensure keep alive works
 
-    final localizations = AppLocalizations.of(context)!;
-    final appState = Provider.of<AppState>(context);
+    // Listen for changes to the active location
+    return Consumer<AppState>(
+      builder: (context, appState, child) {
+        // Update radar controller when active location changes
+        if (appState.activeLocation != null) {
+          final location = appState.activeLocation!;
+          _radarCtrl.moveTo(location.lat, location.lon, 8.0);
+        }
 
-    // Calculate available height (subtract app bar, status bar, navigation bar)
-    final mediaQuery = MediaQuery.of(context);
-    final availableHeight = mediaQuery.size.height -
-        mediaQuery.padding.top -
-        mediaQuery.padding.bottom -
-        kToolbarHeight -
-        8;
-
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: WeatherRadar(
-                controller: _radarCtrl,
-                height: availableHeight, // Use full available height
-              ),
-            ),
-          ],
-        ),
-      ),
+        return Scaffold(
+          body: SafeArea(child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  WeatherRadar(
+                    controller: _radarCtrl,
+                    height: constraints.maxHeight, // Use full available height
+                  ),
+                ],
+              );
+            },
+          )),
+        );
+      },
     );
   }
 }

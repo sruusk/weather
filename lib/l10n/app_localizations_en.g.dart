@@ -325,6 +325,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Information about data sources and licenses';
 
   @override
+  String get favouritesPageDescription =>
+      'View and manage your saved locations';
+
+  @override
   String get locating => 'Locating your position...';
 
   @override

@@ -17,12 +17,12 @@ import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class WeatherRadar extends StatefulWidget {
   final WeatherRadarController controller;
-  final double? height;
+  final double height;
 
   const WeatherRadar({
     super.key,
     required this.controller,
-    this.height = 350,
+    this.height = 400,
   });
 
   @override
@@ -158,7 +158,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
           ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
             child: SizedBox(
-              height: widget.height,
+              height: widget.height - 64, // Subtract height of controls
               child: FutureBuilder(
                   future: _tileProviderFuture,
                   builder: (context, snapshot) {
@@ -319,30 +319,33 @@ class _WeatherRadarState extends State<WeatherRadar> {
                   }),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                  onPressed: _togglePlayPause,
-                  tooltip: _isPlaying ? 'Pause' : 'Play',
-                ),
-                Expanded(
-                  child: Slider(
-                    value: _sliderValue,
-                    min: 0,
-                    max: 5,
-                    divisions: 5,
-                    onChanged: _updateTime,
-                    label: '${((5 - _sliderValue) * 15).toInt()} min ago',
+          SizedBox(
+            height: 64,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                    onPressed: _togglePlayPause,
+                    tooltip: _isPlaying ? 'Pause' : 'Play',
                   ),
-                ),
-                Text(
-                  '${_currentTime.toLocal().hour.toString()}:${_currentTime.toLocal().minute.toString().padLeft(2, '0')}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+                  Expanded(
+                    child: Slider(
+                      value: _sliderValue,
+                      min: 0,
+                      max: 5,
+                      divisions: 5,
+                      onChanged: _updateTime,
+                      label: '${((5 - _sliderValue) * 15).toInt()} min ago',
+                    ),
+                  ),
+                  Text(
+                    '${_currentTime.toLocal().hour.toString()}:${_currentTime.toLocal().minute.toString().padLeft(2, '0')}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -55,6 +55,33 @@ class _OtherPageListViewState extends State<OtherPageListView> with AutomaticKee
               Card(
                 elevation: 2,
                 child: InkWell(
+                  onTap: () =>
+                      context.goNamed('other-${AppRoutes.favourites.name}'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(children: [
+                      const Icon(Icons.favorite, size: 40),
+                      const SizedBox(width: 16),
+                      Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                            Text(localizations.favouritesPageTitle,
+                                style: const TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(localizations.favouritesPageDescription,
+                                style: const TextStyle(fontSize: 14)),
+                          ])),
+                      const Icon(Icons.arrow_forward_ios),
+                    ]),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                elevation: 2,
+                child: InkWell(
                   onTap: () => context.goNamed(AppRoutes.weatherSymbols.name), // Use .name
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),

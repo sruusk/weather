@@ -38,52 +38,59 @@ class CurrentForecast extends StatelessWidget {
       height: 300,
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Stack(
             children: [
-              SizedBox(width: 20),
-              DropdownButtonHideUnderline(
-                child: DropdownButton<int>(
-                  value: selectedIndex,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  borderRadius: BorderRadius.circular(8),
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  alignment: Alignment.center,
-                  items: [
-                    for (int i = 0; i < locations.length; i++)
-                      DropdownMenuItem<int>(
-                        value: i,
-                        child: Row(
-                          children: [
-                            Icon(i == 0 &&
-                                    appState.geolocationEnabled &&
-                                    geoLocation != null
-                                ? Icons.my_location
-                                : Icons.place),
-                            SizedBox(width: 8),
-                            Text(
-                              locations[i].name +
-                                  (locations[i].region != null
-                                      ? ', ${locations[i].region}'
-                                      : ''),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<int>(
+                      value: selectedIndex,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      borderRadius: BorderRadius.circular(8),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      alignment: Alignment.center,
+                      items: [
+                        for (int i = 0; i < locations.length; i++)
+                          DropdownMenuItem<int>(
+                            value: i,
+                            child: Row(
+                              children: [
+                                Icon(i == 0 &&
+                                        appState.geolocationEnabled &&
+                                        geoLocation != null
+                                    ? Icons.my_location
+                                    : Icons.place),
+                                SizedBox(width: 8),
+                                Text(
+                                  locations[i].name +
+                                      (locations[i].region != null
+                                          ? ', ${locations[i].region}'
+                                          : ''),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                  ],
-                  onChanged: (i) {
-                    if (i == null) return;
-                    onLocationChanged(i);
+                          ),
+                      ],
+                      onChanged: (i) {
+                        if (i == null) return;
+                        onLocationChanged(i);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                right: 3,
+                top: 3,
+                child: IconButton(
+                  icon: const Icon(Icons.edit_location_outlined),
+                  tooltip: 'Favorites',
+                  onPressed: () {
+                    context.goNamed(AppRoutes.favourites.name);
                   },
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.favorite),
-                tooltip: 'Favorites',
-                onPressed: () {
-                  context.goNamed(AppRoutes.favourites.name);
-                },
-              ),
+              )
             ],
           ),
 

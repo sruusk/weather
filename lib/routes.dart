@@ -10,7 +10,8 @@ class AppRoutes {
   static const AppRouteInfo home = AppRouteInfo(path: '/', name: 'home');
   static const AppRouteInfo login =
       AppRouteInfo(path: 'login', name: 'login'); // Added login route
-  static const AppRouteInfo favourites = AppRouteInfo(path: '/favourites', name: 'favourites');
+  static const AppRouteInfo favourites =
+      AppRouteInfo(path: 'favourites', name: 'favourites');
   static const AppRouteInfo weatherRadar =
       AppRouteInfo(path: '/weather_radar', name: 'weather_radar');
   static const AppRouteInfo warnings = AppRouteInfo(path: '/warnings', name: 'warnings');

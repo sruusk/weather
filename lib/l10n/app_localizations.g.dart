@@ -698,6 +698,12 @@ abstract class AppLocalizations {
   /// **'Information about data sources and licenses'**
   String get aboutPageDescription;
 
+  /// Description for the favourites page in the other page
+  ///
+  /// In en, this message translates to:
+  /// **'View and manage your saved locations'**
+  String get favouritesPageDescription;
+
   /// Message shown when the app is trying to locate the user's position
   ///
   /// In en, this message translates to:

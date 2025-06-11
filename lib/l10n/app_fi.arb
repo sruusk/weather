@@ -412,6 +412,10 @@
   "@aboutPageDescription": {
     "description": "Description for the about page in the other page"
   },
+  "favouritesPageDescription": "Tarkastele ja muokkaa tallennettuja sijainteja",
+  "@favouritesPageDescription": {
+    "description": "Description for the favourites page in the other page"
+  },
   "locating": "Paikannetaan...",
   "@locating": {
     "description": "Message shown while locating the user's position"
@@ -460,4 +464,3 @@
   "deleteAccountSuccess": "Tili poistettiin onnistuneesti.",
   "deleteAccountError": "Tilin poisto epäonnistui."
 }
-

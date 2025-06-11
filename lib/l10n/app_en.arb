@@ -412,6 +412,10 @@
   "@aboutPageDescription": {
     "description": "Description for the about page in the other page"
   },
+  "favouritesPageDescription": "View and manage your saved locations",
+  "@favouritesPageDescription": {
+    "description": "Description for the favourites page in the other page"
+  },
   "locating": "Locating your position...",
   "@locating": {
     "description": "Message shown when the app is trying to locate the user's position"
@@ -460,4 +464,3 @@
   "deleteAccountSuccess": "Account deleted successfully.",
   "deleteAccountError": "Error deleting account."
 }
-
