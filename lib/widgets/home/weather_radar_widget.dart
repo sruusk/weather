@@ -12,6 +12,8 @@ import 'package:pmtiles/pmtiles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
+import 'package:weather/data/lightning_data.dart';
+import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class WeatherRadarWidget extends StatefulWidget {
   final WeatherRadarController controller;
@@ -36,12 +38,16 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
   Timer? _timer;
   bool _isMapInitialized = false;
   late final StreamController<void> _resetController;
+  List<LightningStrike> _currentLightningStrikes = [];
+  List<LightningStrike> _pastLightningStrikes = [];
+  final lightningData = LightningData();
 
   @override
   void initState() {
     super.initState();
     _resetController = StreamController<void>.broadcast();
     _currentTime = getTime();
+    _updateLightningStrikes();
     _tileProviderFuture = () async {
       if (kIsWeb || kIsWasm) {
         return null;
@@ -101,6 +107,8 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
       _isPlaying = false;
     }
 
+    _updateLightningStrikes();
+
     setState(() {
       _sliderValue = value;
       // Calculate time based on inverted slider value (each step is 15 minutes)
@@ -121,6 +129,23 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
 
       _resetController.add(null);
     });
+  }
+
+  _updateLightningStrikes() async {
+    try {
+      await lightningData.loadStrikes(_currentTime);
+      setState(() {
+        _currentLightningStrikes =
+            lightningData.getStrikes(_currentTime, const Duration(minutes: 15));
+        _pastLightningStrikes = lightningData.getStrikes(
+            _currentTime.subtract(const Duration(minutes: 15)),
+            const Duration(minutes: 15));
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading lightning strikes: $e');
+      }
+    }
   }
 
   @override
@@ -249,6 +274,23 @@ class _WeatherRadarWidgetState extends State<WeatherRadarWidget> {
                             },
                           ),
                           MarkerLayer(markers: [
+                            ..._pastLightningStrikes.map((strike) {
+                              return Marker(
+                                  point: LatLng(strike.lon, strike.lat),
+                                  width: 80,
+                                  height: 80,
+                                  child: WeatherSymbolWidget(
+                                      symbolName: 'lightning-bolt', size: 80));
+                            }),
+                            ..._currentLightningStrikes.map((strike) {
+                              return Marker(
+                                  point: LatLng(strike.lon, strike.lat),
+                                  width: 80,
+                                  height: 80,
+                                  child: WeatherSymbolWidget(
+                                      symbolName: 'lightning-bolt-red',
+                                      size: 80));
+                            }),
                             Marker(
                               point: widget.controller.currentCenter,
                               alignment: Alignment.topCenter,
