@@ -98,6 +98,84 @@ abstract class AppLocalizations {
     Locale('fi')
   ];
 
+  /// Button text for logging in
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
+  /// Text for sign up button and title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get signUp;
+
+  /// Label for name field
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// Hint text for name field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name'**
+  String get enterYourName;
+
+  /// Label for email field
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// Hint text for email field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get enterYourEmail;
+
+  /// Label for password field
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// Hint text for password field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get enterYourPassword;
+
+  /// Text for creating a new account
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get createAccount;
+
+  /// Text for switching to login
+  ///
+  /// In en, this message translates to:
+  /// **'Have an account? Login'**
+  String get haveAccountLogin;
+
+  /// Text for divider between login options
+  ///
+  /// In en, this message translates to:
+  /// **'Or'**
+  String get or;
+
+  /// Text for Google sign-in button
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get signInWithGoogle;
+
+  /// Generic error message
+  ///
+  /// In en, this message translates to:
+  /// **'An unknown error occurred'**
+  String get unknownError;
+
   /// The title of the application
   ///
   /// In en, this message translates to:
@@ -524,12 +602,6 @@ abstract class AppLocalizations {
   /// **'Synchronize your app preferences and favourites across devices'**
   String get settingsSyncDesc;
 
-  /// Button text for logging in
-  ///
-  /// In en, this message translates to:
-  /// **'Login'**
-  String get login;
-
   /// Button text for logging out
   ///
   /// In en, this message translates to:
@@ -757,6 +829,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error synchronizing favourites: {error}'**
   String syncFavouritesError(String error);
+
+  /// Message instructing users to add locations in the favourites page
+  ///
+  /// In en, this message translates to:
+  /// **'You can add locations on the Favourites page.'**
+  String get addLocationsInFavourites;
+
+  /// Button text to navigate to the favourites page
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Favourites'**
+  String get goToFavourites;
 
   /// No description provided for @deleteAccount.
   ///

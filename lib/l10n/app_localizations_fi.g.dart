@@ -10,6 +10,45 @@ class AppLocalizationsFi extends AppLocalizations {
   AppLocalizationsFi([String locale = 'fi']) : super(locale);
 
   @override
+  String get login => 'Kirjaudu sisään';
+
+  @override
+  String get signUp => 'Rekisteröidy';
+
+  @override
+  String get name => 'Nimi';
+
+  @override
+  String get enterYourName => 'Syötä nimesi';
+
+  @override
+  String get email => 'Sähköposti';
+
+  @override
+  String get enterYourEmail => 'Syötä sähköpostiosoitteesi';
+
+  @override
+  String get password => 'Salasana';
+
+  @override
+  String get enterYourPassword => 'Syötä salasanasi';
+
+  @override
+  String get createAccount => 'Luo tili';
+
+  @override
+  String get haveAccountLogin => 'Onko sinulla tili? Kirjaudu';
+
+  @override
+  String get or => 'Tai';
+
+  @override
+  String get signInWithGoogle => 'Kirjaudu Google-tilillä';
+
+  @override
+  String get unknownError => 'Tuntematon virhe tapahtui';
+
+  @override
   String get appTitle => 'Sää';
 
   @override
@@ -232,9 +271,6 @@ class AppLocalizationsFi extends AppLocalizations {
       'Synkronoi sovelluksen asetukset ja suosikit laitteiden välillä.';
 
   @override
-  String get login => 'Kirjaudu sisään';
-
-  @override
   String get logout => 'Kirjaudu ulos';
 
   @override
@@ -354,6 +390,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String syncFavouritesError(String error) {
     return 'Synkronointi epäonnistui: $error';
   }
+
+  @override
+  String get addLocationsInFavourites =>
+      'Voit lisätä sijainteja siirtymällä suosikkeihin';
+
+  @override
+  String get goToFavourites => 'Siirry suosikkeihin';
 
   @override
   String get deleteAccount => 'Poista tili';

@@ -158,6 +158,13 @@ class _SettingsPageState extends State<SettingsPage>
                 _buildAccountDeleteButton(context, localizations),
               ],
             )
+          ] else ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(localizations.settingsSyncDesc,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            ),
           ]
         ],
       ),
@@ -176,12 +183,12 @@ class _SettingsPageState extends State<SettingsPage>
           itemCount: settingsItems.length,
           itemBuilder: (context, index) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 0),
               child: settingsItems[index],
             );
           },
           separatorBuilder: (context, index) =>
-              const Divider(indent: 40, endIndent: 40),
+              const Divider(indent: 10, endIndent: 10),
         ),
       ),
     );
@@ -196,7 +203,6 @@ class _SettingsPageState extends State<SettingsPage>
           ? const Icon(Icons.sync)
           : const Icon(Icons.sync_disabled),
       title: Text(localizations.settingsSync),
-      subtitle: Text(localizations.settingsSyncDesc),
       trailing: isLoggedIn == null
           ? const CircularProgressIndicator()
           : !isLoggedIn

@@ -10,6 +10,7 @@ import 'package:weather/app_state.dart';
 import 'package:weather/appwrite_client.dart';
 import 'package:weather/data/ui_stub.dart' // Stub implementation
     if (dart.library.ui_web) 'dart:ui_web';
+import 'package:weather/l10n/app_localizations.g.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -158,13 +159,15 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(_isLogin ? 'Login' : 'Sign Up'),
+        title: Text(_isLogin ? localizations.login : localizations.signUp),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -184,8 +187,8 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'Name',
-                        hintText: 'Enter your name',
+                        labelText: localizations.name,
+                        hintText: localizations.enterYourName,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                         ),
@@ -197,8 +200,8 @@ class _LoginPageState extends State<LoginPage> {
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'Enter your email',
+                      labelText: localizations.email,
+                      hintText: localizations.enterYourEmail,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -211,8 +214,8 @@ class _LoginPageState extends State<LoginPage> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Enter your password',
+                      labelText: localizations.password,
+                      hintText: localizations.enterYourPassword,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -245,7 +248,9 @@ class _LoginPageState extends State<LoginPage> {
                               _passwordController.text, _nameController.text);
                         }
                       },
-                      child: Text(_isLogin ? 'Login' : 'Sign Up'),
+                      child: Text(_isLogin
+                          ? localizations.login
+                          : localizations.signUp),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
@@ -261,17 +266,18 @@ class _LoginPageState extends State<LoginPage> {
                         });
                       },
                       child: Text(_isLogin
-                          ? 'Create an account'
-                          : 'Have an account? Login'),
+                          ? localizations.createAccount
+                          : localizations.haveAccountLogin),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Or',
-                        style: TextStyle(fontSize: 16, color: Colors.grey)),
+                    Text(localizations.or,
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.grey)),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.login),
-                      label: const Text('Sign in with Google',
-                          style: TextStyle(fontSize: 16)),
+                      label: Text(localizations.signInWithGoogle,
+                          style: const TextStyle(fontSize: 16)),
                       onPressed: _googleSignIn,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
@@ -288,7 +294,9 @@ class _LoginPageState extends State<LoginPage> {
                   if (_error != null) ...[
                     const SizedBox(height: 16),
                     Text(
-                      _error!,
+                      _error == 'An unknown error occurred'
+                          ? localizations.unknownError
+                          : _error!,
                       style: const TextStyle(color: Colors.red),
                       textAlign: TextAlign.center,
                     ),

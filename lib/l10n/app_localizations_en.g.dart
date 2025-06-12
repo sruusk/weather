@@ -10,6 +10,45 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get login => 'Login';
+
+  @override
+  String get signUp => 'Sign Up';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get enterYourName => 'Enter your name';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get enterYourEmail => 'Enter your email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get enterYourPassword => 'Enter your password';
+
+  @override
+  String get createAccount => 'Create an account';
+
+  @override
+  String get haveAccountLogin => 'Have an account? Login';
+
+  @override
+  String get or => 'Or';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get unknownError => 'An unknown error occurred';
+
+  @override
   String get appTitle => 'Weather';
 
   @override
@@ -232,9 +271,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Synchronize your app preferences and favourites across devices';
 
   @override
-  String get login => 'Login';
-
-  @override
   String get logout => 'Logout';
 
   @override
@@ -357,6 +393,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncFavouritesError(String error) {
     return 'Error synchronizing favourites: $error';
   }
+
+  @override
+  String get addLocationsInFavourites =>
+      'You can add locations on the Favourites page.';
+
+  @override
+  String get goToFavourites => 'Go to Favourites';
 
   @override
   String get deleteAccount => 'Delete Account';

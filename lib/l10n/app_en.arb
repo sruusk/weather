@@ -1,5 +1,57 @@
 {
   "@@locale": "en",
+  "login": "Login",
+  "@login": {
+    "description": "Text for login button and title"
+  },
+  "signUp": "Sign Up",
+  "@signUp": {
+    "description": "Text for sign up button and title"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Label for name field"
+  },
+  "enterYourName": "Enter your name",
+  "@enterYourName": {
+    "description": "Hint text for name field"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Label for email field"
+  },
+  "enterYourEmail": "Enter your email",
+  "@enterYourEmail": {
+    "description": "Hint text for email field"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Label for password field"
+  },
+  "enterYourPassword": "Enter your password",
+  "@enterYourPassword": {
+    "description": "Hint text for password field"
+  },
+  "createAccount": "Create an account",
+  "@createAccount": {
+    "description": "Text for creating a new account"
+  },
+  "haveAccountLogin": "Have an account? Login",
+  "@haveAccountLogin": {
+    "description": "Text for switching to login"
+  },
+  "or": "Or",
+  "@or": {
+    "description": "Text for divider between login options"
+  },
+  "signInWithGoogle": "Sign in with Google",
+  "@signInWithGoogle": {
+    "description": "Text for Google sign-in button"
+  },
+  "unknownError": "An unknown error occurred",
+  "@unknownError": {
+    "description": "Generic error message"
+  },
   "appTitle": "Weather",
   "@appTitle": {
     "description": "The title of the application"
@@ -457,6 +509,14 @@
         "example": "Network error"
       }
     }
+  },
+  "addLocationsInFavourites": "You can add locations on the Favourites page.",
+  "@addLocationsInFavourites": {
+    "description": "Message instructing users to add locations in the favourites page"
+  },
+  "goToFavourites": "Go to Favourites",
+  "@goToFavourites": {
+    "description": "Button text to navigate to the favourites page"
   },
   "deleteAccount": "Delete Account",
   "deleteAccountConfirmationTitle": "Delete Account?",

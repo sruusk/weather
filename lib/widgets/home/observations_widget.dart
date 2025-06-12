@@ -141,9 +141,9 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
             child: Padding(
               padding: const EdgeInsets.only(top: 16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
                     "${station.location.name} (${station.time.toLocal().hour}:${station.time.toLocal().minute.toString().padLeft(2, '0')})",
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -302,20 +302,23 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
   }
 
   Widget _buildInfoItem(BuildContext context, String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
+    return SizedBox(
+      width: 100,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ],
+      ),
     );
   }
 

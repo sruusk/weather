@@ -1,5 +1,57 @@
 {
   "@@locale": "fi",
+  "login": "Kirjaudu",
+  "@login": {
+    "description": "Text for login button and title"
+  },
+  "signUp": "Rekisteröidy",
+  "@signUp": {
+    "description": "Text for sign up button and title"
+  },
+  "name": "Nimi",
+  "@name": {
+    "description": "Label for name field"
+  },
+  "enterYourName": "Syötä nimesi",
+  "@enterYourName": {
+    "description": "Hint text for name field"
+  },
+  "email": "Sähköposti",
+  "@email": {
+    "description": "Label for email field"
+  },
+  "enterYourEmail": "Syötä sähköpostiosoitteesi",
+  "@enterYourEmail": {
+    "description": "Hint text for email field"
+  },
+  "password": "Salasana",
+  "@password": {
+    "description": "Label for password field"
+  },
+  "enterYourPassword": "Syötä salasanasi",
+  "@enterYourPassword": {
+    "description": "Hint text for password field"
+  },
+  "createAccount": "Luo tili",
+  "@createAccount": {
+    "description": "Text for creating a new account"
+  },
+  "haveAccountLogin": "Onko sinulla tili? Kirjaudu",
+  "@haveAccountLogin": {
+    "description": "Text for switching to login"
+  },
+  "or": "Tai",
+  "@or": {
+    "description": "Text for divider between login options"
+  },
+  "signInWithGoogle": "Kirjaudu Google-tilillä",
+  "@signInWithGoogle": {
+    "description": "Text for Google sign-in button"
+  },
+  "unknownError": "Tuntematon virhe tapahtui",
+  "@unknownError": {
+    "description": "Generic error message"
+  },
   "appTitle": "Sää",
   "@appTitle": {
     "description": "The title of the application"
@@ -457,6 +509,14 @@
         "example": "Network error"
       }
     }
+  },
+  "addLocationsInFavourites": "Voit lisätä sijainteja siirtymällä suosikkeihin",
+  "@addLocationsInFavourites": {
+    "description": "Message instructing users to add locations in the favourites page"
+  },
+  "goToFavourites": "Siirry suosikkeihin",
+  "@goToFavourites": {
+    "description": "Button text to navigate to the favourites page"
   },
   "deleteAccount": "Poista tili",
   "deleteAccountConfirmationTitle": "Vahvista tilin poisto",
