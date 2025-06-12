@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather/data/constants.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
@@ -33,10 +34,6 @@ class WeatherDetails extends StatefulWidget {
 
 class _WeatherDetailsState extends State<WeatherDetails> {
   late final WeatherRadarController _radarCtrl;
-
-  // Arrays of country codes that define if radar and observations should be shown
-  final List<String> _radarEnabledCountries = ['FI', 'AX']; // Finland and Åland Islands
-  final List<String> _observationsEnabledCountries = ['FI', 'AX'];
 
   void _handleLocationChanged(int index) {
     if (widget.selectedIndex != index) {
@@ -73,7 +70,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
 
     if (newLoc != null && newLoc != oldLoc) {
       // Only update radar controller if the new location has radar enabled
-      if (_radarEnabledCountries.contains(newLoc.countryCode)) {
+      if (radarEnabledCountries.contains(newLoc.countryCode)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _radarCtrl.moveTo(newLoc.lat, newLoc.lon, 10.0);
         });
@@ -148,11 +145,12 @@ class _WeatherDetailsState extends State<WeatherDetails> {
           ),
         ],
       )),
-      if(_radarEnabledCountries.contains(countryCode) && constraints.maxWidth < 900)
+      if (observationsEnabledCountries.contains(countryCode) &&
+          constraints.maxWidth < 900)
         ChildCardWidget(child: WeatherWarnings(location: f.location)),
 
       ChildCardWidget(child: ForecastWidget(forecast: f)),
-      if(_radarEnabledCountries.contains(countryCode))
+      if (radarEnabledCountries.contains(countryCode))
         ChildCardWidget(
           padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
           child: Column(
@@ -166,7 +164,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
             ],
           ),
         ),
-      if(_observationsEnabledCountries.contains(countryCode))
+      if (observationsEnabledCountries.contains(countryCode))
         ChildCardWidget(
           padding: EdgeInsetsGeometry.all(16),
           child: Column(

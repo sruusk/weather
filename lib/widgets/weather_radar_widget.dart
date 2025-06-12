@@ -231,6 +231,13 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     }),
                                     theme: ProtomapsThemes.blackV4(),
                                     showTileDebugInfo: true,
+                                    cacheFolder: () {
+                                      return getTemporaryDirectory()
+                                          .then((dir) {
+                                        return Directory(
+                                            '${dir.path}/pmtiles_dark_cache');
+                                      });
+                                    },
                                   ),
                           TileLayer(
                             tileSize: 256,
@@ -267,7 +274,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                           MarkerLayer(markers: [
                             ..._pastLightningStrikes.map((strike) {
                               return Marker(
-                                  point: LatLng(strike.lon, strike.lat),
+                                  point: LatLng(strike.lat, strike.lon),
                                   width: 80,
                                   height: 80,
                                   child: WeatherSymbolWidget(
@@ -275,7 +282,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                             }),
                             ..._currentLightningStrikes.map((strike) {
                               return Marker(
-                                  point: LatLng(strike.lon, strike.lat),
+                                  point: LatLng(strike.lat, strike.lon),
                                   width: 80,
                                   height: 80,
                                   child: WeatherSymbolWidget(
@@ -385,15 +392,26 @@ class WeatherRadarController {
     required double lng,
     this.initialZoom = 8.0,
   })  : initialCenter = LatLng(lat, lng),
-        currentCenter = LatLng(lat, lng);
+        currentCenter = LatLng(lat, lng) {
+    // Queue an initial move operation to ensure the map renders properly
+    _pendingOperations
+        .add(() => mapController.move(currentCenter, initialZoom));
+  }
+
+  bool get isMapReady => _isMapReady;
 
   void setMapReady() {
     _isMapReady = true;
+
     // Execute any pending operations
     for (final operation in _pendingOperations) {
       operation();
     }
     _pendingOperations.clear();
+
+    // Perform an additional move operation to ensure the map is properly centered and zoomed
+    // This helps trigger the proper rendering of the map
+    mapController.move(currentCenter, initialZoom);
   }
 
   void moveTo(double lat, double lng, double zoom) {
@@ -408,4 +426,3 @@ class WeatherRadarController {
     }
   }
 }
-

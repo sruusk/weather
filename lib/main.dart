@@ -239,7 +239,7 @@ class MyApp extends StatelessWidget {
               seedColor: Colors.blue,
               brightness: Brightness.light,
               surfaceDim: Colors.white,
-            ),
+                errorContainer: Colors.red),
             scaffoldBackgroundColor: Colors.blueGrey[50],
             cardTheme: CardThemeData(
               color: Colors.white,

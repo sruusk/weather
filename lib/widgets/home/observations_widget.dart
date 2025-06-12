@@ -19,7 +19,7 @@ class ObservationsWidget extends StatefulWidget {
 
 class _ObservationsWidgetState extends State<ObservationsWidget> {
   final ObservationData _observationData = ObservationData();
-  final PageController _pageController = PageController();
+  final PageController _pageController = PageController(initialPage: 0);
   late Future<List<ObservationStation>> _stationsFuture;
 
   Future<List<ObservationStation>> _getStations() async {
@@ -94,6 +94,13 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
                 Center(child: Text(localizations.noObservationStationsFound)),
           );
         }
+
+        // Ensure we start at the first page when stations are loaded
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_pageController.hasClients) {
+            _pageController.jumpToPage(0);
+          }
+        });
 
         return Column(
           children: [

@@ -37,6 +37,7 @@ class LightningData {
       'request': 'GetFeature',
       'storedquery_id': 'fmi::observations::lightning::simple',
       'parameters': 'multiplicity',
+      // 'bbox': '17.402344,59.389178,33.288574,71.230221', // Finland bounding box
       'starttime':
           '${now.toUtc().subtract(const Duration(hours: 2)).toIso8601String().split('.').first}Z',
       'endtime': '${now.toUtc().toIso8601String().split('.').first}Z',
@@ -57,8 +58,8 @@ class LightningData {
       final timeStr = strike.findElements('BsWfs:Time').first.innerText;
       return LightningStrike(
         time: DateTime.parse(timeStr),
-        lat: double.parse(coords[1]),
-        lon: double.parse(coords[0]),
+        lat: double.parse(coords[0]),
+        lon: double.parse(coords[1]),
       );
     }).toList();
 
