@@ -12,17 +12,24 @@ import 'package:pmtiles/pmtiles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart' show Logger;
 import 'package:weather/data/lightning_data.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class WeatherRadar extends StatefulWidget {
   final WeatherRadarController controller;
   final double height;
+  final int flags;
+  final int rotationWinGestures;
+  final CursorKeyboardRotationOptions? cursorKeyboardRotationOptions;
 
   const WeatherRadar({
     super.key,
     required this.controller,
     this.height = 400,
+    this.flags = InteractiveFlag.all & ~InteractiveFlag.rotate,
+    this.cursorKeyboardRotationOptions,
+    this.rotationWinGestures = MultiFingerGesture.none,
   });
 
   @override
@@ -112,7 +119,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
     setState(() {
       _sliderValue = value;
       // Calculate time based on inverted slider value (each step is 15 minutes)
-      // 5 is latest time (0 minutes ago), 0 is oldest time (75 minutes ago)
+      // 5 is latest time (0 minutes ago), 0 is  time (75 minutes ago)
       final minutesToSubtract = (5 - value.toInt()) * 15;
 
       try {
@@ -178,9 +185,12 @@ class _WeatherRadarState extends State<WeatherRadar> {
                           minZoom: 5,
                           keepAlive: true,
                           interactionOptions: InteractionOptions(
-                              flags:
-                                  InteractiveFlag.all & ~InteractiveFlag.rotate,
-                              rotationWinGestures: MultiFingerGesture.none),
+                            flags: widget.flags,
+                            rotationWinGestures:
+                                widget.rotationWinGestures,
+                            cursorKeyboardRotationOptions:
+                                widget.cursorKeyboardRotationOptions ?? CursorKeyboardRotationOptions.disabled(),
+                          ),
                           onMapReady: () {
                             // Notify controller that map is ready
                             if (!_isMapInitialized) {
@@ -214,7 +224,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                       'protomaps': tileProvider!,
                                     }),
                                     theme: ProtomapsThemes.whiteV4(),
-                                    showTileDebugInfo: true,
+                                    showTileDebugInfo: false,
                                     // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
                                     cacheFolder: () {
                                       return getTemporaryDirectory()
@@ -229,8 +239,8 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     tileProviders: TileProviders({
                                       'protomaps': tileProvider!,
                                     }),
-                                    theme: ProtomapsThemes.blackV4(),
-                                    showTileDebugInfo: true,
+                                    theme: ProtomapsThemes.blackV4(/*logger: Logger.console()*/),
+                                    showTileDebugInfo: false,
                                     cacheFolder: () {
                                       return getTemporaryDirectory()
                                           .then((dir) {
@@ -243,7 +253,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                             tileSize: 256,
                             // Add constraints to prevent NaN/Infinity values
                             tileProvider: CancellableNetworkTileProvider(
-                                silenceExceptions: false),
+                                silenceExceptions: true),
                             maxNativeZoom: 12,
                             minNativeZoom: 7,
                             keepBuffer: 5,

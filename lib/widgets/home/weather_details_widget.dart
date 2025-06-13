@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:weather/data/constants.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
@@ -160,7 +161,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
-              WeatherRadar(controller: _radarCtrl),
+              WeatherRadar(controller: _radarCtrl, flags: InteractiveFlag.none),
             ],
           ),
         ),
