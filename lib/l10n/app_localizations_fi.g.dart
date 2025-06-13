@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -413,4 +412,16 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get deleteAccountError => 'Tilin poisto epäonnistui.';
+
+  @override
+  String get locationServicesDisabled =>
+      'Sijaintipalvelut ovat pois käytöstä. Ota sijaintipalvelut käyttöön laitteen asetuksista.';
+
+  @override
+  String get locationPermissionDenied =>
+      'Sijaintilupa evätty. Salli sovelluksen käyttää sijaintiasi.';
+
+  @override
+  String get locationPermissionPermanentlyDenied =>
+      'Sijaintilupa pysyvästi evätty. Ota sijainti käyttöön sovelluksen asetuksista.';
 }

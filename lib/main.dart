@@ -11,6 +11,7 @@ import 'package:weather/l10n/app_localizations.g.dart';
 import 'app_state.dart';
 import 'appwrite_client.dart';
 import 'pages/about_page.dart';
+
 // Import pages
 import 'pages/favourites_page.dart';
 import 'pages/home_page.dart';
@@ -239,7 +240,8 @@ class MyApp extends StatelessWidget {
               seedColor: Colors.blue,
               brightness: Brightness.light,
               surfaceDim: Colors.white,
-                errorContainer: Colors.red),
+              errorContainer: Colors.red,
+            ),
             scaffoldBackgroundColor: Colors.blueGrey[50],
             cardTheme: CardThemeData(
               color: Colors.white,
@@ -304,7 +306,7 @@ class _MainScreenState extends State<MainScreen> {
     final String location = GoRouterState.of(context).uri.toString();
 
     // Check if the location is the favourites page and return 0 (home tab)
-    if (location.contains('/' + AppRoutes.favourites.path)) return 0;
+    if (location.contains('/${AppRoutes.favourites.path}')) return 0;
 
     if (location.startsWith(AppRoutes.other.path)) return 3;
     if (location.startsWith(AppRoutes.warnings.path)) return 2;

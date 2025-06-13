@@ -522,5 +522,17 @@
   "deleteAccountConfirmationTitle": "Delete Account?",
   "deleteAccountConfirmationMessage": "Are you sure you want to delete your account? This action cannot be undone and will remove all your data.",
   "deleteAccountSuccess": "Account deleted successfully.",
-  "deleteAccountError": "Error deleting account."
+  "deleteAccountError": "Error deleting account.",
+  "locationServicesDisabled": "Location services are disabled. Please enable location services in your device settings.",
+  "@locationServicesDisabled": {
+    "description": "Message shown when location services are disabled on the device"
+  },
+  "locationPermissionDenied": "Location permission denied. Please allow the app to access your location.",
+  "@locationPermissionDenied": {
+    "description": "Message shown when location permission is denied"
+  },
+  "locationPermissionPermanentlyDenied": "Location permission permanently denied. Please enable location access in app settings.",
+  "@locationPermissionPermanentlyDenied": {
+    "description": "Message shown when location permission is permanently denied"
+  }
 }

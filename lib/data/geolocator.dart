@@ -1,10 +1,40 @@
 import 'package:geolocator/geolocator.dart';
 
+/// Enum representing possible geolocation errors
+enum GeolocationStatus {
+  /// Location services are disabled on the device
+  locationServicesDisabled,
+
+  /// Location permissions are denied
+  permissionDenied,
+
+  /// Location permissions are permanently denied
+  permissionDeniedForever,
+
+  /// Success - no error
+  success
+}
+
+/// Class to hold the result of a geolocation attempt
+class GeolocationResult {
+  /// The position if successful
+  final Position? position;
+
+  /// The status of the geolocation attempt
+  final GeolocationStatus status;
+
+  /// Constructor
+  GeolocationResult({this.position, required this.status});
+
+  /// Check if the result is successful
+  bool get isSuccess => status == GeolocationStatus.success;
+}
+
 /// Determine the current position of the device.
 ///
-/// When the location services are not enabled or permissions
-/// are denied the `Future` will return an error.
-Future<Position> determinePosition() async {
+/// Returns a GeolocationResult object that contains both the position (if successful)
+/// and a status indicating success or the type of error that occurred.
+Future<GeolocationResult> determinePosition() async {
   bool serviceEnabled;
   LocationPermission permission;
 
@@ -14,7 +44,9 @@ Future<Position> determinePosition() async {
     // Location services are not enabled don't continue
     // accessing the position and request users of the
     // App to enable the location services.
-    return Future.error('Location services are disabled.');
+    return GeolocationResult(
+      status: GeolocationStatus.locationServicesDisabled
+    );
   }
 
   permission = await Geolocator.checkPermission();
@@ -26,17 +58,24 @@ Future<Position> determinePosition() async {
       // Android's shouldShowRequestPermissionRationale
       // returned true. According to Android guidelines
       // your App should show an explanatory UI now.
-      return Future.error('Location permissions are denied');
+      return GeolocationResult(
+        status: GeolocationStatus.permissionDenied
+      );
     }
   }
 
   if (permission == LocationPermission.deniedForever) {
     // Permissions are denied forever, handle appropriately.
-    return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
+    return GeolocationResult(
+      status: GeolocationStatus.permissionDeniedForever
+    );
   }
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
-  return await Geolocator.getCurrentPosition();
+  final position = await Geolocator.getCurrentPosition();
+  return GeolocationResult(
+    position: position,
+    status: GeolocationStatus.success
+  );
 }

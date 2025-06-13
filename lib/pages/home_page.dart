@@ -89,17 +89,65 @@ class _HomePageState extends State<HomePage>
         setState(() {
           _isGeolocating = true;
         });
-        final pos =
-            await determinePosition().timeout(const Duration(seconds: 10));
-        // Use reverse geocoding to get location information
-        locationToLoad = await _weatherData.reverseGeocoding(
-          pos.latitude,
-          pos.longitude,
-        );
-        setState(() {
-          _geoLocation = locationToLoad;
-          _isGeolocating = false;
-        });
+
+        final result = await determinePosition().timeout(const Duration(seconds: 10));
+
+        if (result.isSuccess && result.position != null) {
+          // Use reverse geocoding to get location information
+          locationToLoad = await _weatherData.reverseGeocoding(
+            result.position!.latitude,
+            result.position!.longitude,
+          );
+          setState(() {
+            _geoLocation = locationToLoad;
+            _isGeolocating = false;
+          });
+        } else {
+          // Handle geolocation errors
+          setState(() {
+            _isGeolocating = false;
+          });
+
+          // Show appropriate error message based on status
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final localizations = AppLocalizations.of(context)!;
+            String errorMessage;
+
+            switch (result.status) {
+              case GeolocationStatus.locationServicesDisabled:
+                errorMessage = localizations.locationServicesDisabled;
+                break;
+              case GeolocationStatus.permissionDenied:
+                errorMessage = localizations.locationPermissionDenied;
+                break;
+              case GeolocationStatus.permissionDeniedForever:
+                // For permanently denied permissions, also disable geolocation in app state
+                appState.setGeolocationEnabled(false);
+                errorMessage = localizations.locationPermissionPermanentlyDenied;
+                break;
+              default:
+                errorMessage = localizations.unknownError;
+            }
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errorMessage),
+                duration: const Duration(seconds: 5),
+                action: result.status != GeolocationStatus.permissionDeniedForever
+                  ? SnackBarAction(
+                      label: localizations.retry,
+                      onPressed: _loadForecasts,
+                    )
+                  : null,
+              ),
+            );
+          });
+
+          // Fall back to first favorite location if available
+          if (locs.isNotEmpty) {
+            locationToLoad = locs.first;
+          }
+        }
       } on TimeoutException {
         // Handle timeout specifically
         if (kDebugMode) {

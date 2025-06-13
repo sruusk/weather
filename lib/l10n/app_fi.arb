@@ -522,5 +522,17 @@
   "deleteAccountConfirmationTitle": "Vahvista tilin poisto",
   "deleteAccountConfirmationMessage": "Haluatko varmasti poistaa tilisi? Tämä poistaa kaikki tietosi pysyvästi.",
   "deleteAccountSuccess": "Tili poistettiin onnistuneesti.",
-  "deleteAccountError": "Tilin poisto epäonnistui."
+  "deleteAccountError": "Tilin poisto epäonnistui.",
+  "locationServicesDisabled": "Sijaintipalvelut ovat pois käytöstä. Ota sijaintipalvelut käyttöön laitteen asetuksista.",
+  "@locationServicesDisabled": {
+    "description": "Message shown when location services are disabled on the device"
+  },
+  "locationPermissionDenied": "Sijaintilupa evätty. Salli sovelluksen käyttää sijaintiasi.",
+  "@locationPermissionDenied": {
+    "description": "Message shown when location permission is denied"
+  },
+  "locationPermissionPermanentlyDenied": "Sijaintilupa pysyvästi evätty. Ota sijainti käyttöön sovelluksen asetuksista.",
+  "@locationPermissionPermanentlyDenied": {
+    "description": "Message shown when location permission is permanently denied"
+  }
 }

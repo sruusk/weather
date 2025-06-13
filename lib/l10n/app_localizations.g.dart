@@ -871,6 +871,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error deleting account.'**
   String get deleteAccountError;
+
+  /// Message shown when location services are disabled on the device
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are disabled. Please enable location services in your device settings.'**
+  String get locationServicesDisabled;
+
+  /// Message shown when location permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission denied. Please allow the app to access your location.'**
+  String get locationPermissionDenied;
+
+  /// Message shown when location permission is permanently denied
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission permanently denied. Please enable location access in app settings.'**
+  String get locationPermissionPermanentlyDenied;
 }
 
 class _AppLocalizationsDelegate

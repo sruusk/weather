@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -416,4 +415,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountError => 'Error deleting account.';
+
+  @override
+  String get locationServicesDisabled =>
+      'Location services are disabled. Please enable location services in your device settings.';
+
+  @override
+  String get locationPermissionDenied =>
+      'Location permission denied. Please allow the app to access your location.';
+
+  @override
+  String get locationPermissionPermanentlyDenied =>
+      'Location permission permanently denied. Please enable location access in app settings.';
 }
