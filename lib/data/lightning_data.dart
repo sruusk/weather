@@ -42,7 +42,6 @@ class LightningData {
           '${now.toUtc().subtract(const Duration(hours: 2)).toIso8601String().split('.').first}Z',
       'endtime': '${now.toUtc().toIso8601String().split('.').first}Z',
     });
-    print(url);
 
     final response = await get(url);
     if (response.statusCode != 200) {

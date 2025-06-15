@@ -12,7 +12,6 @@ import 'package:pmtiles/pmtiles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
-import 'package:vector_tile_renderer/vector_tile_renderer.dart' show Logger;
 import 'package:weather/data/lightning_data.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
 
