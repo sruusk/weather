@@ -11,7 +11,6 @@ import 'package:weather/l10n/app_localizations.g.dart';
 import 'app_state.dart';
 import 'appwrite_client.dart';
 import 'pages/about_page.dart';
-
 // Import pages
 import 'pages/favourites_page.dart';
 import 'pages/home_page.dart';
@@ -22,6 +21,25 @@ import 'pages/warnings_page.dart';
 import 'pages/weather_radar_page.dart';
 import 'pages/weather_symbols_page.dart';
 import 'routes.dart';
+
+// Global key for ScaffoldMessenger to show SnackBars across the app
+final GlobalKey<ScaffoldMessengerState> globalScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
+// Utility function to show SnackBars from anywhere in the app
+void showGlobalSnackBar({
+  required String message,
+  Duration duration = const Duration(seconds: 5),
+  SnackBarAction? action,
+}) {
+  globalScaffoldMessengerKey.currentState?.showSnackBar(
+    SnackBar(
+      content: Text(message),
+      duration: duration,
+      action: action,
+    ),
+  );
+}
 
 class NoTransitionPage<T> extends CustomTransitionPage<T> {
   const NoTransitionPage({
@@ -235,6 +253,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           title: 'Weather App',
           debugShowCheckedModeBanner: true,
+          scaffoldMessengerKey: globalScaffoldMessengerKey,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.blue,

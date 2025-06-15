@@ -10,6 +10,7 @@ import 'package:weather/data/geolocator.dart';
 import 'package:weather/data/location.dart';
 import 'package:weather/data/weather_data.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
+import 'package:weather/main.dart' show showGlobalSnackBar;
 import 'package:weather/widgets/home/weather_details_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage>
   bool _isLoading = true;
   bool _isGeolocating = false;
   bool _geolocationTimedOut = false;
+  bool _geolocatingFailed = false;
   int _selectedLocationIndex = 0;
 
   @override
@@ -46,11 +48,14 @@ class _HomePageState extends State<HomePage>
     final appState = Provider.of<AppState>(context, listen: false);
     final locs = appState.favouriteLocations;
     if (_isLoading) return;
+    if (!appState.geolocationEnabled) _geolocatingFailed = false;
 
     if (locs.length !=
         _locations.length -
-            ((appState.geolocationEnabled && _geoLocation != null) ? 1 : 0)) {
-      // If the number of locations has changed, reload forecasts
+            ((appState.geolocationEnabled && !_geolocatingFailed) ? 1 : 0)) {
+      if (kDebugMode) {
+        print("didChangeDependencies: Reloading forecasts, locations changed");
+      }
       _loadForecasts();
     }
   }
@@ -90,7 +95,8 @@ class _HomePageState extends State<HomePage>
           _isGeolocating = true;
         });
 
-        final result = await determinePosition().timeout(const Duration(seconds: 10));
+        final result =
+            await determinePosition().timeout(const Duration(seconds: 10));
 
         if (result.isSuccess && result.position != null) {
           // Use reverse geocoding to get location information
@@ -101,11 +107,13 @@ class _HomePageState extends State<HomePage>
           setState(() {
             _geoLocation = locationToLoad;
             _isGeolocating = false;
+            _geolocatingFailed = false;
           });
         } else {
           // Handle geolocation errors
           setState(() {
             _isGeolocating = false;
+            _geolocatingFailed = true;
           });
 
           // Show appropriate error message based on status
@@ -123,23 +131,22 @@ class _HomePageState extends State<HomePage>
               case GeolocationStatus.permissionDeniedForever:
                 // For permanently denied permissions, also disable geolocation in app state
                 appState.setGeolocationEnabled(false);
-                errorMessage = localizations.locationPermissionPermanentlyDenied;
+                errorMessage =
+                    localizations.locationPermissionPermanentlyDenied;
                 break;
               default:
                 errorMessage = localizations.unknownError;
             }
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(errorMessage),
-                duration: const Duration(seconds: 5),
-                action: result.status != GeolocationStatus.permissionDeniedForever
+            showGlobalSnackBar(
+              message: errorMessage,
+              duration: const Duration(seconds: 5),
+              action: result.status != GeolocationStatus.permissionDeniedForever
                   ? SnackBarAction(
                       label: localizations.retry,
                       onPressed: _loadForecasts,
                     )
                   : null,
-              ),
             );
           });
 
@@ -230,12 +237,11 @@ class _HomePageState extends State<HomePage>
     if (_geolocationTimedOut) {
       // Show a message if geolocation timed out
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(localizations.geolocationTimeout),
-              duration: const Duration(seconds: 5),
-              action: SnackBarAction(
-                  label: localizations.retry, onPressed: _loadForecasts)),
+        showGlobalSnackBar(
+          message: localizations.geolocationTimeout,
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+              label: localizations.retry, onPressed: _loadForecasts),
         );
       });
       _geolocationTimedOut = false; // Reset the flag after showing the message
