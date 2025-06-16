@@ -2,12 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:xml/xml.dart' as xml;
 import 'package:open_meteo/open_meteo.dart';
 import 'package:weather/data/forecast_point.dart';
+import 'package:intl/intl.dart';
 
 import 'credentials.dart';
 import 'forecast.dart';
 import 'location.dart';
+
+/// A simple class to hold a time and a value
+class _TimeValue {
+  final DateTime time;
+  final double value;
+
+  _TimeValue({required this.time, required this.value});
+}
 
 /// A singleton class for handling weather data
 class WeatherData {
@@ -52,108 +62,100 @@ class WeatherData {
     }
 
     try {
-      // Calculate start and end dates (today and 7 days from now)
-      final now = DateTime.now();
-      final startDate = DateTime(now.year, now.month, now.day - 1);
-      final endDate = startDate.add(const Duration(days: 7));
+      // Check if the location is in one of the countries that support Harmonie forecast
+      final bool useHarmonie = _isHarmonieSupportedCountry(location);
 
-      // Use the open_meteo package to make the request
-      final response = await _weatherApi.request(
-        latitude: location.lat,
-        longitude: location.lon,
-        hourly: {
-          WeatherHourly.temperature_2m,
-          WeatherHourly.relative_humidity_2m,
-          WeatherHourly.precipitation_probability,
-          WeatherHourly.precipitation,
-          WeatherHourly.weather_code,
-          WeatherHourly.wind_direction_10m,
-          WeatherHourly.wind_speed_10m,
-          WeatherHourly.wind_gusts_10m,
-          WeatherHourly.apparent_temperature,
-        },
-        startDate: startDate,
-        endDate: endDate,
-      );
+      // Get the open_meteo forecast
+      final openMeteoForecast = await _getOpenMeteoForecast(location);
 
-      // Convert the response to our Forecast model
-      final forecastPoints = <ForecastPoint>[];
-
-      // Create a list of DateTime objects for the forecast period
-      // Since we're requesting hourly data, we'll create a DateTime for each hour
-      final times = <DateTime>[];
-      for (int i = 0; i < 24 * 7; i++) {
-        // 7 days of hourly data
-        times.add(startDate.add(Duration(hours: i)));
-      }
-
-      // Get the hourly data
-      final temperatureData = response.hourlyData[WeatherHourly.temperature_2m];
-      final humidityData =
-          response.hourlyData[WeatherHourly.relative_humidity_2m];
-      final precipitationProbData =
-          response.hourlyData[WeatherHourly.precipitation_probability];
-      final precipitationData =
-          response.hourlyData[WeatherHourly.precipitation];
-      final weatherCodeData = response.hourlyData[WeatherHourly.weather_code];
-      final windDirectionData =
-          response.hourlyData[WeatherHourly.wind_direction_10m];
-      final windSpeedData = response.hourlyData[WeatherHourly.wind_speed_10m];
-      final windGustData = response.hourlyData[WeatherHourly.wind_gusts_10m];
-      final apparentTempData =
-          response.hourlyData[WeatherHourly.apparent_temperature];
-
-      // Process each hourly data point
-      for (var i = 0; i < times.length; i++) {
-        // Skip if we don't have temperature data for this time point
-        final currentTime = times[i];
-        if (temperatureData == null ||
-            !temperatureData.values.containsKey(currentTime)) {
-          continue;
+      // Create a map of precipitation probability data for easy lookup
+      final precipProbMap = <DateTime, double>{};
+      for (final point in openMeteoForecast.forecast) {
+        if (point.probabilityOfPrecipitation != null) {
+          precipProbMap[point.time] = point.probabilityOfPrecipitation!;
         }
-
-        // Get the weather data for this time point
-        final temperature = temperatureData.values[currentTime]?.toDouble();
-        final humidity = humidityData?.values[currentTime]?.toDouble();
-        final precipitationProb =
-            precipitationProbData?.values[currentTime]?.toDouble();
-        final precipitation =
-            precipitationData?.values[currentTime]?.toDouble();
-        final weatherCode = weatherCodeData?.values[currentTime]?.toInt() ?? 0;
-        final windDirection =
-            windDirectionData?.values[currentTime]?.toDouble();
-        final windSpeed = windSpeedData?.values[currentTime]?.toDouble();
-        final windGust = windGustData?.values[currentTime]?.toDouble();
-        final feelsLike = apparentTempData?.values[currentTime]?.toDouble();
-
-        // Convert weather code to symbol name
-        final weatherSymbol = _mapWeatherCodeToSymbol(weatherCode);
-
-        // Create a forecast point
-        forecastPoints.add(ForecastPoint(
-          time: times[i],
-          temperature: temperature,
-          humidity: humidity,
-          probabilityOfPrecipitation: precipitationProb,
-          precipitation: precipitation,
-          windDirection: windDirection,
-          windSpeed: windSpeed,
-          windGust: windGust,
-          weatherSymbol: weatherSymbol,
-          feelsLike: feelsLike,
-        ));
       }
 
-      return Forecast(
-        location: location,
-        forecast: forecastPoints,
-      );
+      // If the location is in a supported country, get the Harmonie forecast and merge it
+      if (useHarmonie) {
+        try {
+          final harmonieForecast = await _getHarmonieForecast(location);
+
+          // Get the last time point in the Harmonie forecast
+          final lastHarmonieTime = harmonieForecast.forecast.isNotEmpty
+              ? harmonieForecast.forecast.last.time
+              : DateTime.now().toUtc();
+
+          // Create the merged forecast points
+          final mergedPoints = <ForecastPoint>[];
+
+          // First, add all Harmonie forecast points with precipitation probability from open_meteo
+          for (final point in harmonieForecast.forecast) {
+            // Find the precipitation probability for this time
+            final precipProb = precipProbMap[point.time.toLocal()];
+
+            // Create a new forecast point with the precipitation probability
+            mergedPoints.add(ForecastPoint(
+              time: point.time.toLocal(),
+              temperature: point.temperature,
+              humidity: point.humidity,
+              windDirection: point.windDirection,
+              windSpeed: point.windSpeed,
+              windGust: point.windGust,
+              precipitation: point.precipitation,
+              weatherSymbol: point.weatherSymbol,
+              feelsLike: point.feelsLike,
+              probabilityOfPrecipitation: precipProb,
+            ));
+          }
+
+          // Then, add all open_meteo forecast points that come after the Harmonie forecast
+          for (final point in openMeteoForecast.forecast) {
+            if (point.time.isAfter(lastHarmonieTime.toLocal())) {
+              mergedPoints.add(point);
+            }
+          }
+
+          // Sort the merged points by time
+          mergedPoints.sort((a, b) => a.time.compareTo(b.time));
+
+          return Forecast(
+            location: location,
+            forecast: mergedPoints,
+          );
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error getting Harmonie forecast, falling back to open_meteo: $e');
+          }
+          // If there's an error with the Harmonie forecast, fall back to open_meteo
+        }
+      }
+
+      // If Harmonie is not supported or there's an error, return the open_meteo forecast
+      return openMeteoForecast;
+
     } catch (e) {
       if (kDebugMode) {
         print('Error getting forecast data: $e');
       }
       rethrow;
     }
+  }
+
+  /// Checks if the location is in a country that supports Harmonie forecast
+  bool _isHarmonieSupportedCountry(Location location) {
+    final supportedCountries = [
+      'NO', // Norway
+      'SE', // Sweden
+      'FI', // Finland
+      'AX', // Åland
+      'DK', // Denmark
+      'EE', // Estonia
+      'LV', // Latvia
+      'LT', // Lithuania
+    ];
+
+    return supportedCountries.contains(location.countryCode.toUpperCase());
   }
 
   /// Maps OpenMeteo weather codes to weather symbols
@@ -215,11 +217,355 @@ class WeatherData {
     }
   }
 
-  Future<void> getWarnings() async {
-    // Implementation will be added later
-    if (kDebugMode) {
-      print('Getting weather warnings...');
+  /// Maps Harmonie WeatherSymbol3 codes to weather symbols
+  ///
+  /// WeatherSymbol3 descriptions:
+  /// 1 selkeää (clear)
+  /// 2 puolipilvistä (partly cloudy)
+  /// 21 heikkoja sadekuuroja (light rain showers)
+  /// 22 sadekuuroja (rain showers)
+  /// 23 voimakkaita sadekuuroja (heavy rain showers)
+  /// 3 pilvistä (cloudy)
+  /// 31 heikkoa vesisadetta (light rain)
+  /// 32 vesisadetta (rain)
+  /// 33 voimakasta vesisadetta (heavy rain)
+  /// 41 heikkoja lumikuuroja (light snow showers)
+  /// 42 lumikuuroja (snow showers)
+  /// 43 voimakkaita lumikuuroja (heavy snow showers)
+  /// 51 heikkoa lumisadetta (light snow)
+  /// 52 lumisadetta (snow)
+  /// 53 voimakasta lumisadetta (heavy snow)
+  /// 61 ukkoskuuroja (thunderstorms)
+  /// 62 voimakkaita ukkoskuuroja (heavy thunderstorms)
+  /// 63 ukkosta (thunder)
+  /// 64 voimakasta ukkosta (heavy thunder)
+  /// 71 heikkoja räntäkuuroja (light sleet showers)
+  /// 72 räntäkuuroja (sleet showers)
+  /// 73 voimakkaita räntäkuuroja (heavy sleet showers)
+  /// 81 heikkoa räntäsadetta (light sleet)
+  /// 82 räntäsadetta (sleet)
+  /// 83 voimakasta räntäsadetta (heavy sleet)
+  /// 91 utua (mist)
+  /// 92 sumua (fog)
+  String _mapHarmonieWeatherCodeToSymbol(int weatherCode) {
+    switch (weatherCode) {
+      case 1:
+        return 'clear-day';
+      case 2:
+        return 'partly-cloudy-day';
+      case 21:
+        return 'partly-cloudy-day-rain';
+      case 22:
+        return 'partly-cloudy-day-rain';
+      case 23:
+        return 'extreme-rain';
+      case 3:
+        return 'cloudy';
+      case 31:
+        return 'rain';
+      case 32:
+        return 'overcast-rain';
+      case 33:
+        return 'extreme-rain';
+      case 41:
+        return 'partly-cloudy-day-snow';
+      case 42:
+        return 'partly-cloudy-day-snow';
+      case 43:
+        return 'extreme-snow';
+      case 51:
+        return 'snow';
+      case 52:
+        return 'overcast-snow';
+      case 53:
+        return 'extreme-snow';
+      case 61:
+        return 'thunderstorms';
+      case 62:
+        return 'thunderstorms-extreme';
+      case 63:
+        return 'thunderstorms';
+      case 64:
+        return 'thunderstorms-extreme';
+      case 71:
+        return 'sleet';
+      case 72:
+        return 'sleet';
+      case 73:
+        return 'extreme-sleet';
+      case 81:
+        return 'sleet';
+      case 82:
+        return 'sleet';
+      case 83:
+        return 'extreme-sleet';
+      case 91:
+        return 'fog';
+      case 92:
+        return 'fog';
+      default:
+        return 'unknown';
     }
+  }
+
+  /// Gets the Harmonie forecast from FMI for a given [location]
+  ///
+  /// The Harmonie is a 66 hour forecast model, updated 4 times per day.
+  /// This method fetches the forecast from the current time forward to the maximum available.
+  Future<Forecast> _getHarmonieForecast(Location location) async {
+    if (kDebugMode) {
+      print('Getting Harmonie forecast for ${location.name}...');
+    }
+
+    try {
+      // Calculate start and end times for the forecast
+      // Start from now and go 66 hours ahead (maximum for Harmonie model)
+      final now = DateTime.now().toUtc();
+      final endTime = now.add(const Duration(hours: 66));
+
+      // Format dates for the URL
+      final dateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      final startTimeStr = dateFormat.format(now);
+      final endTimeStr = dateFormat.format(endTime);
+
+      // Construct the URL with the required parameters
+      final url = Uri.parse(
+        'https://opendata.fmi.fi/wfs'
+        '?request=getFeature'
+        '&starttime=$startTimeStr'
+        '&endtime=$endTimeStr'
+        '&latlon=${location.lat},${location.lon}'
+        '&storedquery_id=fmi::forecast::harmonie::surface::point::timevaluepair'
+        '&parameters=Humidity,Temperature,WindDirection,WindSpeedMS,WindGust,Precipitation1h,WeatherSymbol3,feelslike'
+      );
+
+      // Fetch the data directly without retries
+      final response = await get(url);
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to fetch Harmonie forecast: ${response.statusCode}');
+      }
+
+      // Parse the XML response
+      final document = xml.XmlDocument.parse(response.body);
+      final members = document.findAllElements('wfs:member').toList();
+
+      if (members.isEmpty) {
+        throw Exception('No forecast data available from FMI Harmonie model');
+      }
+
+      // Parse the time series data for each parameter
+      final humidityData = _parseHarmonieTimeSeries(members[0]);
+      final temperatureData = _parseHarmonieTimeSeries(members[1]);
+      final windDirectionData = _parseHarmonieTimeSeries(members[2]);
+      final windSpeedData = _parseHarmonieTimeSeries(members[3]);
+      final windGustData = _parseHarmonieTimeSeries(members[4]);
+      final precipitationData = _parseHarmonieTimeSeries(members[5]);
+      final weatherSymbolData = _parseHarmonieTimeSeries(members[6]);
+      final feelsLikeData = _parseHarmonieTimeSeries(members[7]);
+
+      // Create a set of all time points
+      final allTimePoints = <DateTime>{};
+      for (final series in [
+        humidityData, temperatureData, windDirectionData, windSpeedData,
+        windGustData, precipitationData, weatherSymbolData, feelsLikeData
+      ]) {
+        for (final point in series) {
+          allTimePoints.add(point.time);
+        }
+      }
+
+      // Sort time points chronologically
+      final sortedTimePoints = allTimePoints.toList()..sort();
+
+      // Create forecast points for each time point
+      final forecastPoints = <ForecastPoint>[];
+
+      for (final time in sortedTimePoints) {
+        // Find data for this time point in each series
+        final humidity = _findValueForTime(humidityData, time);
+        final temperature = _findValueForTime(temperatureData, time);
+        final windDirection = _findValueForTime(windDirectionData, time);
+        final windSpeed = _findValueForTime(windSpeedData, time);
+        final windGust = _findValueForTime(windGustData, time);
+        final precipitation = _findValueForTime(precipitationData, time);
+        final weatherSymbolCode = _findValueForTime(weatherSymbolData, time)?.toInt();
+        final feelsLike = _findValueForTime(feelsLikeData, time);
+
+        // Convert weather symbol code to symbol name
+        final weatherSymbol = weatherSymbolCode != null
+            ? _mapHarmonieWeatherCodeToSymbol(weatherSymbolCode)
+            : null;
+
+        // Create a forecast point
+        forecastPoints.add(ForecastPoint(
+          time: time,
+          temperature: temperature,
+          humidity: humidity,
+          windDirection: windDirection,
+          windSpeed: windSpeed,
+          windGust: windGust,
+          precipitation: precipitation,
+          weatherSymbol: weatherSymbol,
+          feelsLike: feelsLike,
+          // probabilityOfPrecipitation is not available in Harmonie model
+          probabilityOfPrecipitation: null,
+        ));
+      }
+
+      // Sort forecast points by time
+      forecastPoints.sort((a, b) => a.time.compareTo(b.time));
+
+      return Forecast(
+        location: location,
+        forecast: forecastPoints,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting Harmonie forecast: $e');
+      }
+      rethrow;
+    }
+  }
+
+  Future<Forecast> _getOpenMeteoForecast(Location location) async {
+    // Use the open_meteo package to make the request
+    final response = await _weatherApi.request(
+      latitude: location.lat,
+      longitude: location.lon,
+      hourly: {
+        WeatherHourly.temperature_2m,
+        WeatherHourly.relative_humidity_2m,
+        WeatherHourly.precipitation_probability,
+        WeatherHourly.precipitation,
+        WeatherHourly.weather_code,
+        WeatherHourly.wind_direction_10m,
+        WeatherHourly.wind_speed_10m,
+        WeatherHourly.wind_gusts_10m,
+        WeatherHourly.apparent_temperature,
+      },
+      pastDays: 1,
+      forecastDays: 7
+    );
+
+    // Convert the response to our Forecast model
+    final forecastPoints = <ForecastPoint>[];
+
+    // Get the hourly data
+    final temperatureData = response.hourlyData[WeatherHourly.temperature_2m];
+    final humidityData =
+    response.hourlyData[WeatherHourly.relative_humidity_2m];
+    final precipitationProbData =
+    response.hourlyData[WeatherHourly.precipitation_probability];
+    final precipitationData =
+    response.hourlyData[WeatherHourly.precipitation];
+    final weatherCodeData = response.hourlyData[WeatherHourly.weather_code];
+    final windDirectionData =
+    response.hourlyData[WeatherHourly.wind_direction_10m];
+    final windSpeedData = response.hourlyData[WeatherHourly.wind_speed_10m];
+    final windGustData = response.hourlyData[WeatherHourly.wind_gusts_10m];
+    final apparentTempData =
+    response.hourlyData[WeatherHourly.apparent_temperature];
+
+    // Process each hourly data point
+    for (var currentTime in temperatureData!.values.keys) {
+      // Get the weather data for this time point
+      final temperature = temperatureData.values[currentTime]?.toDouble();
+      final humidity = humidityData?.values[currentTime]?.toDouble();
+      final precipitationProb =
+      precipitationProbData?.values[currentTime]?.toDouble();
+      final precipitation =
+      precipitationData?.values[currentTime]?.toDouble();
+      final weatherCode = weatherCodeData?.values[currentTime]?.toInt() ?? 0;
+      final windDirection =
+      windDirectionData?.values[currentTime]?.toDouble();
+      final windSpeed = windSpeedData?.values[currentTime]?.toDouble();
+      final windGust = windGustData?.values[currentTime]?.toDouble();
+      final feelsLike = apparentTempData?.values[currentTime]?.toDouble();
+
+      // Convert weather code to symbol name
+      final weatherSymbol = _mapWeatherCodeToSymbol(weatherCode);
+
+      // Create a forecast point
+      forecastPoints.add(ForecastPoint(
+        time: currentTime,
+        temperature: temperature,
+        humidity: humidity,
+        probabilityOfPrecipitation: precipitationProb,
+        precipitation: precipitation,
+        windDirection: windDirection,
+        windSpeed: windSpeed,
+        windGust: windGust,
+        weatherSymbol: weatherSymbol,
+        feelsLike: feelsLike,
+      ));
+    }
+
+    return Forecast(
+      location: location,
+      forecast: forecastPoints,
+    );
+  }
+
+
+  /// Parses time series data from a member element
+  List<_TimeValue> _parseHarmonieTimeSeries(xml.XmlElement member) {
+    final result = <_TimeValue>[];
+
+    try {
+      final points = member
+          .findAllElements('omso:PointTimeSeriesObservation')
+          .first
+          .findAllElements('om:result')
+          .first
+          .findAllElements('wml2:MeasurementTimeseries')
+          .first
+          .findAllElements('wml2:point');
+
+      for (final point in points) {
+        try {
+          final timeElement = point
+              .findAllElements('wml2:MeasurementTVP')
+              .first
+              .findAllElements('wml2:time')
+              .first;
+
+          final valueElement = point
+              .findAllElements('wml2:MeasurementTVP')
+              .first
+              .findAllElements('wml2:value')
+              .first;
+
+          final time = DateTime.parse(timeElement.innerText);
+          final value = double.tryParse(valueElement.innerText);
+
+          if (value != null && !value.isNaN) {
+            result.add(_TimeValue(time: time, value: value));
+          }
+        } catch (e) {
+          // Skip this point if there's an error
+          if (kDebugMode) {
+            print('Error parsing time series point: $e');
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error parsing time series: $e');
+      }
+    }
+
+    return result;
+  }
+
+  /// Finds a value for a specific time in a list of time-value pairs
+  double? _findValueForTime(List<_TimeValue> data, DateTime time) {
+    for (final point in data) {
+      if (point.time.isAtSameMomentAs(time)) {
+        return point.value;
+      }
+    }
+    return null;
   }
 
   /// Returns top 5 locations matching [query], sorted by population.

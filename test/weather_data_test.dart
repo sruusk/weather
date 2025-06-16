@@ -36,9 +36,5 @@ void main() {
       expect(results, isNotEmpty);
       expect(results.first.name, contains('Tampere'));
     });
-
-    test('getWarnings does not throw', () async {
-      await weatherData.getWarnings();
-    });
   });
 }

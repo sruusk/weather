@@ -73,7 +73,11 @@ Future<GeolocationResult> determinePosition() async {
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
-  final position = await Geolocator.getCurrentPosition();
+  final position = await Geolocator.getCurrentPosition(
+    locationSettings: LocationSettings(
+      accuracy: LocationAccuracy.low
+    )
+  );
   return GeolocationResult(
     position: position,
     status: GeolocationStatus.success
