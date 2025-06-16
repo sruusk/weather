@@ -30,11 +30,11 @@ class GeolocationResult {
   bool get isSuccess => status == GeolocationStatus.success;
 }
 
-/// Determine the current position of the device.
+/// Check location permissions and services
 ///
-/// Returns a GeolocationResult object that contains both the position (if successful)
-/// and a status indicating success or the type of error that occurred.
-Future<GeolocationResult> determinePosition() async {
+/// Returns a GeolocationResult with appropriate status if there's an error,
+/// or null if permissions are granted and location services are enabled.
+Future<GeolocationResult?> _checkLocationPermissions() async {
   bool serviceEnabled;
   LocationPermission permission;
 
@@ -73,11 +73,48 @@ Future<GeolocationResult> determinePosition() async {
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
+  return null;
+}
+
+/// Determine the current position of the device.
+///
+/// Returns a GeolocationResult object that contains both the position (if successful)
+/// and a status indicating success or the type of error that occurred.
+Future<GeolocationResult> determinePosition() async {
+  // Check permissions first
+  final permissionResult = await _checkLocationPermissions();
+  if (permissionResult != null) {
+    return permissionResult;
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
   final position = await Geolocator.getCurrentPosition(
     locationSettings: LocationSettings(
       accuracy: LocationAccuracy.low
     )
   );
+  return GeolocationResult(
+    position: position,
+    status: GeolocationStatus.success
+  );
+}
+
+/// Get the last known position of the device.
+///
+/// Returns a GeolocationResult object that contains both the position (if successful)
+/// and a status indicating success or the type of error that occurred.
+/// If no position is available, returns a successful result with a null position.
+Future<GeolocationResult> getLastKnownPosition() async {
+  // Check permissions first
+  final permissionResult = await _checkLocationPermissions();
+  if (permissionResult != null) {
+    return permissionResult;
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  final position = await Geolocator.getLastKnownPosition();
   return GeolocationResult(
     position: position,
     status: GeolocationStatus.success

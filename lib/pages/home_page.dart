@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show cos, sin, sqrt, atan2, pi;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,9 @@ class _HomePageState extends State<HomePage>
   bool _geolocatingFailed = false;
   int _selectedLocationIndex = 0;
 
+  // Distance threshold in meters - locations closer than this won't trigger a forecast update
+  static const double _locationUpdateThreshold = 500.0; // 500 meters
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +67,22 @@ class _HomePageState extends State<HomePage>
   @override
   bool get wantKeepAlive => true;
 
+  /// Calculates the distance between two coordinates in meters
+  double _distanceBetweenCoordinates(double lat1, double lon1, double lat2, double lon2) {
+    const R = 6371e3; // Earth radius in meters
+    final phi1 = lat1 * pi / 180; // φ, λ in radians
+    final phi2 = lat2 * pi / 180;
+    final deltaPhi = (lat2 - lat1) * pi / 180;
+    final deltaLambda = (lon2 - lon1) * pi / 180;
+
+    final a = sin(deltaPhi / 2) * sin(deltaPhi / 2) +
+        cos(phi1) * cos(phi2) *
+        sin(deltaLambda / 2) * sin(deltaLambda / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    return R * c; // in meters
+  }
+
   Future<void> _loadForecasts() async {
     final appState = Provider.of<AppState>(context, listen: false);
     final locs = appState.favouriteLocations;
@@ -86,7 +106,7 @@ class _HomePageState extends State<HomePage>
     // Determine which location to load
     Location? locationToLoad;
 
-    // If geolocation is enabled, try to get current location
+    // If geolocation is enabled, try to get location
     if (appState.geolocationEnabled && _geoLocation != null) {
       locationToLoad = _geoLocation;
     } else if (appState.geolocationEnabled) {
@@ -95,20 +115,105 @@ class _HomePageState extends State<HomePage>
           _isGeolocating = true;
         });
 
-        final result =
+        // First try to get the last known position
+        final lastKnownResult =
+            await getLastKnownPosition().timeout(const Duration(seconds: 5));
+
+        late final Location lastKnownLocation;
+        bool hasLastKnownLocation = false;
+
+        // If we have a valid last known position, use it first
+        if (lastKnownResult.isSuccess && lastKnownResult.position != null) {
+          // Use reverse geocoding to get location information for last known position
+          lastKnownLocation = await _weatherData.reverseGeocoding(
+            lastKnownResult.position!.latitude,
+            lastKnownResult.position!.longitude,
+          );
+
+          // Update UI with last known location immediately
+          setState(() {
+            _geoLocation = lastKnownLocation;
+            locationToLoad = lastKnownLocation;
+            hasLastKnownLocation = true;
+            // Don't set _isGeolocating to false yet as we'll try to get current position
+          });
+
+          // If we have a last known location, load its forecast immediately
+          try {
+            final forecast = await _weatherData.getForecast(lastKnownLocation);
+
+            // Create a list of all locations (current location + favorites)
+            final allLocations = <Location>[];
+            allLocations.add(lastKnownLocation);
+            allLocations.addAll(locs);
+
+            if (mounted) {
+              setState(() {
+                _forecast = forecast;
+                _locations = allLocations;
+                _isLoading = false; // We have data to show now
+                _selectedLocationIndex = 0;
+                appState.setActiveLocation(lastKnownLocation!);
+              });
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error getting forecast for last known location: $e');
+            }
+            // We'll continue to try getting current position
+          }
+                }
+
+        // Now try to get the current position for more accuracy
+        final currentResult =
             await determinePosition().timeout(const Duration(seconds: 10));
 
-        if (result.isSuccess && result.position != null) {
-          // Use reverse geocoding to get location information
-          locationToLoad = await _weatherData.reverseGeocoding(
-            result.position!.latitude,
-            result.position!.longitude,
-          );
-          setState(() {
-            _geoLocation = locationToLoad;
-            _isGeolocating = false;
-            _geolocatingFailed = false;
-          });
+        if (currentResult.isSuccess && currentResult.position != null) {
+          // Check if we need to update based on the distance from last known position
+          bool shouldUpdateLocation = true;
+
+          if (hasLastKnownLocation && lastKnownResult.position != null) {
+            // Calculate distance between last known and current position
+            final distance = _distanceBetweenCoordinates(
+              lastKnownResult.position!.latitude,
+              lastKnownResult.position!.longitude,
+              currentResult.position!.latitude,
+              currentResult.position!.longitude
+            );
+
+            // Only update if the distance is greater than the threshold
+            shouldUpdateLocation = distance > _locationUpdateThreshold;
+
+            if (kDebugMode && !shouldUpdateLocation) {
+              print('Current location is close to last known location (${distance.toStringAsFixed(1)}m). Skipping update.');
+            }
+          }
+
+          if (shouldUpdateLocation) {
+            // Use reverse geocoding to get location information for current position
+            locationToLoad = await _weatherData.reverseGeocoding(
+              currentResult.position!.latitude,
+              currentResult.position!.longitude,
+            );
+
+            setState(() {
+              _geoLocation = locationToLoad;
+              _isGeolocating = false;
+              _geolocatingFailed = false;
+            });
+          } else {
+            // Just update the state to indicate we're done geolocating
+            setState(() {
+              _isGeolocating = false;
+              _geolocatingFailed = false;
+            });
+
+            // If we already loaded the forecast for the last known location,
+            // and the current location is close enough, we're done
+            if (hasLastKnownLocation && _forecast != null) {
+              return;
+            }
+          }
         } else {
           // Handle geolocation errors
           setState(() {
@@ -116,12 +221,17 @@ class _HomePageState extends State<HomePage>
             _geolocatingFailed = true;
           });
 
+          // If we already have a last known location, we can use that
+          if (hasLastKnownLocation && _forecast != null) {
+            return;
+          }
+
           // Show appropriate error message based on status
           WidgetsBinding.instance.addPostFrameCallback((_) {
             final localizations = AppLocalizations.of(context)!;
             String errorMessage;
 
-            switch (result.status) {
+            switch (currentResult.status) {
               case GeolocationStatus.locationServicesDisabled:
                 errorMessage = localizations.locationServicesDisabled;
                 break;
@@ -141,7 +251,7 @@ class _HomePageState extends State<HomePage>
             showGlobalSnackBar(
               message: errorMessage,
               duration: const Duration(seconds: 5),
-              action: result.status != GeolocationStatus.permissionDeniedForever
+              action: currentResult.status != GeolocationStatus.permissionDeniedForever
                   ? SnackBarAction(
                       label: localizations.retry,
                       onPressed: _loadForecasts,
@@ -150,8 +260,8 @@ class _HomePageState extends State<HomePage>
             );
           });
 
-          // Fall back to first favorite location if available
-          if (locs.isNotEmpty) {
+          // Fall back to first favorite location if available and we don't have a last known location
+          if (!hasLastKnownLocation && locs.isNotEmpty) {
             locationToLoad = locs.first;
           }
         }
@@ -190,7 +300,7 @@ class _HomePageState extends State<HomePage>
     if (locationToLoad != null) {
       try {
         // Store the non-nullable location
-        final Location activeLocation = locationToLoad;
+        final Location activeLocation = locationToLoad!;
 
         final forecast = await _weatherData.getForecast(activeLocation);
 
