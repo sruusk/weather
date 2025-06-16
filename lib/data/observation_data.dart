@@ -82,8 +82,7 @@ class ObservationData {
 
         // Only add stations with valid temperature data
         if (observations.temperature != null &&
-            observations.temperatureHistory != null &&
-            observations.temperatureHistory!.isNotEmpty) {
+            observations.temperature!.isNotEmpty) {
           result.add(observations);
 
           // Once we have 5 valid stations, we can stop
@@ -257,31 +256,45 @@ class ObservationData {
     }
     final time = DateTime.parse(timeElements.first.innerText);
 
-    // Safely get temperature and precipitation history
-    List<TimeSeries> temperatureHistory = [];
-    List<TimeSeries> precipitationHistory = [];
+    // Get filtered time series data for all parameters
+    final List<TimeSeries>? humidity = timeSeriesData.isNotEmpty ?
+        timeSeriesData[0].where((item) => !item.value.isNaN).toList() : null;
 
-    if (timeSeriesData.length > 1) {
-      temperatureHistory = timeSeriesData[1].where((item) => !item.value.isNaN).toList();
-    }
+    final List<TimeSeries>? temperature = timeSeriesData.length > 1 ?
+        timeSeriesData[1].where((item) => !item.value.isNaN).toList() : null;
 
-    if (timeSeriesData.length > 6) {
-      precipitationHistory = timeSeriesData[6].where((item) => !item.value.isNaN).toList();
-    }
+    final List<TimeSeries>? dewPoint = timeSeriesData.length > 2 ?
+        timeSeriesData[2].where((item) => !item.value.isNaN).toList() : null;
 
-    // Safely get the last observation for each parameter
-    final humidity = timeSeriesData.isNotEmpty ? _lastObservation(timeSeriesData[0])?.value : null;
-    final temperature = _lastObservation(temperatureHistory)?.value;
-    final dewPoint = timeSeriesData.length > 2 ? _lastObservation(timeSeriesData[2])?.value : null;
-    final windSpeed = timeSeriesData.length > 3 ? _lastObservation(timeSeriesData[3])?.value : null;
-    final windDirection = timeSeriesData.length > 4 ? _lastObservation(timeSeriesData[4])?.value : null;
-    final windGust = timeSeriesData.length > 5 ? _lastObservation(timeSeriesData[5])?.value : null;
-    final precipitation = _lastObservation(precipitationHistory)?.value;
-    final snowDepth = timeSeriesData.length > 7 ? _lastObservation(timeSeriesData[7])?.value : null;
-    final pressure = timeSeriesData.length > 8 ? _lastObservation(timeSeriesData[8])?.value : null;
-    final cloudBase = timeSeriesData.length > 9 ? _lastObservation(timeSeriesData[9])?.value : null;
-    final visibility = timeSeriesData.length > 10 ? _lastObservation(timeSeriesData[10])?.value : null;
-    //final weather = timeSeriesData.length > 11 ? _lastObservation(timeSeriesData[11])?.value : null;
+    final List<TimeSeries>? windSpeed = timeSeriesData.length > 3 ?
+        timeSeriesData[3].where((item) => !item.value.isNaN).toList() : null;
+
+    final List<TimeSeries>? windDirection = timeSeriesData.length > 4 ?
+        timeSeriesData[4].where((item) => !item.value.isNaN).toList() : null;
+
+    final List<TimeSeries>? windGust = timeSeriesData.length > 5 ?
+        timeSeriesData[5].where((item) => !item.value.isNaN).toList() : null;
+
+    final List<TimeSeries>? precipitation = timeSeriesData.length > 6 ?
+        timeSeriesData[6].where((item) => !item.value.isNaN).toList() : null;
+
+    final List<TimeSeries>? snowDepth = timeSeriesData.length > 7 ?
+        timeSeriesData[7].where((item) => !item.value.isNaN).toList().map((item) {
+          // Ensure snow depth is not negative
+          return item.value < 0 ? TimeSeries(time: item.time, value: 0) : item;
+        }).toList() : null;
+
+    final List<TimeSeries>? pressure = timeSeriesData.length > 8 ?
+        timeSeriesData[8].where((item) => !item.value.isNaN).toList() : null;
+
+    final List<TimeSeries>? cloudBase = timeSeriesData.length > 9 ?
+        timeSeriesData[9].where((item) => !item.value.isNaN).toList() : null;
+
+    final List<TimeSeries>? visibility = timeSeriesData.length > 10 ?
+        timeSeriesData[10].where((item) => !item.value.isNaN).toList() : null;
+
+    //final List<TimeSeries>? weather = timeSeriesData.length > 11 ?
+    //    timeSeriesData[11].where((item) => !item.value.isNaN).toList() : null;
 
     final result = ObservationStation(
       location: station,
@@ -293,12 +306,10 @@ class ObservationData {
       windDirection: windDirection,
       windGust: windGust,
       precipitation: precipitation,
-      snowDepth: snowDepth != null ? snowDepth < 0 ? 0 : snowDepth : null, // Ensure snow depth is not negative
+      snowDepth: snowDepth,
       pressure: pressure,
       cloudBase: cloudBase,
       visibility: visibility,
-      temperatureHistory: temperatureHistory,
-      precipitationHistory: precipitationHistory,
     );
 
     // Cache the result
@@ -339,12 +350,6 @@ class ObservationData {
     }
 
     return result;
-  }
-
-  /// Gets the last observation from a list of time series
-  TimeSeries? _lastObservation(List<TimeSeries> observations) {
-    if (observations.isEmpty) return null;
-    return observations.last;
   }
 
   /// Calculates the distance between two coordinates in meters

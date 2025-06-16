@@ -10,43 +10,37 @@ class ObservationStation {
   final DateTime time;
 
   /// Temperature in degrees Celsius
-  final double? temperature;
+  final List<TimeSeries>? temperature;
 
   /// Relative humidity percentage (0-100)
-  final double? humidity;
+  final List<TimeSeries>? humidity;
 
   /// Dew point temperature in degrees Celsius
-  final double? dewPoint;
+  final List<TimeSeries>? dewPoint;
 
   /// Snow depth in centimeters
-  final double? snowDepth;
+  final List<TimeSeries>? snowDepth;
 
   /// Air pressure in hectopascals (hPa)
-  final double? pressure;
+  final List<TimeSeries>? pressure;
 
   /// Visibility in meters
-  final double? visibility;
+  final List<TimeSeries>? visibility;
 
   /// Precipitation amount in millimeters
-  final double? precipitation;
+  final List<TimeSeries>? precipitation;
 
   /// Height of the cloud base in meters
-  final double? cloudBase;
+  final List<TimeSeries>? cloudBase;
 
   /// Wind direction in degrees (0-360, where 0 is North)
-  final double? windDirection;
+  final List<TimeSeries>? windDirection;
 
   /// Wind speed in meters per second
-  final double? windSpeed;
+  final List<TimeSeries>? windSpeed;
 
   /// Wind gust speed in meters per second
-  final double? windGust;
-
-  /// Historical temperature measurements
-  final List<TimeSeries>? temperatureHistory;
-
-  /// Historical precipitation measurements
-  final List<TimeSeries>? precipitationHistory;
+  final List<TimeSeries>? windGust;
 
   /// Creates a new ObservationStation instance
   const ObservationStation({
@@ -63,8 +57,6 @@ class ObservationStation {
     this.windDirection,
     this.windSpeed,
     this.windGust,
-    this.temperatureHistory,
-    this.precipitationHistory,
   });
 
   @override
