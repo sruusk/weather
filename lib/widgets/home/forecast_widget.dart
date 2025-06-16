@@ -53,13 +53,13 @@ class ForecastWidget extends StatelessWidget {
     final days = grouped.keys.toList();
 
     return SizedBox(
-      height: 330,
+      height: 335,
       child: DefaultTabController(
         length: days.length,
         child: Column(
           children: [
             SizedBox(
-              height: 90,
+              height: 92,
               child: TabBar(
                 isScrollable: true,
                 labelPadding:
