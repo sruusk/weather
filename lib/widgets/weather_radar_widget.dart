@@ -254,7 +254,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     },
                                   ),
                           TileLayer(
-                            tileSize: 256,
+                            tileSize: 128,
                             // Add constraints to prevent NaN/Infinity values
                             tileProvider: CancellableNetworkTileProvider(
                                 silenceExceptions: true),

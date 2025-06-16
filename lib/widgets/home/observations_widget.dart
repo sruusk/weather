@@ -204,123 +204,128 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
                           station.temperature!.isEmpty
                       ? Center(
                           child: Text(localizations.noTemperatureHistoryData))
-                      : Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: LineChart(
-                            LineChartData(
-                              gridData: FlGridData(
-                                show: true,
-                                horizontalInterval: 5,
-                                verticalInterval: 60 * 60 * 1000, // 1 hour in milliseconds
+                      : LineChart(
+                        LineChartData(
+                          gridData: FlGridData(
+                            show: true,
+                            horizontalInterval: 5,
+                            verticalInterval:
+                                60 * 60 * 1000, // 1 hour in milliseconds
+                          ),
+                          titlesData: FlTitlesData(
+                            show: true,
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: AxisTitles(
+                              axisNameWidget: SizedBox.shrink(),
+                              axisNameSize: 20,
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, meta) {
+                                  // Convert milliseconds to DateTime
+                                  final dateTime =
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                          value.toInt());
+                                  // Format as HH:mm
+                                  final formattedTime =
+                                      '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.only(top: 8.0),
+                                    child: Text(formattedTime,
+                                        style: const TextStyle(
+                                            fontSize: 10)),
+                                  );
+                                },
+                                // Show fewer labels to avoid overcrowding
+                                reservedSize: 30,
+                                interval: 3600000 * 2,
+                                // Show a label every 2 hours
+                                maxIncluded: false,
+                                minIncluded: false,
                               ),
-                              titlesData: FlTitlesData(
-                                show: true,
-                                topTitles: AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
-                                ),
-                                rightTitles: AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
-                                ),
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    getTitlesWidget: (value, meta) {
-                                      // Convert milliseconds to DateTime
-                                      final dateTime = DateTime
-                                          .fromMillisecondsSinceEpoch(
-                                              value.toInt());
-                                      // Format as HH:mm
-                                      final formattedTime =
-                                          '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 8.0),
-                                        child: Text(formattedTime,
-                                            style: const TextStyle(
-                                                fontSize: 10)),
-                                      );
-                                    },
-                                    // Show fewer labels to avoid overcrowding
-                                    reservedSize: 30,
-                                    interval: 3600000 * 2,
-                                    // Show a label every 2 hours
-                                    maxIncluded: false,
-                                    minIncluded: false,
+                              axisNameSize: 20,
+                              axisNameWidget: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 4,
+                                children: [
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    color: Colors.green,
                                   ),
-                                  axisNameSize: 20,
-                                  axisNameWidget: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    spacing: 4,
-                                    children: [
-                                      Container(
-                                        width: 10,
-                                        height: 10,
-                                        color: Colors.green,
-                                      ),
-                                      Text(localizations.temperature,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleSmall
-                                              ?.copyWith(
-                                                  color: Colors.green)),
-                                      const SizedBox(width: 10),
-                                      Container(
-                                        width: 10,
-                                        height: 10,
-                                        color: Colors.blue,
-                                      ),
-                                      Text(localizations.dewPoint,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleSmall
-                                              ?.copyWith(
-                                                  color: Colors.blue)),
-                                    ],
+                                  Text(localizations.temperature,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                              color: Colors.green)),
+                                  const SizedBox(width: 10),
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    color: Colors.blue,
                                   ),
-                                ),
-                                leftTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    reservedSize: 40,
-                                    maxIncluded: false,
-                                    minIncluded: false,
-                                  ),
-                                ),
+                                  Text(localizations.dewPoint,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(color: Colors.blue)),
+                                ],
                               ),
-                              borderData: FlBorderData(
-                                show: true,
-                                border: Border.all(
-                                  color: Colors.grey,
-                                  width: 1,
-                                ),
+                            ),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 40,
+                                // maxIncluded: false,
+                                // minIncluded: false,
                               ),
-                              // minX: _getMinX(station.temperature!),
-                              // maxX: _getMaxX(station.temperature!),
-                              minY: _getMinY([ ...station.temperature!, ...station.dewPoint ?? [] ]),
-                              maxY: _getMaxY( [ ...station.temperature!, ...station.dewPoint ?? [] ]),
-                              lineBarsData: [
-                                LineChartBarData(
-                                  spots: _getTemperatureSpots(
-                                      station.temperature!),
-                                  isCurved: true,
-                                  color: Colors.green,
-                                  barWidth: 3,
-                                  belowBarData: BarAreaData(show: false),
-                                  dotData: FlDotData(show: false),
-                                ),
-                                LineChartBarData(
-                                  spots: _getTemperatureSpots(
-                                      station.dewPoint!),
-                                  isCurved: true,
-                                  color: Colors.blue,
-                                  barWidth: 3,
-                                  belowBarData: BarAreaData(show: false),
-                                  dotData: FlDotData(show: false),
-                                ),
-                              ],
                             ),
                           ),
-                        )),
+                          borderData: FlBorderData(
+                            show: true,
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 1,
+                            ),
+                          ),
+                          // minX: _getMinX(station.temperature!),
+                          // maxX: _getMaxX(station.temperature!),
+                          minY: _getMinY([
+                            ...station.temperature!,
+                            ...station.dewPoint ?? []
+                          ]),
+                          maxY: _getMaxY([
+                            ...station.temperature!,
+                            ...station.dewPoint ?? []
+                          ]),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: _getTemperatureSpots(
+                                  station.temperature!),
+                              isCurved: true,
+                              color: Colors.green,
+                              barWidth: 3,
+                              belowBarData: BarAreaData(show: false),
+                              dotData: FlDotData(show: false),
+                            ),
+                            LineChartBarData(
+                              spots:
+                                  _getTemperatureSpots(station.dewPoint!),
+                              isCurved: true,
+                              color: Colors.blue,
+                              barWidth: 3,
+                              belowBarData: BarAreaData(show: false),
+                              dotData: FlDotData(show: false),
+                            ),
+                          ],
+                        ),
+                      )),
             ],
           ),
         ),
