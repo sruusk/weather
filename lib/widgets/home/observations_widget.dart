@@ -1,4 +1,3 @@
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -238,6 +237,8 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
                                       reservedSize: 30,
                                       interval: 3600000 *
                                           2, // Show a label every 2 hours
+                                      maxIncluded: false,
+                                      minIncluded: false,
                                     ),
                                   ),
                                   leftTitles: AxisTitles(
@@ -254,8 +255,8 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
                                     width: 1,
                                   ),
                                 ),
-                                minX: _getMinX(station.temperatureHistory!),
-                                maxX: _getMaxX(station.temperatureHistory!),
+                                // minX: _getMinX(station.temperatureHistory!),
+                                // maxX: _getMaxX(station.temperatureHistory!),
                                 minY: _getMinY(station.temperatureHistory!),
                                 maxY: _getMaxY(station.temperatureHistory!),
                                 lineBarsData: [
@@ -349,17 +350,30 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
 
   /// Gets the minimum X value for the chart
   double _getMinX(List<TimeSeries> history) {
-    DateTime now = DateTime.now();
-    now = DateTime(now.year, now.month, now.day, now.hour, 0, 0);
-    final twelveHoursAgo = now.subtract(const Duration(hours: 12));
-    return twelveHoursAgo.millisecondsSinceEpoch.toDouble();
+    if (history.isEmpty) return 0;
+
+    // Find the earliest time in the history
+    final minTime = history.map((e) => e.time).reduce((a, b) => a.isBefore(b) ? a : b);
+
+    // Round down to the nearest hour
+    final roundedMinTime = DateTime.utc(minTime.year, minTime.month, minTime.day, minTime.hour, 0, 0);
+
+    return roundedMinTime.millisecondsSinceEpoch.toDouble();
   }
 
   /// Gets the maximum X value for the chart
   double _getMaxX(List<TimeSeries> history) {
-    DateTime now = DateTime.now();
-    now = DateTime(now.year, now.month, now.day, now.hour + 1, 0, 0);
-    return now.millisecondsSinceEpoch.toDouble();
+    if (history.isEmpty) return 0;
+
+    // Find the latest time in the history
+    final maxTime = history.map((e) => e.time).reduce((a, b) => a.isAfter(b) ? a : b);
+
+    // Round up to the nearest hour
+    final roundedMaxTime = DateTime.utc(maxTime.year, maxTime.month, maxTime.day, maxTime.hour + 1 + (maxTime.hour%2 == 0 ? 1 : 0), 0, 0);
+
+
+
+    return roundedMaxTime.millisecondsSinceEpoch.toDouble();
   }
 
   /// Gets the minimum Y value for the chart with some padding
@@ -367,10 +381,10 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
     if (history.isEmpty) return 0;
 
     // Find the minimum temperature
-    final minTemp = history.map((e) => e.value).reduce((a, b) => a < b ? a : b);
+    final minTemp = history.map((e) => e.value).reduce((a, b) => a < b ? a : b).floor();
 
-    // Add some padding (10% of the range, or at least 2 degrees)
-    return minTemp.floor() - 2;
+    // Add some padding
+    return minTemp - minTemp % 5;
   }
 
   /// Gets the maximum Y value for the chart with some padding
@@ -378,9 +392,9 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
     if (history.isEmpty) return 10;
 
     // Find the maximum temperature
-    final maxTemp = history.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+    final maxTemp = history.map((e) => e.value).reduce((a, b) => a > b ? a : b).ceil();
 
-    // Add some padding (10% of the range, or at least 2 degrees)
-    return maxTemp.ceil() + 2;
+    // Add some padding
+    return maxTemp + (5 - maxTemp % 5);
   }
 }
