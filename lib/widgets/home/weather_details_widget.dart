@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:weather/data/constants.dart';
@@ -35,6 +37,7 @@ class WeatherDetails extends StatefulWidget {
 
 class _WeatherDetailsState extends State<WeatherDetails> {
   late final WeatherRadarController _radarCtrl;
+  Timer? _mapReadyCheckTimer;
 
   void _handleLocationChanged(int index) {
     if (widget.selectedIndex != index) {
@@ -72,11 +75,32 @@ class _WeatherDetailsState extends State<WeatherDetails> {
     if (newLoc != null && newLoc != oldLoc) {
       // Only update radar controller if the new location has radar enabled
       if (radarEnabledCountries.contains(newLoc.countryCode)) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _radarCtrl.moveTo(newLoc.lat, newLoc.lon, 10.0);
-        });
+        if (_radarCtrl.isMapReady) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _radarCtrl.moveTo(newLoc.lat, newLoc.lon, 10.0);
+          });
+        } else {
+          _mapReadyCheckTimer =
+              Timer.periodic(const Duration(milliseconds: 100), (timer) {
+            if (_radarCtrl.isMapReady) {
+              // Map is ready, trigger a movement to ensure proper rendering
+              _radarCtrl.moveTo(newLoc.lat, newLoc.lon, 10.0);
+              setState(() {});
+
+              // Cancel the timer as we don't need to check anymore
+              timer.cancel();
+              _mapReadyCheckTimer = null;
+            }
+          });
+        }
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _mapReadyCheckTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -123,7 +147,8 @@ class _WeatherDetailsState extends State<WeatherDetails> {
     });
   }
 
-  List<Widget> _buildChildren(BuildContext context, BoxConstraints constraints) {
+  List<Widget> _buildChildren(
+      BuildContext context, BoxConstraints constraints) {
     final localizations = AppLocalizations.of(context)!;
 
     final loc = widget.locations[widget.selectedIndex];
@@ -149,11 +174,11 @@ class _WeatherDetailsState extends State<WeatherDetails> {
       if (observationsEnabledCountries.contains(countryCode) &&
           constraints.maxWidth < 900)
         ChildCardWidget(child: WeatherWarnings(location: f.location)),
-
       ChildCardWidget(child: ForecastWidget(forecast: f)),
       if (radarEnabledCountries.contains(countryCode))
         ChildCardWidget(
-          padding: EdgeInsetsGeometry.only(top: 16, left: 16, right: 16),
+          padding:
+              EdgeInsetsGeometry.only(top: 16, left: 10, right: 10, bottom: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -172,8 +197,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(localizations.observations,
-                  style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Transform.translate(
                 offset: const Offset(0, -15),
                 child: ObservationsWidget(location: loc),

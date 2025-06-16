@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:weather/app_state.dart';
 import 'package:weather/data/constants.dart';
 import 'package:weather/data/location.dart';
+import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/widgets/weather_radar_widget.dart';
 
 const Location defaultLocation =
@@ -40,6 +41,8 @@ class _WeatherRadarPageState extends State<WeatherRadarPage>
       initialZoom: 10,
     );
 
+    _currentLocation = location;
+
     // Start a timer to check if the map is ready
     _startMapReadyCheck();
   }
@@ -74,6 +77,7 @@ class _WeatherRadarPageState extends State<WeatherRadarPage>
     super.build(context); // Call super to ensure keep alive works
 
     AppState appState = Provider.of<AppState>(context);
+    final localizations = AppLocalizations.of(context)!;
 
     // Update radar controller when active location changes
     if (appState.activeLocation != null &&
@@ -89,9 +93,42 @@ class _WeatherRadarPageState extends State<WeatherRadarPage>
     }
 
     return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          _currentLocation?.name ?? '',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            shadows: [
+              Shadow(
+                color: Theme.of(context).colorScheme.surface,
+                offset: const Offset(0, 1),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _radarCtrl.moveTo(
+                _currentLocation?.lat ?? defaultLocation.lat,
+                _currentLocation?.lon ?? defaultLocation.lon,
+                10.0,
+              );
+            },
+            tooltip: localizations.resetMapPosition,
+          ),
+        ],
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return Column(
+          return Stack(
             children: [
               WeatherRadar(
                 controller: _radarCtrl,

@@ -98,12 +98,6 @@ abstract class AppLocalizations {
     Locale('fi')
   ];
 
-  /// Button text for logging in
-  ///
-  /// In en, this message translates to:
-  /// **'Login'**
-  String get login;
-
   /// Text for sign up button and title
   ///
   /// In en, this message translates to:
@@ -602,6 +596,12 @@ abstract class AppLocalizations {
   /// **'Synchronize your app preferences and favourites across devices'**
   String get settingsSyncDesc;
 
+  /// Button text for logging in
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
   /// Button text for logging out
   ///
   /// In en, this message translates to:
@@ -641,7 +641,7 @@ abstract class AppLocalizations {
   /// Description for Finnish Meteorological Institute data source
   ///
   /// In en, this message translates to:
-  /// **'Observations, alerts and radar images by \n the Finnish Meteorological Institute.'**
+  /// **'Observations, alerts, radar images and HARMONIE forecast by the Finnish Meteorological Institute.'**
   String get fmiDescription;
 
   /// Description for OpenStreetMap data source
@@ -889,6 +889,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location permission permanently denied. Please enable location access in app settings.'**
   String get locationPermissionPermanentlyDenied;
+
+  /// No description provided for @play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get play;
+
+  /// No description provided for @pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pause;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min ago'**
+  String minutesAgo(Object minutes);
+
+  /// No description provided for @resetMapPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Map Position'**
+  String get resetMapPosition;
 }
 
 class _AppLocalizationsDelegate

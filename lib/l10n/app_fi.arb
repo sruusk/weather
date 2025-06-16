@@ -1,9 +1,5 @@
 {
   "@@locale": "fi",
-  "login": "Kirjaudu",
-  "@login": {
-    "description": "Text for login button and title"
-  },
   "signUp": "Rekisteröidy",
   "@signUp": {
     "description": "Text for sign up button and title"
@@ -408,7 +404,7 @@
   "@openMeteoDescription": {
     "description": "Description for Open-Meteo data source"
   },
-  "fmiDescription": "Havainnot, varoitukset ja tutkakuvat - Ilmatieteenlaitos.",
+  "fmiDescription": "Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteenlaitos.",
   "@fmiDescription": {
     "description": "Description for Finnish Meteorological Institute data source"
   },
@@ -492,7 +488,7 @@
   "@syncFavouritesDesc": {
     "description": "Description for synchronizing favourites feature"
   },
-  "syncToAppwrite" : "Synkronoi",
+  "syncToAppwrite": "Synkronoi",
   "@syncToAppwrite": {
     "description": "Button text to sync data to Appwrite"
   },
@@ -534,5 +530,9 @@
   "locationPermissionPermanentlyDenied": "Sijaintilupa pysyvästi evätty. Ota sijainti käyttöön sovelluksen asetuksista.",
   "@locationPermissionPermanentlyDenied": {
     "description": "Message shown when location permission is permanently denied"
-  }
+  },
+  "play": "Toista",
+  "pause": "Pysäytä",
+  "minutesAgo": "{minutes} min. sitten",
+  "resetMapPosition": "Nollaa kartan sijainti"
 }

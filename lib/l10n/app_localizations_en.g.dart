@@ -9,9 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get login => 'Login';
-
-  @override
   String get signUp => 'Sign Up';
 
   @override
@@ -270,6 +267,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Synchronize your app preferences and favourites across devices';
 
   @override
+  String get login => 'Login';
+
+  @override
   String get logout => 'Logout';
 
   @override
@@ -290,7 +290,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fmiDescription =>
-      'Observations, alerts and radar images by \n the Finnish Meteorological Institute.';
+      'Observations, alerts, radar images and HARMONIE forecast by the Finnish Meteorological Institute.';
 
   @override
   String get openStreetMapDescription => 'Map data by OpenStreetMap';
@@ -427,4 +427,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationPermissionPermanentlyDenied =>
       'Location permission permanently denied. Please enable location access in app settings.';
+
+  @override
+  String get play => 'Play';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String minutesAgo(Object minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String get resetMapPosition => 'Reset Map Position';
 }

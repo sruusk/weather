@@ -1,9 +1,5 @@
 {
   "@@locale": "en",
-  "login": "Login",
-  "@login": {
-    "description": "Text for login button and title"
-  },
   "signUp": "Sign Up",
   "@signUp": {
     "description": "Text for sign up button and title"
@@ -376,7 +372,7 @@
   "@openMeteoDescription": {
     "description": "Description for Open-Meteo data source"
   },
-  "fmiDescription": "Observations, alerts and radar images by \n the Finnish Meteorological Institute.",
+  "fmiDescription": "Observations, alerts, radar images and HARMONIE forecast by the Finnish Meteorological Institute.",
   "@fmiDescription": {
     "description": "Description for Finnish Meteorological Institute data source"
   },
@@ -492,7 +488,7 @@
   "@syncFavouritesDesc": {
     "description": "Description for synchronizing favourites feature"
   },
-  "syncToAppwrite" : "Sync",
+  "syncToAppwrite": "Sync",
   "@syncToAppwrite": {
     "description": "Button text to sync data to Appwrite"
   },
@@ -534,5 +530,9 @@
   "locationPermissionPermanentlyDenied": "Location permission permanently denied. Please enable location access in app settings.",
   "@locationPermissionPermanentlyDenied": {
     "description": "Message shown when location permission is permanently denied"
-  }
+  },
+  "play": "Play",
+  "pause": "Pause",
+  "minutesAgo": "{minutes} min ago",
+  "resetMapPosition": "Reset Map Position"
 }

@@ -9,9 +9,6 @@ class AppLocalizationsFi extends AppLocalizations {
   AppLocalizationsFi([String locale = 'fi']) : super(locale);
 
   @override
-  String get login => 'Kirjaudu sisään';
-
-  @override
   String get signUp => 'Rekisteröidy';
 
   @override
@@ -270,6 +267,9 @@ class AppLocalizationsFi extends AppLocalizations {
       'Synkronoi sovelluksen asetukset ja suosikit laitteiden välillä.';
 
   @override
+  String get login => 'Kirjaudu sisään';
+
+  @override
   String get logout => 'Kirjaudu ulos';
 
   @override
@@ -289,7 +289,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get fmiDescription =>
-      'Havainnot, varoitukset ja tutkakuvat - Ilmatieteenlaitos.';
+      'Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteenlaitos.';
 
   @override
   String get openStreetMapDescription => 'Karttadata - OpenStreetMap';
@@ -424,4 +424,18 @@ class AppLocalizationsFi extends AppLocalizations {
   @override
   String get locationPermissionPermanentlyDenied =>
       'Sijaintilupa pysyvästi evätty. Ota sijainti käyttöön sovelluksen asetuksista.';
+
+  @override
+  String get play => 'Toista';
+
+  @override
+  String get pause => 'Pysäytä';
+
+  @override
+  String minutesAgo(Object minutes) {
+    return '$minutes min. sitten';
+  }
+
+  @override
+  String get resetMapPosition => 'Nollaa kartan sijainti';
 }

@@ -388,9 +388,7 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           if (isWideScreen) _buildNavigationRail(context, currentIndex),
           Expanded(
-            child: SafeArea(
-              child: widget.child,
-            ),
+            child: widget.child
           ),
         ],
       ),

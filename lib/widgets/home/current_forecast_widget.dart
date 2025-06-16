@@ -65,7 +65,8 @@ class CurrentForecast extends StatelessWidget {
                                 Text(
                                   locations[i].name +
                                       (locations[i].region != null
-                                          ? ', ${locations[i].region}'
+                                          ? locations[i].region! == locations[i].name && locations[i].country != null
+                                          ? ', ${locations[i].country}' : ', ${locations[i].region}'
                                           : ''),
                                 ),
                               ],

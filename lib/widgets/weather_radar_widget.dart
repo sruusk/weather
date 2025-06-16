@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pmtiles/pmtiles.dart';
@@ -13,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
 import 'package:weather/data/lightning_data.dart';
+import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class WeatherRadar extends StatefulWidget {
@@ -157,14 +159,16 @@ class _WeatherRadarState extends State<WeatherRadar> {
   @override
   Widget build(BuildContext context) {
     debugPrint('🌐 WeatherRadarWidget.build called');
+    final localizations = AppLocalizations.of(context)!;
 
     return Builder(builder: (context) {
-      return Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: SizedBox(
-              height: widget.height - 64, // Subtract height of controls
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8.0),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            SizedBox(
+              height: widget.height /* - 64*/, // Subtract height of controls
               child: FutureBuilder(
                   future: _tileProviderFuture,
                   builder: (context, snapshot) {
@@ -185,10 +189,10 @@ class _WeatherRadarState extends State<WeatherRadar> {
                           keepAlive: true,
                           interactionOptions: InteractionOptions(
                             flags: widget.flags,
-                            rotationWinGestures:
-                                widget.rotationWinGestures,
+                            rotationWinGestures: widget.rotationWinGestures,
                             cursorKeyboardRotationOptions:
-                                widget.cursorKeyboardRotationOptions ?? CursorKeyboardRotationOptions.disabled(),
+                                widget.cursorKeyboardRotationOptions ??
+                                    CursorKeyboardRotationOptions.disabled(),
                           ),
                           onMapReady: () {
                             // Notify controller that map is ready
@@ -234,17 +238,18 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     },
                                   )
                                 : VectorTileLayer(
-                                    key: const Key('protomaps-dark'),
+                                    key: const Key('protomaps-black'),
                                     tileProviders: TileProviders({
                                       'protomaps': tileProvider!,
                                     }),
-                                    theme: ProtomapsThemes.blackV4(/*logger: Logger.console()*/),
+                                    theme: ProtomapsThemes.blackV4(
+                                        /*logger: Logger.console()*/),
                                     showTileDebugInfo: false,
                                     cacheFolder: () {
                                       return getTemporaryDirectory()
                                           .then((dir) {
                                         return Directory(
-                                            '${dir.path}/pmtiles_dark_cache');
+                                            '${dir.path}/pmtiles_black_cache');
                                       });
                                     },
                                   ),
@@ -310,61 +315,75 @@ class _WeatherRadarState extends State<WeatherRadar> {
                               ),
                             ),
                           ]),
-                          RichAttributionWidget(
-                            showFlutterMapAttribution: false,
-                            popupInitialDisplayDuration: Duration(seconds: 5),
-                            attributions: [
-                              TextSourceAttribution(
-                                'OpenStreetMap [Map]',
-                                onTap: () => launchUrl(Uri.parse(
-                                  'https://www.openstreetmap.org/copyright',
-                                )),
-                                prependCopyright: true,
-                              ),
-                              TextSourceAttribution(
-                                'Finnish Meteorological Institute [Radar, Lightning]',
-                                onTap: () => launchUrl(Uri.parse(
-                                  'https://en.ilmatieteenlaitos.fi/open-data',
-                                )),
-                              ),
-                            ],
+                          Transform.translate(
+                            offset: const Offset(0, -64),
+                            child: RichAttributionWidget(
+                              showFlutterMapAttribution: false,
+                              popupInitialDisplayDuration: Duration(seconds: 5),
+                              attributions: [
+                                TextSourceAttribution(
+                                  'OpenStreetMap [Map]',
+                                  onTap: () => launchUrl(Uri.parse(
+                                    'https://www.openstreetmap.org/copyright',
+                                  )),
+                                  prependCopyright: true,
+                                ),
+                                TextSourceAttribution(
+                                  'Finnish Meteorological Institute [Radar, Lightning]',
+                                  onTap: () => launchUrl(Uri.parse(
+                                    'https://en.ilmatieteenlaitos.fi/open-data',
+                                  )),
+                                ),
+                                LogoSourceAttribution(
+                                  SvgPicture.asset(
+                                    'assets/about/fmiodata.svg',
+                                    height: 20,
+                                    colorFilter: ColorFilter.mode(
+                                      Theme.of(context).colorScheme.onSurface,
+                                      BlendMode.srcIn,
+                                    ),
+                                  )),
+                              ],
+                            ),
                           ),
                         ],
                       );
                     }
                   }),
             ),
-          ),
-          SizedBox(
-            height: 64,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                    onPressed: _togglePlayPause,
-                    tooltip: _isPlaying ? 'Pause' : 'Play',
-                  ),
-                  Expanded(
-                    child: Slider(
-                      value: _sliderValue,
-                      min: 0,
-                      max: 5,
-                      divisions: 5,
-                      onChanged: _updateTime,
-                      label: '${((5 - _sliderValue) * 15).toInt()} min ago',
+            Container(
+              height: 64,
+              color: Theme.of(context).colorScheme.surface.withAlpha(150),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                      onPressed: _togglePlayPause,
+                      tooltip:
+                          _isPlaying ? localizations.pause : localizations.play,
                     ),
-                  ),
-                  Text(
-                    '${_currentTime.toLocal().hour.toString()}:${_currentTime.toLocal().minute.toString().padLeft(2, '0')}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
+                    Expanded(
+                      child: Slider(
+                          value: _sliderValue,
+                          min: 0,
+                          max: 5,
+                          divisions: 5,
+                          onChanged: _updateTime,
+                          label: localizations
+                              .minutesAgo(((5 - _sliderValue) * 15).toInt())),
+                    ),
+                    Text(
+                      '${_currentTime.toLocal().hour.toString()}:${_currentTime.toLocal().minute.toString().padLeft(2, '0')}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     });
   }
