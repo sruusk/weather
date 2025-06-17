@@ -404,7 +404,7 @@
   "@openMeteoDescription": {
     "description": "Description for Open-Meteo data source"
   },
-  "fmiDescription": "Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteenlaitos.",
+  "fmiDescription": "Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteen laitos.",
   "@fmiDescription": {
     "description": "Description for Finnish Meteorological Institute data source"
   },
