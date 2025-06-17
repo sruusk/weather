@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:weather/data/constants.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
@@ -133,8 +132,9 @@ class _WeatherDetailsState extends State<WeatherDetails> {
       if (constraints.maxWidth > 900) {
         return Wrap(
           children: children.map((child) {
+            final isObservations = child.key == Key('observations');
             return SizedBox(
-              width: constraints.maxWidth / 2,
+              width: isObservations ? constraints.maxWidth : constraints.maxWidth / 2,
               child: child,
             );
           }).toList(),
@@ -168,6 +168,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
             selectedIndex: widget.selectedIndex,
             onLocationChanged: _handleLocationChanged,
             geoLocation: widget.geoLocation,
+            height: constraints.maxWidth > 900 ? 335 : 300,
           ),
         ],
       )),
@@ -175,7 +176,7 @@ class _WeatherDetailsState extends State<WeatherDetails> {
           constraints.maxWidth < 900)
         ChildCardWidget(child: WeatherWarnings(location: f.location)),
       ChildCardWidget(child: ForecastWidget(forecast: f)),
-      if (radarEnabledCountries.contains(countryCode))
+/*      if (radarEnabledCountries.contains(countryCode))
         ChildCardWidget(
           padding:
               EdgeInsetsGeometry.only(top: 16, left: 10, right: 10, bottom: 10),
@@ -189,9 +190,10 @@ class _WeatherDetailsState extends State<WeatherDetails> {
               WeatherRadar(controller: _radarCtrl, flags: InteractiveFlag.none),
             ],
           ),
-        ),
+        ),*/
       if (observationsEnabledCountries.contains(countryCode))
         ChildCardWidget(
+          key: Key('observations'),
           padding: EdgeInsetsGeometry.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -441,4 +441,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetMapPosition => 'Reset Map Position';
+
+  @override
+  String get openSettings => 'Open Settings';
 }

@@ -27,14 +27,14 @@ class Precipitation extends StatelessWidget {
             Transform.translate(
               offset: Offset(-7, compact ? 4 : 0),
               child: Text(
-                '${p.probabilityOfPrecipitation?.toStringAsFixed(0) ?? '–'}%',
+                '${p.probabilityOfPrecipitation.toStringAsFixed(0)}%',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
         Text(
-          '${p.precipitation?.toStringAsFixed(1) ?? '-'} mm',
+          '${p.precipitation.toStringAsFixed(1)} mm',
         ),
       ],
     );

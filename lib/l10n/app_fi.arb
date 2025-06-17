@@ -534,5 +534,6 @@
   "play": "Toista",
   "pause": "Pysäytä",
   "minutesAgo": "{minutes} min. sitten",
-  "resetMapPosition": "Nollaa kartan sijainti"
+  "resetMapPosition": "Nollaa kartan sijainti",
+  "openSettings": "Avaa asetukset"
 }

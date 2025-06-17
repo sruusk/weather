@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:intl/intl.dart';
 import 'package:open_meteo/open_meteo.dart';
 import 'package:weather/data/forecast_point.dart';
-import 'package:intl/intl.dart';
+import 'package:xml/xml.dart' as xml;
 
 import 'credentials.dart';
 import 'forecast.dart';
@@ -71,9 +71,7 @@ class WeatherData {
       // Create a map of precipitation probability data for easy lookup
       final precipProbMap = <DateTime, double>{};
       for (final point in openMeteoForecast.forecast) {
-        if (point.probabilityOfPrecipitation != null) {
-          precipProbMap[point.time] = point.probabilityOfPrecipitation!;
-        }
+        precipProbMap[point.time] = point.probabilityOfPrecipitation;
       }
 
       // If the location is in a supported country, get the Harmonie forecast and merge it
@@ -104,8 +102,9 @@ class WeatherData {
               windGust: point.windGust,
               precipitation: point.precipitation,
               weatherSymbol: point.weatherSymbol,
+              weatherSymbolCode: point.weatherSymbolCode,
               feelsLike: point.feelsLike,
-              probabilityOfPrecipitation: precipProb,
+              probabilityOfPrecipitation: precipProb!,
             ));
           }
 
@@ -125,7 +124,8 @@ class WeatherData {
           );
         } catch (e) {
           if (kDebugMode) {
-            print('Error getting Harmonie forecast, falling back to open_meteo: $e');
+            print(
+                'Error getting Harmonie forecast, falling back to open_meteo: $e');
           }
           // If there's an error with the Harmonie forecast, fall back to open_meteo
         }
@@ -133,7 +133,6 @@ class WeatherData {
 
       // If Harmonie is not supported or there's an error, return the open_meteo forecast
       return openMeteoForecast;
-
     } catch (e) {
       if (kDebugMode) {
         print('Error getting forecast data: $e');
@@ -329,21 +328,20 @@ class WeatherData {
       final endTimeStr = dateFormat.format(endTime);
 
       // Construct the URL with the required parameters
-      final url = Uri.parse(
-        'https://opendata.fmi.fi/wfs'
-        '?request=getFeature'
-        '&starttime=$startTimeStr'
-        '&endtime=$endTimeStr'
-        '&latlon=${location.lat},${location.lon}'
-        '&storedquery_id=fmi::forecast::harmonie::surface::point::timevaluepair'
-        '&parameters=Humidity,Temperature,WindDirection,WindSpeedMS,WindGust,Precipitation1h,WeatherSymbol3,feelslike'
-      );
+      final url = Uri.parse('https://opendata.fmi.fi/wfs'
+          '?request=getFeature'
+          '&starttime=$startTimeStr'
+          '&endtime=$endTimeStr'
+          '&latlon=${location.lat},${location.lon}'
+          '&storedquery_id=fmi::forecast::harmonie::surface::point::timevaluepair'
+          '&parameters=Humidity,Temperature,WindDirection,WindSpeedMS,WindGust,Precipitation1h,WeatherSymbol3,feelslike');
 
       // Fetch the data directly without retries
       final response = await get(url);
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to fetch Harmonie forecast: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch Harmonie forecast: ${response.statusCode}');
       }
 
       // Parse the XML response
@@ -367,8 +365,14 @@ class WeatherData {
       // Create a set of all time points
       final allTimePoints = <DateTime>{};
       for (final series in [
-        humidityData, temperatureData, windDirectionData, windSpeedData,
-        windGustData, precipitationData, weatherSymbolData, feelsLikeData
+        humidityData,
+        temperatureData,
+        windDirectionData,
+        windSpeedData,
+        windGustData,
+        precipitationData,
+        weatherSymbolData,
+        feelsLikeData
       ]) {
         for (final point in series) {
           allTimePoints.add(point.time);
@@ -389,7 +393,8 @@ class WeatherData {
         final windSpeed = _findValueForTime(windSpeedData, time);
         final windGust = _findValueForTime(windGustData, time);
         final precipitation = _findValueForTime(precipitationData, time);
-        final weatherSymbolCode = _findValueForTime(weatherSymbolData, time)?.toInt();
+        final weatherSymbolCode =
+            _findValueForTime(weatherSymbolData, time)?.toInt();
         final feelsLike = _findValueForTime(feelsLikeData, time);
 
         // Convert weather symbol code to symbol name
@@ -400,16 +405,17 @@ class WeatherData {
         // Create a forecast point
         forecastPoints.add(ForecastPoint(
           time: time,
-          temperature: temperature,
-          humidity: humidity,
-          windDirection: windDirection,
-          windSpeed: windSpeed,
-          windGust: windGust,
-          precipitation: precipitation,
-          weatherSymbol: weatherSymbol,
+          temperature: temperature!,
+          humidity: humidity!,
+          windDirection: windDirection!,
+          windSpeed: windSpeed!,
+          windGust: windGust!,
+          precipitation: precipitation!,
+          weatherSymbol: weatherSymbol!,
+          weatherSymbolCode: weatherSymbolCode!,
           feelsLike: feelsLike,
           // probabilityOfPrecipitation is not available in Harmonie model
-          probabilityOfPrecipitation: null,
+          probabilityOfPrecipitation: 0,
         ));
       }
 
@@ -431,22 +437,21 @@ class WeatherData {
   Future<Forecast> _getOpenMeteoForecast(Location location) async {
     // Use the open_meteo package to make the request
     final response = await _weatherApi.request(
-      latitude: location.lat,
-      longitude: location.lon,
-      hourly: {
-        WeatherHourly.temperature_2m,
-        WeatherHourly.relative_humidity_2m,
-        WeatherHourly.precipitation_probability,
-        WeatherHourly.precipitation,
-        WeatherHourly.weather_code,
-        WeatherHourly.wind_direction_10m,
-        WeatherHourly.wind_speed_10m,
-        WeatherHourly.wind_gusts_10m,
-        WeatherHourly.apparent_temperature,
-      },
-      pastDays: 1,
-      forecastDays: 7
-    );
+        latitude: location.lat,
+        longitude: location.lon,
+        hourly: {
+          WeatherHourly.temperature_2m,
+          WeatherHourly.relative_humidity_2m,
+          WeatherHourly.precipitation_probability,
+          WeatherHourly.precipitation,
+          WeatherHourly.weather_code,
+          WeatherHourly.wind_direction_10m,
+          WeatherHourly.wind_speed_10m,
+          WeatherHourly.wind_gusts_10m,
+          WeatherHourly.apparent_temperature,
+        },
+        pastDays: 1,
+        forecastDays: 7);
 
     // Convert the response to our Forecast model
     final forecastPoints = <ForecastPoint>[];
@@ -454,34 +459,31 @@ class WeatherData {
     // Get the hourly data
     final temperatureData = response.hourlyData[WeatherHourly.temperature_2m];
     final humidityData =
-    response.hourlyData[WeatherHourly.relative_humidity_2m];
+        response.hourlyData[WeatherHourly.relative_humidity_2m];
     final precipitationProbData =
-    response.hourlyData[WeatherHourly.precipitation_probability];
-    final precipitationData =
-    response.hourlyData[WeatherHourly.precipitation];
+        response.hourlyData[WeatherHourly.precipitation_probability];
+    final precipitationData = response.hourlyData[WeatherHourly.precipitation];
     final weatherCodeData = response.hourlyData[WeatherHourly.weather_code];
     final windDirectionData =
-    response.hourlyData[WeatherHourly.wind_direction_10m];
+        response.hourlyData[WeatherHourly.wind_direction_10m];
     final windSpeedData = response.hourlyData[WeatherHourly.wind_speed_10m];
     final windGustData = response.hourlyData[WeatherHourly.wind_gusts_10m];
     final apparentTempData =
-    response.hourlyData[WeatherHourly.apparent_temperature];
+        response.hourlyData[WeatherHourly.apparent_temperature];
 
     // Process each hourly data point
     for (var currentTime in temperatureData!.values.keys) {
       // Get the weather data for this time point
-      final temperature = temperatureData.values[currentTime]?.toDouble();
-      final humidity = humidityData?.values[currentTime]?.toDouble();
+      final temperature = temperatureData.values[currentTime]!.toDouble();
+      final humidity = humidityData!.values[currentTime]!.toDouble();
       final precipitationProb =
-      precipitationProbData?.values[currentTime]?.toDouble();
-      final precipitation =
-      precipitationData?.values[currentTime]?.toDouble();
-      final weatherCode = weatherCodeData?.values[currentTime]?.toInt() ?? 0;
-      final windDirection =
-      windDirectionData?.values[currentTime]?.toDouble();
-      final windSpeed = windSpeedData?.values[currentTime]?.toDouble();
-      final windGust = windGustData?.values[currentTime]?.toDouble();
-      final feelsLike = apparentTempData?.values[currentTime]?.toDouble();
+          precipitationProbData!.values[currentTime]!.toDouble();
+      final precipitation = precipitationData!.values[currentTime]!.toDouble();
+      final weatherCode = weatherCodeData!.values[currentTime]!.toInt();
+      final windDirection = windDirectionData!.values[currentTime]!.toDouble();
+      final windSpeed = windSpeedData!.values[currentTime]!.toDouble();
+      final windGust = windGustData!.values[currentTime]!.toDouble();
+      final feelsLike = apparentTempData!.values[currentTime]!.toDouble();
 
       // Convert weather code to symbol name
       final weatherSymbol = _mapWeatherCodeToSymbol(weatherCode);
@@ -497,6 +499,7 @@ class WeatherData {
         windSpeed: windSpeed,
         windGust: windGust,
         weatherSymbol: weatherSymbol,
+        weatherSymbolCode: weatherCode,
         feelsLike: feelsLike,
       ));
     }
@@ -506,7 +509,6 @@ class WeatherData {
       forecast: forecastPoints,
     );
   }
-
 
   /// Parses time series data from a member element
   List<_TimeValue> _parseHarmonieTimeSeries(xml.XmlElement member) {
@@ -576,8 +578,7 @@ class WeatherData {
     }
 
     final url = Uri.parse(
-      'https://api.openweathermap.org/geo/1.0/reverse?lat=$lat&lon=$lon&limit=1&appid=$openWeatherMapApiKey'
-    );
+        'https://api.openweathermap.org/geo/1.0/reverse?lat=$lat&lon=$lon&limit=1&appid=$openWeatherMapApiKey');
 
     final response = await get(url);
     if (response.statusCode != 200) {
@@ -601,7 +602,8 @@ class WeatherData {
     );
   }
 
-  Future<List<Location>> getAutoCompleteResults(String query, { lang = 'fi' }) async {
+  Future<List<Location>> getAutoCompleteResults(String query,
+      {lang = 'fi'}) async {
     if (kDebugMode) {
       print('Getting autocomplete results for $query...');
     }

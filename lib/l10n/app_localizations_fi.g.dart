@@ -289,7 +289,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get fmiDescription =>
-      'Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteenlaitos.';
+      'Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteen laitos.';
 
   @override
   String get openStreetMapDescription => 'Karttadata - OpenStreetMap';
@@ -438,4 +438,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get resetMapPosition => 'Nollaa kartan sijainti';
+
+  @override
+  String get openSettings => 'Avaa asetukset';
 }

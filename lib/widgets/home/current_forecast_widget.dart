@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:weather/app_state.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
+import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/routes.dart';
 import 'package:weather/widgets/home/precipitation.dart';
 import 'package:weather/widgets/home/sunrise_sunset_widget.dart';
@@ -16,6 +17,7 @@ class CurrentForecast extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onLocationChanged;
   final Location? geoLocation;
+  final double height;
 
   const CurrentForecast({
     super.key,
@@ -24,6 +26,7 @@ class CurrentForecast extends StatelessWidget {
     required this.selectedIndex,
     required this.onLocationChanged,
     this.geoLocation,
+    this.height = 300,
   });
 
   @override
@@ -33,9 +36,10 @@ class CurrentForecast extends StatelessWidget {
       (p) => p.time.isAfter(DateTime.now()),
     );
     final appState = Provider.of<AppState>(context);
+    final localizations = AppLocalizations.of(context)!;
 
     return SizedBox(
-      height: 300,
+      height: height,
       child: Column(
         children: [
           Stack(
@@ -86,7 +90,7 @@ class CurrentForecast extends StatelessWidget {
                 top: 3,
                 child: IconButton(
                   icon: const Icon(Icons.edit_location_outlined),
-                  tooltip: 'Favorites',
+                  tooltip: localizations.favouritesPageTitle,
                   onPressed: () {
                     context.goNamed(AppRoutes.favourites.name);
                   },
@@ -106,13 +110,13 @@ class CurrentForecast extends StatelessWidget {
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   WeatherSymbolWidget(
-                    symbolName: p.weatherSymbol ?? 'error',
+                    symbolName: p.weatherSymbol,
                     size: 150,
                   ),
                   RichText(
                     text: TextSpan(
-                      text: '${p.temperature! >= 0 ? '+' : ''}'
-                          '${p.temperature!.toStringAsFixed(0)}',
+                      text: '${p.temperature >= 0 ? '+' : ''}'
+                          '${p.temperature.toStringAsFixed(0)}',
                       style: TextStyle(
                         fontSize: 80,
                         fontWeight: FontWeight.w300,
@@ -165,8 +169,8 @@ class CurrentForecast extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         WindArrow(
-                          degrees: p.windDirection ?? 0,
-                          windSpeed: p.windSpeed ?? 0,
+                          degrees: p.windDirection,
+                          windSpeed: p.windSpeed,
                           size: 55,
                         ),
                       ],

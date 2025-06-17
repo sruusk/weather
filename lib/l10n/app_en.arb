@@ -534,5 +534,6 @@
   "play": "Play",
   "pause": "Pause",
   "minutesAgo": "{minutes} min ago",
-  "resetMapPosition": "Reset Map Position"
+  "resetMapPosition": "Reset Map Position",
+  "openSettings": "Open Settings"
 }

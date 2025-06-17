@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/app_state.dart';
@@ -21,7 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-    with AutomaticKeepAliveClientMixin<HomePage> {
+    with AutomaticKeepAliveClientMixin<HomePage>, WidgetsBindingObserver {
   final WeatherData _weatherData = WeatherData();
   Forecast? _forecast;
   List<Location> _locations = [];
@@ -61,11 +62,35 @@ class _HomePageState extends State<HomePage>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // App has come back to the foreground
+      final appState = Provider.of<AppState>(context, listen: false);
+      if (appState.geolocationEnabled) {
+        // Only reload if geolocation is enabled in app settings
+        if (kDebugMode) {
+          print("App resumed, reloading forecasts");
+        }
+        _loadForecasts();
+      }
+      WidgetsBinding.instance.removeObserver(this);
+    }
+  }
+
+  @override
   bool get wantKeepAlive => true;
 
   Future<void> _loadForecasts() async {
     final appState = Provider.of<AppState>(context, listen: false);
-    final locs = appState.favouriteLocations;
+
+    // If the locations is empty, it might mean that the AppState has not been initialized yet
+    // so we wait a bit to ensure it is ready.
+    final List<Location>locs = appState.favouriteLocations.isEmpty
+        ? await () async {
+            await Future.delayed(const Duration(milliseconds: 100));
+            return appState.favouriteLocations;
+          }()
+        : appState.favouriteLocations;
 
     if (kDebugMode) {
       print(
@@ -141,12 +166,28 @@ class _HomePageState extends State<HomePage>
             showGlobalSnackBar(
               message: errorMessage,
               duration: const Duration(seconds: 5),
-              action: result.status != GeolocationStatus.permissionDeniedForever
+              action: result.status == GeolocationStatus.permissionDeniedForever
                   ? SnackBarAction(
-                      label: localizations.retry,
-                      onPressed: _loadForecasts,
+                      label: localizations.openSettings,
+                      onPressed: () {
+                        // Open app settings
+                        WidgetsBinding.instance.addObserver(this);
+                        Geolocator.openAppSettings();
+                      },
                     )
-                  : null,
+                  : result.status == GeolocationStatus.locationServicesDisabled
+                      ? SnackBarAction(
+                          label: localizations.openSettings,
+                          onPressed: () {
+                            // Open location settings
+                            WidgetsBinding.instance.addObserver(this);
+                            Geolocator.openLocationSettings();
+                          },
+                        )
+                      : SnackBarAction(
+                          label: localizations.retry,
+                          onPressed: _loadForecasts,
+                        ),
             );
           });
 

@@ -40,12 +40,12 @@ class ForecastWidget extends StatelessWidget {
     (String, String) getDaySymbolTemp(List<ForecastPoint> points) {
       for (var p in points) {
         if (p.time.hour >= 14) {
-          return (p.weatherSymbol!, p.temperature?.toStringAsFixed(0) ?? 'N/A');
+          return (p.weatherSymbol, p.temperature.toStringAsFixed(0));
         }
       }
       return (
-        points.first.weatherSymbol!,
-        points.first.temperature?.toStringAsFixed(0) ?? 'N/A'
+        points.first.weatherSymbol,
+        points.first.temperature.toStringAsFixed(0)
       );
     }
 
@@ -137,18 +137,17 @@ class ForecastWidget extends StatelessWidget {
                                   ],
                                 ),
                                 Text(
-                                  '${data.temperature?.toStringAsFixed(0)}°C',
+                                  '${data.temperature.toStringAsFixed(0)}°C',
                                   style: const TextStyle(fontSize: 16),
                                 ),
                                 WeatherSymbolWidget(
-                                    symbolName: data.weatherSymbol!,
+                                    symbolName: data.weatherSymbol,
                                     useFilled: false,
                                     size: 60),
-                                if (data.windSpeed != null)
-                                  WindArrow(
-                                    degrees: data.windDirection ?? 0,
-                                    windSpeed: data.windSpeed ?? 0,
-                                  ),
+                                WindArrow(
+                                  degrees: data.windDirection,
+                                  windSpeed: data.windSpeed,
+                                ),
                                 Precipitation(p: data, compact: true),
                               ],
                             ),
