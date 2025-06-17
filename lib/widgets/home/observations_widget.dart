@@ -282,6 +282,7 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 reservedSize: 40,
+                                interval: 5,
                                 // maxIncluded: false,
                                 // minIncluded: false,
                               ),
