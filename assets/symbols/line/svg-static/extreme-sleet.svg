@@ -28,5 +28,5 @@
         </clipPath>
     </defs>
     <use xlink:href="#b" width="447.7" height="371.5" transform="translate(64.34)"/>
-    <use xlink:href="#e" width="155.2" height="138" transform="translate(150 310) scale(1.3)"/>
+    <use xlink:href="#e" width="155.2" height="138" transform="translate(160 310) scale(1.3)"/>
 </svg>

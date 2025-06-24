@@ -63,19 +63,19 @@
                     fill="url(#a)"
                     stroke="#0a5ad4"
                     stroke-miterlimit="10"
-                    d="M8 56.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"
+                    d="M20 56.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"
                     id="path340"/>
             <path
                     fill="url(#b)"
                     stroke="#0a5ad4"
                     stroke-miterlimit="10"
-                    d="M50 100a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"
+                    d="M55 100a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"
                     id="path342"/>
             <path
                     fill="url(#c)"
                     stroke="#0a5ad4"
                     stroke-miterlimit="10"
-                    d="M100.5 74.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"
+                    d="M95.5 74.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"
                     id="path344"/>
         </symbol>
     </defs>

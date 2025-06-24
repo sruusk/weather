@@ -20,9 +20,9 @@
             <path fill="url(#b)" stroke="#0a5ad4" stroke-miterlimit="10"
                   d="M8.5 56.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"/>
             <path fill="url(#c)" stroke="#0a5ad4" stroke-miterlimit="10"
-                  d="M64.5 109.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"/>
+                  d="M50.5 109.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"/>
             <path fill="url(#d)" stroke="#0a5ad4" stroke-miterlimit="10"
-                  d="M120.5 74.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"/>
+                  d="M90.5 70.5a8 8 0 01-8-8v-40a8 8 0 0116 0v40a8 8 0 01-8 8Z"/>
         </symbol>
         <linearGradient id="b" x1="1381.3" x2="1399.5" y1="-1144.7" y2="-1097.4"
                         gradientTransform="rotate(-9 8002.567 8233.063)" gradientUnits="userSpaceOnUse">
