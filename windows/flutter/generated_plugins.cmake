@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
+  dynamic_color
   flutter_inappwebview_windows
   geolocator_windows
   url_launcher_windows

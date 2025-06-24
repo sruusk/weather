@@ -226,14 +226,14 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     tileProviders: TileProviders({
                                       'protomaps': tileProvider!,
                                     }),
-                                    theme: ProtomapsThemes.whiteV4(),
+                                    theme: ProtomapsThemes.whiteV3(),
                                     showTileDebugInfo: false,
                                     // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
                                     cacheFolder: () {
                                       return getTemporaryDirectory()
                                           .then((dir) {
                                         return Directory(
-                                            '${dir.path}/pmtiles_light_cache');
+                                            '${dir.path}/pmtiles_white_v3_cache');
                                       });
                                     },
                                   )
@@ -242,14 +242,14 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     tileProviders: TileProviders({
                                       'protomaps': tileProvider!,
                                     }),
-                                    theme: ProtomapsThemes.blackV4(
+                                    theme: ProtomapsThemes.blackV3(
                                         /*logger: Logger.console()*/),
                                     showTileDebugInfo: false,
                                     cacheFolder: () {
                                       return getTemporaryDirectory()
                                           .then((dir) {
                                         return Directory(
-                                            '${dir.path}/pmtiles_black_cache');
+                                            '${dir.path}/pmtiles_black_v3_cache');
                                       });
                                     },
                                   ),
@@ -334,15 +334,14 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     'https://en.ilmatieteenlaitos.fi/open-data',
                                   )),
                                 ),
-                                LogoSourceAttribution(
-                                  SvgPicture.asset(
-                                    'assets/about/fmiodata.svg',
-                                    height: 20,
-                                    colorFilter: ColorFilter.mode(
-                                      Theme.of(context).colorScheme.onSurface,
-                                      BlendMode.srcIn,
-                                    ),
-                                  )),
+                                LogoSourceAttribution(SvgPicture.asset(
+                                  'assets/about/fmiodata.svg',
+                                  height: 20,
+                                  colorFilter: ColorFilter.mode(
+                                    Theme.of(context).colorScheme.onSurface,
+                                    BlendMode.srcIn,
+                                  ),
+                                )),
                               ],
                             ),
                           ),
@@ -355,7 +354,8 @@ class _WeatherRadarState extends State<WeatherRadar> {
               height: 64,
               color: Theme.of(context).colorScheme.surface.withAlpha(150),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
                 child: Row(
                   children: [
                     IconButton(

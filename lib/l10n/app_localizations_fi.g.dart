@@ -441,4 +441,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get openSettings => 'Avaa asetukset';
+
+  @override
+  String get ossLicenses => 'Avoimen Lähdekoodin Lisenssit';
 }

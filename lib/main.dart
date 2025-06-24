@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -250,44 +251,60 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
-        return MaterialApp.router(
-          title: 'Weather App',
-          debugShowCheckedModeBanner: true,
-          scaffoldMessengerKey: globalScaffoldMessengerKey,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blue,
-              brightness: Brightness.light,
-              surfaceDim: Colors.white,
-              errorContainer: Colors.red,
-            ),
-            scaffoldBackgroundColor: Colors.blueGrey[50],
-            cardTheme: CardThemeData(
-              color: Colors.white,
-              surfaceTintColor: Colors.white,
-            ),
-          ),
-          darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blue,
-              brightness: Brightness.dark,
-            ),
-            useMaterial3: true,
-          ),
-          themeMode: appState.themeMode,
-          locale: appState.locale,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en'),
-            Locale('fi'),
-          ],
-          scrollBehavior: MyCustomScrollBehavior(),
-          routerConfig: _router,
+        // Define fallback color schemes
+        final lightColorScheme = ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.light,
+        );
+
+        final darkColorScheme = ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        );
+
+        // Use DynamicColorBuilder to get dynamic color schemes if available
+        return DynamicColorBuilder(
+          builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+            // Use dynamic color schemes if available, otherwise use fallback
+            final lightScheme = lightDynamic ?? lightColorScheme;
+            final darkScheme = darkDynamic ?? darkColorScheme;
+
+            return MaterialApp.router(
+              title: 'Weather App',
+              debugShowCheckedModeBanner: true,
+              scaffoldMessengerKey: globalScaffoldMessengerKey,
+              theme: ThemeData(
+                colorScheme: lightScheme.copyWith(
+                  surfaceDim: Colors.white,
+                  errorContainer: Colors.red,
+                ),
+                scaffoldBackgroundColor: Colors.blueGrey[50],
+                cardTheme: CardThemeData(
+                  color: Colors.white,
+                  surfaceTintColor: Colors.white,
+                ),
+                useMaterial3: true,
+              ),
+              darkTheme: ThemeData(
+                colorScheme: darkScheme,
+                useMaterial3: true,
+              ),
+              themeMode: appState.themeMode,
+              locale: appState.locale,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en'),
+                Locale('fi'),
+              ],
+              scrollBehavior: MyCustomScrollBehavior(),
+              routerConfig: _router,
+            );
+          },
         );
       },
     );

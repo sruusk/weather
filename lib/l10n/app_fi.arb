@@ -535,5 +535,9 @@
   "pause": "Pysäytä",
   "minutesAgo": "{minutes} min. sitten",
   "resetMapPosition": "Nollaa kartan sijainti",
-  "openSettings": "Avaa asetukset"
+  "openSettings": "Avaa asetukset",
+  "ossLicenses": "Avoimen Lähdekoodin Lisenssit",
+  "@ossLicenses": {
+    "description": "Title for the open source licenses page"
+  }
 }

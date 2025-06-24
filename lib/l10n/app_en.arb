@@ -535,5 +535,9 @@
   "pause": "Pause",
   "minutesAgo": "{minutes} min ago",
   "resetMapPosition": "Reset Map Position",
-  "openSettings": "Open Settings"
+  "openSettings": "Open Settings",
+  "ossLicenses": "Open Source Licenses",
+  "@ossLicenses": {
+    "description": "Title for the open source licenses page"
+  }
 }

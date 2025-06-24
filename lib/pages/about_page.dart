@@ -10,7 +10,8 @@ class AboutPage extends StatefulWidget {
   State<AboutPage> createState() => _AboutPageState();
 }
 
-class _AboutPageState extends State<AboutPage> with AutomaticKeepAliveClientMixin<AboutPage> {
+class _AboutPageState extends State<AboutPage>
+    with AutomaticKeepAliveClientMixin<AboutPage> {
   @override
   bool get wantKeepAlive => true;
 
@@ -20,6 +21,7 @@ class _AboutPageState extends State<AboutPage> with AutomaticKeepAliveClientMixi
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
+      primary: false,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -37,8 +39,8 @@ class _AboutPageState extends State<AboutPage> with AutomaticKeepAliveClientMixi
               children: [
                 Text(
                   localizations.dataSourcesHeader,
-                  style:
-                      const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 28, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 // Open-Meteo data source vertical block
@@ -93,7 +95,8 @@ class _AboutPageState extends State<AboutPage> with AutomaticKeepAliveClientMixi
                           ),
                           const SizedBox(height: 8),
                           SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.8, // Constrain width to 80% of screen width
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            // Constrain width to 80% of screen width
                             child: Text(
                               localizations.fmiDescription,
                               textAlign: TextAlign.center,
@@ -136,8 +139,8 @@ class _AboutPageState extends State<AboutPage> with AutomaticKeepAliveClientMixi
                 // Licenses section header
                 Text(
                   localizations.licensesHeader,
-                  style:
-                      const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 28, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 // SmartMet Alert Client license entry
@@ -166,6 +169,28 @@ class _AboutPageState extends State<AboutPage> with AutomaticKeepAliveClientMixi
                       ],
                     ),
                   ],
+                ),
+                const SizedBox(height: 20),
+                // Open Source Licenses button
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showLicensePage(
+                      context: context,
+                      applicationName: 'Weather',
+                      applicationIcon: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Image.asset(
+                          'assets/icon.png',
+                          width: 48,
+                          height: 48,
+                        ),
+                      ),
+                      applicationLegalese: '© 2025',
+                      useRootNavigator: false,
+                    );
+                  },
+                  icon: const Icon(Icons.list_alt),
+                  label: Text(localizations.ossLicenses),
                 ),
               ],
             ),

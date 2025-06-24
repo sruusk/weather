@@ -919,6 +919,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Settings'**
   String get openSettings;
+
+  /// Title for the open source licenses page
+  ///
+  /// In en, this message translates to:
+  /// **'Open Source Licenses'**
+  String get ossLicenses;
 }
 
 class _AppLocalizationsDelegate
