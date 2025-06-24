@@ -21,7 +21,6 @@ class _AboutPageState extends State<AboutPage>
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      primary: false,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
