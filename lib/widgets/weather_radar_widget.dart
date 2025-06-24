@@ -226,14 +226,14 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     tileProviders: TileProviders({
                                       'protomaps': tileProvider!,
                                     }),
-                                    theme: ProtomapsThemes.whiteV3(),
+                                    theme: ProtomapsThemes.whiteV4(),
                                     showTileDebugInfo: false,
                                     // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
                                     cacheFolder: () {
                                       return getTemporaryDirectory()
                                           .then((dir) {
                                         return Directory(
-                                            '${dir.path}/pmtiles_white_v3_cache');
+                                            '${dir.path}/pmtiles_white_v4_cache');
                                       });
                                     },
                                   )
@@ -242,14 +242,14 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     tileProviders: TileProviders({
                                       'protomaps': tileProvider!,
                                     }),
-                                    theme: ProtomapsThemes.blackV3(
+                                    theme: ProtomapsThemes.blackV4(
                                         /*logger: Logger.console()*/),
                                     showTileDebugInfo: false,
                                     cacheFolder: () {
                                       return getTemporaryDirectory()
                                           .then((dir) {
                                         return Directory(
-                                            '${dir.path}/pmtiles_black_v3_cache');
+                                            '${dir.path}/pmtiles_black_v4_cache');
                                       });
                                     },
                                   ),
