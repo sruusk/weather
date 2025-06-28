@@ -28,6 +28,28 @@ class WeatherData {
 
   factory WeatherData() => _instance;
 
+  // Cache for open_meteo forecasts
+  final Map<String, Forecast> _openMeteoCache = {};
+
+  // Cache for harmonie forecasts
+  final Map<String, Forecast> _harmonieCache = {};
+
+  /// Clears all cached data
+  void clearCache() {
+    if (kDebugMode) print('Clearing all cached forecast data');
+    _openMeteoCache.clear();
+    _harmonieCache.clear();
+  }
+
+  /// Clears cached data for a specific location
+  void clearCacheForLocation(Location location) {
+    final cacheKey = '${location.lat},${location.lon}';
+    if (kDebugMode)
+      print('Clearing cached forecast data for location $cacheKey');
+    _openMeteoCache.remove(cacheKey);
+    _harmonieCache.remove(cacheKey);
+  }
+
   final WeatherApi _weatherApi = WeatherApi(
       temperatureUnit: TemperatureUnit.celsius,
       windspeedUnit: WindspeedUnit.ms);
@@ -312,8 +334,18 @@ class WeatherData {
   /// The Harmonie is a 66 hour forecast model, updated 4 times per day.
   /// This method fetches the forecast from the current time forward to the maximum available.
   Future<Forecast> _getHarmonieForecast(Location location) async {
+    // Create a cache key based on the location coordinates
+    final cacheKey = '${location.lat},${location.lon}';
+
+    // Check if we have cached data for this location
+    if (_harmonieCache.containsKey(cacheKey)) {
+      if (kDebugMode)
+        print('Using cached Harmonie forecast data for location $cacheKey');
+      return _harmonieCache[cacheKey]!;
+    }
+
     if (kDebugMode) {
-      print('Getting Harmonie forecast for ${location.name}...');
+      print('Fetching new Harmonie forecast for location $cacheKey...');
     }
 
     try {
@@ -422,10 +454,15 @@ class WeatherData {
       // Sort forecast points by time
       forecastPoints.sort((a, b) => a.time.compareTo(b.time));
 
-      return Forecast(
+      final forecast = Forecast(
         location: location,
         forecast: forecastPoints,
       );
+
+      // Cache the result
+      _harmonieCache[cacheKey] = forecast;
+
+      return forecast;
     } catch (e) {
       if (kDebugMode) {
         print('Error getting Harmonie forecast: $e');
@@ -435,6 +472,19 @@ class WeatherData {
   }
 
   Future<Forecast> _getOpenMeteoForecast(Location location) async {
+    // Create a cache key based on the location coordinates
+    final cacheKey = '${location.lat},${location.lon}';
+
+    // Check if we have cached data for this location
+    if (_openMeteoCache.containsKey(cacheKey)) {
+      if (kDebugMode)
+        print('Using cached open_meteo forecast data for location $cacheKey');
+      return _openMeteoCache[cacheKey]!;
+    }
+
+    if (kDebugMode)
+      print('Fetching new open_meteo forecast data for location $cacheKey');
+
     // Use the open_meteo package to make the request
     final response = await _weatherApi.request(
         latitude: location.lat,
@@ -504,10 +554,15 @@ class WeatherData {
       ));
     }
 
-    return Forecast(
+    final forecast = Forecast(
       location: location,
       forecast: forecastPoints,
     );
+
+    // Cache the result
+    _openMeteoCache[cacheKey] = forecast;
+
+    return forecast;
   }
 
   /// Parses time series data from a member element

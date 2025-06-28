@@ -283,11 +283,9 @@ class MyApp extends StatelessWidget {
                   color: Colors.white,
                   surfaceTintColor: Colors.white,
                 ),
-                useMaterial3: true,
               ),
               darkTheme: ThemeData(
                 colorScheme: darkScheme,
-                useMaterial3: true,
               ),
               themeMode: appState.themeMode,
               locale: appState.locale,

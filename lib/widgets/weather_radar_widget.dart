@@ -187,6 +187,8 @@ class _WeatherRadarState extends State<WeatherRadar> {
                           maxZoom: 12,
                           minZoom: 5,
                           keepAlive: true,
+                          backgroundColor:
+                              Theme.of(context).scaffoldBackgroundColor,
                           interactionOptions: InteractionOptions(
                             flags: widget.flags,
                             rotationWinGestures: widget.rotationWinGestures,
