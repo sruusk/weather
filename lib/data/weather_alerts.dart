@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:maps_toolkit/maps_toolkit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart';
 
 import 'location.dart';
@@ -18,6 +20,10 @@ class WeatherAlerts {
     'Extreme': WeatherAlertSeverity.extreme,
   };
 
+  // Cache keys
+  static const String _fmiAlertsKey = 'fmi_alerts_cache';
+  static const String _fmiEtagKey = 'fmi_alerts_etag';
+
   // Private static instance variable for singleton pattern
   static WeatherAlerts? _instance;
 
@@ -32,6 +38,73 @@ class WeatherAlerts {
   /// Factory constructor to get the singleton instance
   factory WeatherAlerts.instance() {
     return _instance ??= WeatherAlerts._(alerts: [], hasLoaded: false);
+  }
+
+  /// Convert WeatherAlerts to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'alerts': alerts.map((alert) => alert.toJson()).toList(),
+      'hasLoaded': hasLoaded,
+    };
+  }
+
+  /// Create WeatherAlerts from JSON
+  factory WeatherAlerts.fromJson(Map<String, dynamic> json) {
+    return WeatherAlerts(
+      alerts: (json['alerts'] as List)
+          .map((alertJson) =>
+              WeatherAlert.fromJson(alertJson as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  /// Save alerts to persistent cache
+  Future<void> _saveFmiAlertsToCache(
+      List<WeatherAlert> alerts, String etag) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final alertsJson =
+          jsonEncode(alerts.map((alert) => alert.toJson()).toList());
+      await prefs.setString(_fmiAlertsKey, alertsJson);
+      await prefs.setString(_fmiEtagKey, etag);
+      if (kDebugMode) {
+        print('Saved FMI alerts to cache with etag: $etag');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving FMI alerts to cache: $e');
+      }
+    }
+  }
+
+  /// Load alerts from persistent cache
+  Future<(List<WeatherAlert>?, String?)> _loadFmiAlertsFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final alertsJson = prefs.getString(_fmiAlertsKey);
+      final etag = prefs.getString(_fmiEtagKey);
+
+      if (alertsJson == null) {
+        return (null, etag);
+      }
+
+      final List<dynamic> decodedJson = jsonDecode(alertsJson);
+      final alerts = decodedJson
+          .map((alertJson) =>
+              WeatherAlert.fromJson(alertJson as Map<String, dynamic>))
+          .toList();
+
+      if (kDebugMode) {
+        print('Loaded ${alerts.length} FMI alerts from cache with etag: $etag');
+      }
+
+      return (alerts, etag);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading FMI alerts from cache: $e');
+      }
+      return (null, null);
+    }
   }
 
   /// Load alerts from all sources
@@ -65,12 +138,35 @@ class WeatherAlerts {
       "en-GB": "en"
     };
 
+    // Load cached data and etag
+    final (cachedAlerts, etag) = await _loadFmiAlertsFromCache();
+
     final url = 'https://a32.fi/proxy/proxy?apiKey=c2cf681ee102a815d7d8800a6aaa1de96998e66cb17bbcc8beb2a2d0268fd918&method=GET&url=${Uri.encodeComponent("https://alerts.fmi.fi/cap/feed/atom_fi-FI.xml")}';
 
     try {
-      final response = await http.get(Uri.parse(url));
+      http.Response response;
+      if (etag != null) {
+        // Create a properly typed map for headers
+        final Map<String, String> headers = <String, String>{
+          'If-None-Match': etag
+        };
+        response = await http.get(Uri.parse(url), headers: headers);
+      } else {
+        response = await http.get(Uri.parse(url));
+      }
 
-      if (response.statusCode != 200) {
+      // If we get a 304 Not Modified response, use the cached data
+      if (response.statusCode == 304) {
+        if (kDebugMode) {
+          print('FMI alerts not modified, using cached data');
+        }
+        if (cachedAlerts != null) {
+          return WeatherAlerts(alerts: cachedAlerts);
+        }
+        // If we somehow got a 304 but don't have cached data, continue as if we got a 200
+      }
+
+      if (response.statusCode != 200 && response.statusCode != 304) {
         throw Exception('Failed to load FMI alerts: ${response.statusCode}');
       }
 
@@ -168,6 +264,15 @@ class WeatherAlerts {
       // Use compute to parse XML in a separate isolate for better performance
       // On web, this will run in the main isolate since compute is not available
       final List<WeatherAlert> alerts = await compute(getAlerts, response);
+
+      // Save the alerts and ETag to the cache if we got a 200 response
+      if (response.statusCode == 200) {
+        // Get the ETag from the response headers
+        final newEtag = response.headers['etag'];
+        if (newEtag != null) {
+          await _saveFmiAlertsToCache(alerts, newEtag);
+        }
+      }
 
       return WeatherAlerts(alerts: alerts);
 
