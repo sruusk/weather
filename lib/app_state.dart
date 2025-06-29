@@ -12,6 +12,7 @@ class AppState extends ChangeNotifier {
   static const String _temperatureUnitKey = 'temperatureUnit';
   static const String _notificationsEnabledKey = 'notificationsEnabled';
   static const String _themeModeKey = 'themeMode';
+  static const String _isAmoledThemeKey = 'isAmoledTheme';
   static const String _favouriteLocationsKey = 'favouriteLocations';
   static const String _geolocationEnabledKey = 'geolocationEnabled';
   static const String _syncFavouritesToAppwriteKey = 'syncFavouritesToAppwrite';
@@ -28,6 +29,7 @@ class AppState extends ChangeNotifier {
       ValueNotifier<bool>(true);
   final ValueNotifier<ThemeMode> _themeModeNotifier =
       ValueNotifier<ThemeMode>(ThemeMode.system);
+  final ValueNotifier<bool> _isAmoledThemeNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<List<Location>> _favouriteLocationsNotifier =
       ValueNotifier<List<Location>>([]);
   final ValueNotifier<Location?> _activeLocationNotifier =
@@ -50,6 +52,8 @@ class AppState extends ChangeNotifier {
 
   ValueNotifier<ThemeMode> get themeModeNotifier => _themeModeNotifier;
 
+  ValueNotifier<bool> get isAmoledThemeNotifier => _isAmoledThemeNotifier;
+
   ValueNotifier<List<Location>> get favouriteLocationsNotifier =>
       _favouriteLocationsNotifier;
 
@@ -69,6 +73,8 @@ class AppState extends ChangeNotifier {
   bool get geolocationEnabled => _geolocationEnabledNotifier.value;
 
   ThemeMode get themeMode => _themeModeNotifier.value;
+
+  bool get isAmoledTheme => _isAmoledThemeNotifier.value;
 
   List<Location> get favouriteLocations {
     // Sort by index if available
@@ -101,6 +107,7 @@ class AppState extends ChangeNotifier {
     _temperatureUnitNotifier.dispose();
     _notificationsEnabledNotifier.dispose();
     _themeModeNotifier.dispose();
+    _isAmoledThemeNotifier.dispose();
     _favouriteLocationsNotifier.dispose();
     _activeLocationNotifier.dispose();
     _geolocationEnabledNotifier.dispose();
@@ -156,6 +163,12 @@ class AppState extends ChangeNotifier {
     final String? syncFavouritesVal = preferences[_syncFavouritesToAppwriteKey];
     if (syncFavouritesVal != null) {
       _syncFavouritesToAppwriteNotifier.value = syncFavouritesVal == 'true';
+    }
+
+    // Load AMOLED theme setting
+    final String? isAmoledVal = preferences[_isAmoledThemeKey];
+    if (isAmoledVal != null) {
+      _isAmoledThemeNotifier.value = isAmoledVal == 'true';
     }
 
     // Load favourite locations
@@ -233,6 +246,12 @@ class AppState extends ChangeNotifier {
     _syncFavouritesToAppwriteNotifier.value = enabled;
     _preferencesNotifier.setPreference(
         _syncFavouritesToAppwriteKey, enabled.toString());
+    notifyListeners();
+  }
+
+  void setAmoledTheme(bool enabled) {
+    _isAmoledThemeNotifier.value = enabled;
+    _preferencesNotifier.setPreference(_isAmoledThemeKey, enabled.toString());
     notifyListeners();
   }
 

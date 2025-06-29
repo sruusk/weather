@@ -539,5 +539,6 @@
   "ossLicenses": "Avoimen Lähdekoodin Lisenssit",
   "@ossLicenses": {
     "description": "Title for the open source licenses page"
-  }
+  },
+  "amoledTheme": "AMOLED Tumma"
 }

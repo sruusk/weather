@@ -15,10 +15,12 @@ class WarningsPage extends StatefulWidget {
   State<WarningsPage> createState() => _WarningsPageState();
 }
 
-class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClientMixin<WarningsPage> {
+class _WarningsPageState extends State<WarningsPage>
+    with AutomaticKeepAliveClientMixin<WarningsPage> {
   final GlobalKey webViewKey = GlobalKey();
   String? theme;
   String? language;
+  bool? isAmoledTheme;
 
   InAppWebViewController? webViewController;
   InAppWebViewSettings settings = InAppWebViewSettings(
@@ -43,27 +45,34 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
   bool get wantKeepAlive => true;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _loadContent();
-  }
-
-  @override
   Widget build(BuildContext context) {
     super.build(context); // Call super to ensure keep alive works
+    bool needReload = false;
 
     final appState = Provider.of<AppState>(context);
-    if(language != appState.locale.languageCode) {
+    if (language != appState.locale.languageCode) {
       setState(() {
         language = appState.locale.languageCode;
       });
+      needReload = true;
     }
 
-    if(theme != (Theme.of(context).brightness == Brightness.dark ? ".dark" : "")) {
+    if (theme !=
+        (Theme.of(context).brightness == Brightness.dark ? ".dark" : "")) {
       setState(() {
         theme = Theme.of(context).brightness == Brightness.dark ? ".dark" : "";
       });
+      needReload = true;
     }
+
+    if (isAmoledTheme != appState.isAmoledTheme) {
+      setState(() {
+        isAmoledTheme = appState.isAmoledTheme;
+      });
+      needReload = true;
+    }
+
+    if (needReload) _loadContent();
 
     return SafeArea(
         child: Column(children: <Widget>[
@@ -118,7 +127,7 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
             });
           },
           onReceivedError: (controller, request, error) {
-            if(kDebugMode) print('Error: $error');
+            if (kDebugMode) print('Error: $error');
           },
           onProgressChanged: (controller, progress) {
             setState(() {
@@ -143,11 +152,12 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
   }
 
   _loadContent() async {
-    if(kDebugMode) {
-      print("Loading warnings page content, theme: $theme, language: $language");
+    if (kDebugMode) {
+      print(
+          "Loading warnings page content, theme: $theme, language: $language");
     }
     // Determine asset paths
-    if(theme == null) return;
+    if (theme == null) return;
     final htmlPath = 'assets/smartmet-alert-client/index$theme.html';
     final jsPath = 'assets/smartmet-alert-client/index.js';
     // Load template and script
@@ -156,6 +166,10 @@ class _WarningsPageState extends State<WarningsPage> with AutomaticKeepAliveClie
     // Replace language attribute
     htmlTemplate = htmlTemplate.replaceAll(
         RegExp(r'language="[^"]*"'), 'language="$language"');
+    // Replace background color if amoled theme
+    if (isAmoledTheme == true) {
+      htmlTemplate = htmlTemplate.replaceAll(RegExp(r'#191b22'), '#000000');
+    }
     // Inline JS by replacing external script tag
     final html = htmlTemplate.replaceFirst(
         RegExp(r'<script[^>]*src="./index\.js"[^>]*></script>'),

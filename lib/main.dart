@@ -284,9 +284,20 @@ class MyApp extends StatelessWidget {
                   surfaceTintColor: Colors.white,
                 ),
               ),
-              darkTheme: ThemeData(
-                colorScheme: darkScheme,
-              ),
+              darkTheme: appState.isAmoledTheme
+                  ? ThemeData(
+                      colorScheme: darkScheme.copyWith(
+                        surfaceDim: Colors.black,
+                        surfaceContainer: Colors.black,
+                      ),
+                      scaffoldBackgroundColor: Colors.black,
+                      cardTheme: CardThemeData(
+                        color: Colors.black,
+                        surfaceTintColor: Colors.black,
+                      ))
+                  : ThemeData(
+                      colorScheme: darkScheme,
+                    ),
               themeMode: appState.themeMode,
               locale: appState.locale,
               localizationsDelegates: const [

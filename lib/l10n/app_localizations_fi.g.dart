@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -444,4 +445,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get ossLicenses => 'Avoimen Lähdekoodin Lisenssit';
+
+  @override
+  String get amoledTheme => 'AMOLED Tumma';
 }

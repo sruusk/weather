@@ -539,5 +539,6 @@
   "ossLicenses": "Open Source Licenses",
   "@ossLicenses": {
     "description": "Title for the open source licenses page"
-  }
+  },
+  "amoledTheme": "AMOLED Dark"
 }

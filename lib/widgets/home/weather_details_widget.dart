@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:weather/app_state.dart';
 import 'package:weather/data/constants.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
@@ -15,18 +17,14 @@ import 'observations_widget.dart';
 class WeatherDetails extends StatefulWidget {
   final Forecast forecast;
   final List<Location> locations;
-  final int selectedIndex;
   final bool isLoading;
-  final Function(int)? onLocationChanged;
   final Location? geoLocation;
 
   const WeatherDetails({
     super.key,
     required this.forecast,
     required this.locations,
-    required this.selectedIndex,
     required this.isLoading,
-    this.onLocationChanged,
     this.geoLocation,
   });
 
@@ -38,22 +36,17 @@ class _WeatherDetailsState extends State<WeatherDetails> {
   late final WeatherRadarController _radarCtrl;
   Timer? _mapReadyCheckTimer;
 
-  void _handleLocationChanged(int index) {
-    if (widget.selectedIndex != index) {
-      // We need to notify the parent (HomePage) about the change
-      // This is done through a callback that we'll add to the WeatherDetails widget
-      if (widget.onLocationChanged != null) {
-        widget.onLocationChanged!(index);
-      }
-    }
-  }
+  // Location change is now handled directly by the LocationDropdown widget
 
   @override
   void initState() {
     super.initState();
-    final loc = widget.locations.isNotEmpty
-        ? widget.locations[widget.selectedIndex]
-        : Location(lat: 0, lon: 0, name: 'Unknown', countryCode: 'Unknown');
+    final appState = Provider.of<AppState>(context, listen: false);
+    final loc = appState.activeLocation ??
+        (widget.locations.isNotEmpty
+            ? widget.locations[0]
+            : Location(
+                lat: 0, lon: 0, name: 'Unknown', countryCode: 'Unknown'));
     _radarCtrl = WeatherRadarController(
       lat: loc.lat,
       lng: loc.lon,
@@ -64,14 +57,10 @@ class _WeatherDetailsState extends State<WeatherDetails> {
   @override
   void didUpdateWidget(WeatherDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final oldLoc = oldWidget.locations.isNotEmpty
-        ? oldWidget.locations[oldWidget.selectedIndex]
-        : null;
-    final newLoc = widget.locations.isNotEmpty
-        ? widget.locations[widget.selectedIndex]
-        : null;
+    final oldLoc = oldWidget.forecast.location;
+    final newLoc = widget.forecast.location;
 
-    if (newLoc != null && newLoc != oldLoc) {
+    if (newLoc != oldLoc) {
       // Only update radar controller if the new location has radar enabled
       if (radarEnabledCountries.contains(newLoc.countryCode)) {
         if (_radarCtrl.isMapReady) {
@@ -150,10 +139,11 @@ class _WeatherDetailsState extends State<WeatherDetails> {
   List<Widget> _buildChildren(
       BuildContext context, BoxConstraints constraints) {
     final localizations = AppLocalizations.of(context)!;
+    final appState = Provider.of<AppState>(context);
 
-    final loc = widget.locations[widget.selectedIndex];
+    final loc = appState.activeLocation;
     final f = widget.forecast;
-    final countryCode = loc.countryCode;
+    final countryCode = loc?.countryCode;
 
     // Create a list of widgets to return
     final List<Widget> children = [
@@ -165,8 +155,6 @@ class _WeatherDetailsState extends State<WeatherDetails> {
           CurrentForecast(
             forecast: f,
             locations: widget.locations,
-            selectedIndex: widget.selectedIndex,
-            onLocationChanged: _handleLocationChanged,
             geoLocation: widget.geoLocation,
             height: constraints.maxWidth > 900 ? 335 : 300,
           ),

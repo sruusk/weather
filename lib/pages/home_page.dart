@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage>
   bool _isGeolocating = false;
   bool _geolocationTimedOut = false;
   bool _geolocatingFailed = false;
-  int _selectedLocationIndex = 0;
 
   @override
   void initState() {
@@ -39,8 +38,31 @@ class _HomePageState extends State<HomePage>
     // Wait until the Provider is available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Use a Future to ensure the Provider is ready
-      Future.delayed(Duration.zero, () => _loadForecasts());
+      Future.delayed(Duration.zero, () {
+        final appState = Provider.of<AppState>(context, listen: false);
+        // Add listener for activeLocation changes
+        appState.activeLocationNotifier.addListener(_onActiveLocationChanged);
+        _loadForecasts();
+      });
     });
+  }
+
+  void _onActiveLocationChanged() {
+    final appState = Provider.of<AppState>(context, listen: false);
+    if (appState.activeLocation != null && mounted) {
+      // Load the forecast for the active location
+      _weatherData.getForecast(appState.activeLocation!).then((forecast) {
+        if (mounted) {
+          setState(() {
+            _forecast = forecast;
+          });
+        }
+      }).catchError((e) {
+        if (kDebugMode) {
+          print('Error getting forecast for active location: $e');
+        }
+      });
+    }
   }
 
   @override
@@ -75,6 +97,14 @@ class _HomePageState extends State<HomePage>
       }
       WidgetsBinding.instance.removeObserver(this);
     }
+  }
+
+  @override
+  void dispose() {
+    // Remove the activeLocation listener
+    final appState = Provider.of<AppState>(context, listen: false);
+    appState.activeLocationNotifier.removeListener(_onActiveLocationChanged);
+    super.dispose();
   }
 
   @override
@@ -246,7 +276,6 @@ class _HomePageState extends State<HomePage>
           _forecast = forecast;
           _locations = allLocations;
           _isLoading = false;
-          _selectedLocationIndex = 0;
           appState.setActiveLocation(activeLocation);
         });
       } catch (e) {
@@ -272,7 +301,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     super.build(context); // Call super to ensure keep alive works
 
-    final appState = Provider.of<AppState>(context);
+    Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
 
     if (_geolocationTimedOut) {
@@ -315,41 +344,8 @@ class _HomePageState extends State<HomePage>
                             WeatherDetails(
                               forecast: _forecast!,
                               locations: _locations,
-                              selectedIndex: _selectedLocationIndex,
                               isLoading: _isLoading,
                               geoLocation: _geoLocation,
-                              onLocationChanged: (index) async {
-                                setState(() {
-                                  _selectedLocationIndex = index;
-                                });
-
-                                // Get the location for the selected index
-                                final location = _locations[index];
-                                appState.setActiveLocation(location);
-
-                                // Load the forecast for the selected location
-                                try {
-                                  final forecast =
-                                      await _weatherData.getForecast(location);
-
-                                  if (mounted) {
-                                    setState(() {
-                                      // Update the forecast
-                                      _forecast = forecast;
-                                    });
-                                  }
-                                } catch (e) {
-                                  if (kDebugMode) {
-                                    print(
-                                        'Error getting selected forecast: $e');
-                                  }
-                                  if (mounted) {
-                                    setState(() {
-                                      _isLoading = false;
-                                    });
-                                  }
-                                }
-                              },
                             ),
                           ],
                         ),

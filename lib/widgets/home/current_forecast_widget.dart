@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:weather/app_state.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
-import 'package:weather/l10n/app_localizations.g.dart';
-import 'package:weather/routes.dart';
+import 'package:weather/data/weather_data.dart';
 import 'package:weather/widgets/home/precipitation.dart';
 import 'package:weather/widgets/home/sunrise_sunset_widget.dart';
 import 'package:weather/widgets/home/wind_arrow.dart';
+import 'package:weather/widgets/location_dropdown.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class CurrentForecast extends StatelessWidget {
   final Forecast forecast;
   final List<Location> locations;
-  final int selectedIndex;
-  final Function(int) onLocationChanged;
   final Location? geoLocation;
   final double height;
 
@@ -23,8 +18,6 @@ class CurrentForecast extends StatelessWidget {
     super.key,
     required this.forecast,
     required this.locations,
-    required this.selectedIndex,
-    required this.onLocationChanged,
     this.geoLocation,
     this.height = 300,
   });
@@ -35,68 +28,15 @@ class CurrentForecast extends StatelessWidget {
     final p = f.forecast.firstWhere(
       (p) => p.time.isAfter(DateTime.now()),
     );
-    final appState = Provider.of<AppState>(context);
-    final localizations = AppLocalizations.of(context)!;
+    final weatherData = WeatherData();
 
     return SizedBox(
       height: height,
       child: Column(
         children: [
-          Stack(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: selectedIndex,
-                      icon: const Icon(Icons.arrow_drop_down),
-                      borderRadius: BorderRadius.circular(8),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      alignment: Alignment.center,
-                      items: [
-                        for (int i = 0; i < locations.length; i++)
-                          DropdownMenuItem<int>(
-                            value: i,
-                            child: Row(
-                              children: [
-                                Icon(i == 0 &&
-                                        appState.geolocationEnabled &&
-                                        geoLocation != null
-                                    ? Icons.my_location
-                                    : Icons.place),
-                                SizedBox(width: 8),
-                                Text(
-                                  locations[i].name +
-                                      (locations[i].region != null
-                                          ? locations[i].region! == locations[i].name && locations[i].country != null
-                                          ? ', ${locations[i].country}' : ', ${locations[i].region}'
-                                          : ''),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                      onChanged: (i) {
-                        if (i == null) return;
-                        onLocationChanged(i);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                right: 3,
-                top: 3,
-                child: IconButton(
-                  icon: const Icon(Icons.edit_location_outlined),
-                  tooltip: localizations.favouritesPageTitle,
-                  onPressed: () {
-                    context.goNamed(AppRoutes.favourites.name);
-                  },
-                ),
-              )
-            ],
+          LocationDropdown(
+            geoLocation: geoLocation,
+            weatherData: weatherData,
           ),
 
           const Spacer(),

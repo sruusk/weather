@@ -51,8 +51,10 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
           _pageController.jumpToPage(0);
         }
       });
-      _pageController
-          .jumpToPage(0); // Reset to first page when location changes
+      if (_pageController.hasClients) {
+        _pageController
+            .jumpToPage(0); // Reset to first page when location changes
+      }
     }
   }
 

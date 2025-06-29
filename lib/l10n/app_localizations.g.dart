@@ -925,6 +925,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Source Licenses'**
   String get ossLicenses;
+
+  /// No description provided for @amoledTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED Dark'**
+  String get amoledTheme;
 }
 
 class _AppLocalizationsDelegate

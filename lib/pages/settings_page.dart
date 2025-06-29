@@ -91,53 +91,93 @@ class _SettingsPageState extends State<SettingsPage>
         valueListenable: appState.themeModeNotifier,
         builder: (context, themeMode, child) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
-          final tilePadding =
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0);
 
           return Padding(
-            padding: tilePadding,
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 8.0,
-              runSpacing: 10.0,
+            padding: const EdgeInsets.only(
+                left: 16.0, top: 12.0, bottom: 12, right: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(isDark ? Icons.dark_mode : Icons.light_mode),
-                    SizedBox(width: 16),
-                    Text(localizations.theme,
-                        style: const TextStyle(fontSize: 16)),
+                    Expanded(
+                      child: Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8.0,
+                        runSpacing: 10.0,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(isDark ? Icons.dark_mode : Icons.light_mode),
+                              SizedBox(width: 16),
+                              Text(localizations.theme,
+                                  style: const TextStyle(fontSize: 16)),
+                            ],
+                          ),
+                          SegmentedButton<ThemeMode>(
+                            direction: Axis.horizontal,
+                            segments: [
+                              ButtonSegment<ThemeMode>(
+                                  value: ThemeMode.system,
+                                  label: Text(localizations.system),
+                                  icon: Icon(Icons.settings)),
+                              ButtonSegment<ThemeMode>(
+                                value: ThemeMode.light,
+                                label: Text(localizations.light),
+                                icon: Icon(Icons.light_mode,
+                                    color: Colors.yellow.shade700),
+                              ),
+                              ButtonSegment<ThemeMode>(
+                                value: ThemeMode.dark,
+                                label: Text(localizations.dark),
+                                icon: Icon(Icons.dark_mode,
+                                    color: Colors.blueGrey.shade700),
+                              ),
+                            ],
+                            selected: {themeMode},
+                            onSelectionChanged: (Set<ThemeMode> newSelection) {
+                              if (newSelection.isNotEmpty) {
+                                appState.setThemeMode(newSelection.first);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                SegmentedButton<ThemeMode>(
-                  direction: Axis.horizontal,
-                  segments: [
-                    ButtonSegment<ThemeMode>(
-                        value: ThemeMode.system,
-                        label: Text(localizations.system),
-                        icon: Icon(Icons.settings)),
-                    ButtonSegment<ThemeMode>(
-                      value: ThemeMode.light,
-                      label: Text(localizations.light),
-                      icon:
-                          Icon(Icons.light_mode, color: Colors.yellow.shade700),
-                    ),
-                    ButtonSegment<ThemeMode>(
-                      value: ThemeMode.dark,
-                      label: Text(localizations.dark),
-                      icon: Icon(Icons.dark_mode,
-                          color: Colors.blueGrey.shade700),
-                    ),
-                  ],
-                  selected: {themeMode},
-                  onSelectionChanged: (Set<ThemeMode> newSelection) {
-                    if (newSelection.isNotEmpty) {
-                      appState.setThemeMode(newSelection.first);
-                    }
-                  },
-                ),
+                // AMOLED theme option (only visible when dark theme is selected)
+                if (isDark)
+                  ValueListenableBuilder<bool>(
+                    valueListenable: appState.isAmoledThemeNotifier,
+                    builder: (context, isAmoled, child) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.dark_mode_outlined,
+                                    color: Colors.grey),
+                                SizedBox(width: 16),
+                                Text(localizations.amoledTheme,
+                                    style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                            Switch(
+                              value: isAmoled,
+                              onChanged: (value) {
+                                appState.setAmoledTheme(value);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
               ],
             ),
           );
