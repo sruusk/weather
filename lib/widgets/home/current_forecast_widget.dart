@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
-import 'package:weather/data/weather_data.dart';
 import 'package:weather/widgets/home/precipitation.dart';
 import 'package:weather/widgets/home/sunrise_sunset_widget.dart';
 import 'package:weather/widgets/home/wind_arrow.dart';
@@ -11,14 +10,12 @@ import 'package:weather/widgets/weather_symbol_widget.dart';
 class CurrentForecast extends StatelessWidget {
   final Forecast forecast;
   final List<Location> locations;
-  final Location? geoLocation;
   final double height;
 
   const CurrentForecast({
     super.key,
     required this.forecast,
     required this.locations,
-    this.geoLocation,
     this.height = 300,
   });
 
@@ -28,16 +25,12 @@ class CurrentForecast extends StatelessWidget {
     final p = f.forecast.firstWhere(
       (p) => p.time.isAfter(DateTime.now()),
     );
-    final weatherData = WeatherData();
 
     return SizedBox(
       height: height,
       child: Column(
         children: [
-          LocationDropdown(
-            geoLocation: geoLocation,
-            weatherData: weatherData,
-          ),
+          const LocationDropdown(),
 
           const Spacer(),
 

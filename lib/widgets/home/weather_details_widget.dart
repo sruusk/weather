@@ -18,14 +18,12 @@ class WeatherDetails extends StatefulWidget {
   final Forecast forecast;
   final List<Location> locations;
   final bool isLoading;
-  final Location? geoLocation;
 
   const WeatherDetails({
     super.key,
     required this.forecast,
     required this.locations,
     required this.isLoading,
-    this.geoLocation,
   });
 
   @override
@@ -155,7 +153,6 @@ class _WeatherDetailsState extends State<WeatherDetails> {
           CurrentForecast(
             forecast: f,
             locations: widget.locations,
-            geoLocation: widget.geoLocation,
             height: constraints.maxWidth > 900 ? 335 : 300,
           ),
         ],

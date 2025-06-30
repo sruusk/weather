@@ -5,8 +5,8 @@ import 'package:weather/app_state.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/forecast_point.dart';
 import 'package:weather/widgets/home/precipitation.dart';
-import 'package:weather/widgets/weather_symbol_widget.dart';
 import 'package:weather/widgets/home/wind_arrow.dart';
+import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class ForecastWidget extends StatelessWidget {
   final Forecast? forecast;
@@ -38,15 +38,46 @@ class ForecastWidget extends StatelessWidget {
     }
 
     (String, String) getDaySymbolTemp(List<ForecastPoint> points) {
+      // Count occurrences of weather symbols and store their codes
+      final symbolCounts = <String, int>{};
+      final symbolCodes = <String, int>{};
+
+      // Filter points between 9:00 and 18:00 and count symbols
       for (var p in points) {
-        if (p.time.hour >= 14) {
-          return (p.weatherSymbol, p.temperature.toStringAsFixed(0));
+        if (p.time.hour >= 9 && p.time.hour <= 18) {
+          symbolCounts[p.weatherSymbol] =
+              (symbolCounts[p.weatherSymbol] ?? 0) + 1;
+          symbolCodes[p.weatherSymbol] = p.weatherSymbolCode;
         }
       }
-      return (
-        points.first.weatherSymbol,
-        points.first.temperature.toStringAsFixed(0)
-      );
+
+      // Use all points if no symbols found in the time range
+      if (symbolCounts.isEmpty) {
+        for (var p in points) {
+          symbolCounts[p.weatherSymbol] =
+              (symbolCounts[p.weatherSymbol] ?? 0) + 1;
+          symbolCodes[p.weatherSymbol] = p.weatherSymbolCode;
+        }
+      }
+
+      // Determine the most frequent symbol
+      String mostFrequentSymbol = points.first.weatherSymbol;
+      int maxCount = 0;
+
+      symbolCounts.forEach((symbol, count) {
+        if (count > maxCount ||
+            (count == maxCount &&
+                symbolCodes[symbol]! > symbolCodes[mostFrequentSymbol]!)) {
+          maxCount = count;
+          mostFrequentSymbol = symbol;
+        }
+      });
+
+      // Find the highest temperature
+      double highestTemp = points.fold(
+          0, (maxTemp, p) => p.temperature > maxTemp ? p.temperature : maxTemp);
+
+      return (mostFrequentSymbol, highestTemp.toStringAsFixed(0));
     }
 
     final grouped = groupByDay(forecast!.forecast);

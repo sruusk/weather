@@ -25,12 +25,9 @@ class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin<HomePage>, WidgetsBindingObserver {
   final WeatherData _weatherData = WeatherData();
   Forecast? _forecast;
-  List<Location> _locations = [];
-  Location? _geoLocation;
   bool _isLoading = true;
   bool _isGeolocating = false;
   bool _geolocationTimedOut = false;
-  bool _geolocatingFailed = false;
 
   @override
   void initState() {
@@ -39,9 +36,14 @@ class _HomePageState extends State<HomePage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Use a Future to ensure the Provider is ready
       Future.delayed(Duration.zero, () {
+        if (!mounted) return; // Ensure widget is still mounted
         final appState = Provider.of<AppState>(context, listen: false);
-        // Add listener for activeLocation changes
+        // Add listeners for activeLocation, geolocation, and favouriteLocations
         appState.activeLocationNotifier.addListener(_onActiveLocationChanged);
+        appState.geolocationEnabledNotifier
+            .addListener(_onGeolocationEnabledChanged);
+        appState.favouriteLocationsNotifier
+            .addListener(_onFavouriteLocationsChanged);
         _loadForecasts();
       });
     });
@@ -65,19 +67,25 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void _onGeolocationEnabledChanged() {
     final appState = Provider.of<AppState>(context, listen: false);
-    final locs = appState.favouriteLocations;
     if (_isLoading) return;
-    if (!appState.geolocationEnabled) _geolocatingFailed = false;
+    if (!appState.geolocationEnabled) {
+      appState.setGeoLocation(null);
+    }
+    if (kDebugMode) {
+      print("Geolocation changed, reloading forecasts");
+    }
+    _loadForecasts();
+  }
 
-    if (locs.length !=
-        _locations.length -
-            ((appState.geolocationEnabled && !_geolocatingFailed) ? 1 : 0)) {
+  void _onFavouriteLocationsChanged() {
+    final appState = Provider.of<AppState>(context, listen: false);
+    if (_isLoading) return;
+
+    if (appState.favouriteLocations.length == 1) {
       if (kDebugMode) {
-        print("didChangeDependencies: Reloading forecasts, locations changed");
+        print("Favourite locations changed, reloading forecasts");
       }
       _loadForecasts();
     }
@@ -101,9 +109,12 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
-    // Remove the activeLocation listener
+    // Remove listeners
     final appState = Provider.of<AppState>(context, listen: false);
     appState.activeLocationNotifier.removeListener(_onActiveLocationChanged);
+    appState.geoLocationNotifier.removeListener(_onGeolocationEnabledChanged);
+    appState.favouriteLocationsNotifier
+        .removeListener(_onFavouriteLocationsChanged);
     super.dispose();
   }
 
@@ -130,7 +141,6 @@ class _HomePageState extends State<HomePage>
     if (locs.isEmpty && !appState.geolocationEnabled) {
       setState(() {
         _forecast = null;
-        _locations = [];
         _isLoading = false;
       });
       return;
@@ -142,8 +152,8 @@ class _HomePageState extends State<HomePage>
     Location? locationToLoad;
 
     // If geolocation is enabled, try to get current location
-    if (appState.geolocationEnabled && _geoLocation != null) {
-      locationToLoad = _geoLocation;
+    if (appState.geolocationEnabled && appState.geoLocation != null) {
+      locationToLoad = appState.geoLocation;
     } else if (appState.geolocationEnabled) {
       try {
         setState(() {
@@ -160,16 +170,15 @@ class _HomePageState extends State<HomePage>
             result.position!.longitude,
           );
           setState(() {
-            _geoLocation = locationToLoad;
             _isGeolocating = false;
-            _geolocatingFailed = false;
           });
+          appState.setGeoLocation(locationToLoad);
         } else {
           // Handle geolocation errors
           setState(() {
             _isGeolocating = false;
-            _geolocatingFailed = true;
           });
+          appState.setGeoLocation(null);
 
           // Show appropriate error message based on status
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -235,6 +244,7 @@ class _HomePageState extends State<HomePage>
           _isGeolocating = false;
           _geolocationTimedOut = true;
         });
+        appState.setGeoLocation(null);
         // If geolocation times out, fall back to first favorite
         if (locs.isNotEmpty) {
           locationToLoad = locs.first;
@@ -247,6 +257,7 @@ class _HomePageState extends State<HomePage>
         setState(() {
           _isGeolocating = false;
         });
+        appState.setGeoLocation(null);
         // If geolocation fails for any reason, fall back to first favorite
         if (locs.isNotEmpty) {
           locationToLoad = locs.first;
@@ -265,16 +276,8 @@ class _HomePageState extends State<HomePage>
 
         final forecast = await _weatherData.getForecast(activeLocation);
 
-        // Create a list of all locations (current location + favorites)
-        final allLocations = <Location>[];
-        if (appState.geolocationEnabled && _geoLocation != null) {
-          allLocations.add(activeLocation);
-        }
-        allLocations.addAll(locs);
-
         setState(() {
           _forecast = forecast;
-          _locations = allLocations;
           _isLoading = false;
           appState.setActiveLocation(activeLocation);
         });
@@ -284,14 +287,12 @@ class _HomePageState extends State<HomePage>
         }
         setState(() {
           _forecast = null;
-          _locations = [];
           _isLoading = false;
         });
       }
     } else {
       setState(() {
         _forecast = null;
-        _locations = [];
         _isLoading = false;
       });
     }
@@ -301,8 +302,12 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     super.build(context); // Call super to ensure keep alive works
 
-    Provider.of<AppState>(context);
+    final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
+
+    List<Location> locations = appState.geoLocation != null
+        ? [appState.geoLocation!, ...appState.favouriteLocations]
+        : appState.favouriteLocations;
 
     if (_geolocationTimedOut) {
       // Show a message if geolocation timed out
@@ -334,7 +339,7 @@ class _HomePageState extends State<HomePage>
                   ),
                 ],
               ))
-            : _forecast == null || _locations.isEmpty
+            : _forecast == null || locations.isEmpty
                 ? NoLocations()
                 : SingleChildScrollView(
                     child: Column(
@@ -343,9 +348,8 @@ class _HomePageState extends State<HomePage>
                           children: [
                             WeatherDetails(
                               forecast: _forecast!,
-                              locations: _locations,
+                              locations: locations,
                               isLoading: _isLoading,
-                              geoLocation: _geoLocation,
                             ),
                           ],
                         ),

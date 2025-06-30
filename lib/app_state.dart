@@ -34,6 +34,8 @@ class AppState extends ChangeNotifier {
       ValueNotifier<List<Location>>([]);
   final ValueNotifier<Location?> _activeLocationNotifier =
       ValueNotifier<Location?>(null);
+  final ValueNotifier<Location?> _geoLocationNotifier =
+  ValueNotifier<Location?>(null);
   final ValueNotifier<bool> _geolocationEnabledNotifier =
       ValueNotifier<bool>(true);
   final ValueNotifier<bool> _syncFavouritesToAppwriteNotifier =
@@ -59,6 +61,8 @@ class AppState extends ChangeNotifier {
 
   ValueNotifier<Location?> get activeLocationNotifier =>
       _activeLocationNotifier;
+
+  ValueNotifier<Location?> get geoLocationNotifier => _geoLocationNotifier;
 
   ValueNotifier<bool> get syncFavouritesToAppwriteNotifier =>
       _syncFavouritesToAppwriteNotifier;
@@ -90,6 +94,8 @@ class AppState extends ChangeNotifier {
 
   Location? get activeLocation => _activeLocationNotifier.value;
 
+  Location? get geoLocation => _geoLocationNotifier.value;
+
   bool get syncFavouritesToAppwrite => _syncFavouritesToAppwriteNotifier.value;
 
   // Getter for preferences notifier
@@ -110,6 +116,7 @@ class AppState extends ChangeNotifier {
     _isAmoledThemeNotifier.dispose();
     _favouriteLocationsNotifier.dispose();
     _activeLocationNotifier.dispose();
+    _geoLocationNotifier.dispose();
     _geolocationEnabledNotifier.dispose();
     _syncFavouritesToAppwriteNotifier.dispose();
     super.dispose();
@@ -386,6 +393,11 @@ class AppState extends ChangeNotifier {
 
   void setActiveLocation(Location location) {
     _activeLocationNotifier.value = location;
+    notifyListeners();
+  }
+
+  void setGeoLocation(Location? location) {
+    _geoLocationNotifier.value = location;
     notifyListeners();
   }
 
