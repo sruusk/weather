@@ -186,6 +186,7 @@ class _ForecastWidgetState extends State<ForecastWidget> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           day[0].toUpperCase() + day.substring(1).toLowerCase(),
@@ -224,17 +225,20 @@ class _ForecastWidgetState extends State<ForecastWidget> {
                           ),
                         ),
                         // Indicator line for active day
-                        ClipRect(
-                          clipBehavior: Clip.hardEdge,
-                          clipper: TopHalfClipper(),
-                          child: Container(
-                            height: 6,
-                            width: 50,
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(4),
+                        SizedOverflowBox(
+                          size: const Size(50, 3),
+                          child: ClipRect(
+                            clipBehavior: Clip.hardEdge,
+                            clipper: TopHalfClipper(),
+                            child: Container(
+                              height: 6,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
                             ),
                           ),
                         ),
@@ -247,7 +251,7 @@ class _ForecastWidgetState extends State<ForecastWidget> {
           ),
 
           Transform.translate(
-            offset: const Offset(0, -3),
+            offset: const Offset(0, -1),
             child: Divider(
               height: 1,
             ),
