@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -99,6 +100,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noTemperatureHistoryData =>
       'No temperature history data available';
+
+  @override
+  String get noWindHistoryData => 'No wind history data available';
 
   @override
   String get temperatureCelsius => '°C';

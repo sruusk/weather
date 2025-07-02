@@ -272,6 +272,12 @@ abstract class AppLocalizations {
   /// **'No temperature history data available'**
   String get noTemperatureHistoryData;
 
+  /// Message shown when no wind history data is available
+  ///
+  /// In en, this message translates to:
+  /// **'No wind history data available'**
+  String get noWindHistoryData;
+
   /// Temperature in Celsius
   ///
   /// In en, this message translates to:

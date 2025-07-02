@@ -128,6 +128,10 @@
   "@noTemperatureHistoryData": {
     "description": "Message shown when no temperature history data is available"
   },
+  "noWindHistoryData": "Tuulen historiaa ei saatavilla",
+  "@noWindHistoryData": {
+    "description": "Message shown when no wind history data is available"
+  },
   "temperatureCelsius": "°C",
   "@temperatureCelsius": {
     "description": "Temperature in Celsius"
