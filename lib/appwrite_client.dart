@@ -53,6 +53,11 @@ class AppwriteClient {
       throw Exception('User is not logged in, disabling sync');
     }
 
+    if(!appState.syncFavouritesToAppwrite) {
+      unsubscribe();
+      return;
+    }
+
     final User user = await account.get();
 
     switch (direction) {
