@@ -105,20 +105,20 @@ void main() {
     });
 
     test('alertsForLocation should return all alerts for a location without time filter', () {
-      final alerts = weatherAlerts.alertsForLocation(testLocation);
+      final alerts = weatherAlerts.getAlerts(location: testLocation);
       expect(alerts.length, 2);
       expect(alerts.map((a) => a.fi.event).toList(), ['Test Event', 'Future Event']);
     });
 
     test('alertsForLocation should filter alerts by time', () {
       // Current time - should only return the active alert
-      final alerts = weatherAlerts.alertsForLocation(testLocation, now);
+      final alerts = weatherAlerts.getAlerts(location: testLocation, time: now);
       expect(alerts.length, 1);
       expect(alerts.first.fi.event, 'Test Event');
 
       // Future time - should only return the future alert
-      final futureAlerts = weatherAlerts.alertsForLocation(
-          testLocation, tomorrow.add(const Duration(hours: 24)));
+      final futureAlerts = weatherAlerts.getAlerts(
+          location: testLocation, time: tomorrow.add(const Duration(hours: 24)));
       expect(futureAlerts.length, 1);
       expect(futureAlerts.first.fi.event, 'Future Event');
     });

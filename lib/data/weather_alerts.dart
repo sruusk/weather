@@ -170,7 +170,7 @@ class WeatherAlerts {
         throw Exception('Failed to load FMI alerts: ${response.statusCode}');
       }
 
-      List<WeatherAlert> getAlerts(http.Response response) {
+      List<WeatherAlert> processAlerts(http.Response response) {
         final xmlDoc = XmlDocument.parse(response.body);
         final entries = xmlDoc.findAllElements('entry').toList();
         final alerts = <WeatherAlert>[];
@@ -263,7 +263,7 @@ class WeatherAlerts {
 
       // Use compute to parse XML in a separate isolate for better performance
       // On web, this will run in the main isolate since compute is not available
-      final List<WeatherAlert> alerts = await compute(getAlerts, response);
+      final List<WeatherAlert> alerts = await compute(processAlerts, response);
 
       // Save the alerts and ETag to the cache if we got a 200 response
       if (response.statusCode == 200) {
@@ -379,9 +379,8 @@ class WeatherAlerts {
   }
 
   /// Get alerts for a specific location and time
-  List<WeatherAlert> alertsForLocation(Location location, [DateTime? time]) {
-    final position = LatLng(location.lat, location.lon);
-
+  /// If only time is provided, returns all alerts active on that day regardless of location
+  List<WeatherAlert> getAlerts({Location? location, DateTime? time}) {
     return alerts.where((alert) {
       // Check if the alert is active at the given time
       if (time != null) {
@@ -392,6 +391,13 @@ class WeatherAlerts {
         }
       }
 
+      // If location is null, only filter by time
+      if (location == null) {
+        return true;
+      }
+
+      // Check if the alert contains the location
+      final position = LatLng(location.lat, location.lon);
       return alert.polygons.any((polygon) {
         return PolygonUtil.containsLocation(position, polygon, false);
       });
@@ -400,7 +406,7 @@ class WeatherAlerts {
 
   /// Get the highest severity for a specific location and time
   WeatherAlertSeverity? severityForLocation(Location location, [DateTime? time]) {
-    final locAlerts = alertsForLocation(location, time);
+    final locAlerts = getAlerts(location: location, time: time);
     if (locAlerts.isEmpty) return null;
 
     const severityRank = {

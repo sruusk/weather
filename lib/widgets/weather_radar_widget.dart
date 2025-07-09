@@ -115,8 +115,6 @@ class _WeatherRadarState extends State<WeatherRadar> {
       _isPlaying = false;
     }
 
-    _updateLightningStrikes();
-
     setState(() {
       _sliderValue = value;
       // Calculate time based on inverted slider value (each step is 15 minutes)
@@ -134,6 +132,9 @@ class _WeatherRadarState extends State<WeatherRadar> {
           print('Error updating time: $e');
         }
       }
+
+      // Update lightning strikes for the new time
+      _updateLightningStrikes();
 
       _resetController.add(null);
     });
@@ -162,230 +163,227 @@ class _WeatherRadarState extends State<WeatherRadar> {
     final localizations = AppLocalizations.of(context)!;
 
     return Builder(builder: (context) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            SizedBox(
-              height: widget.height /* - 64*/, // Subtract height of controls
-              child: FutureBuilder(
-                  future: _tileProviderFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    } else {
-                      final tileProvider = snapshot.data;
+      return Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          SizedBox(
+            height: widget.height /* - 64*/, // Subtract height of controls
+            child: FutureBuilder(
+                future: _tileProviderFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    final tileProvider = snapshot.data;
 
-                      return FlutterMap(
-                        mapController: widget.controller.mapController,
-                        options: MapOptions(
-                          initialCenter: widget.controller.initialCenter,
-                          initialZoom: 10,
-                          maxZoom: 12,
-                          minZoom: 5,
-                          keepAlive: true,
-                          backgroundColor:
-                              Theme.of(context).scaffoldBackgroundColor,
-                          interactionOptions: InteractionOptions(
-                            flags: widget.flags,
-                            rotationWinGestures: widget.rotationWinGestures,
-                            cursorKeyboardRotationOptions:
-                                widget.cursorKeyboardRotationOptions ??
-                                    CursorKeyboardRotationOptions.disabled(),
-                          ),
-                          onMapReady: () {
-                            // Notify controller that map is ready
-                            if (!_isMapInitialized) {
-                              widget.controller.setMapReady();
-                              _isMapInitialized = true;
+                    return FlutterMap(
+                      mapController: widget.controller.mapController,
+                      options: MapOptions(
+                        initialCenter: widget.controller.initialCenter,
+                        initialZoom: 10,
+                        maxZoom: 12,
+                        minZoom: 5,
+                        keepAlive: true,
+                        backgroundColor:
+                            Theme.of(context).scaffoldBackgroundColor,
+                        interactionOptions: InteractionOptions(
+                          flags: widget.flags,
+                          rotationWinGestures: widget.rotationWinGestures,
+                          cursorKeyboardRotationOptions:
+                              widget.cursorKeyboardRotationOptions ??
+                                  CursorKeyboardRotationOptions.disabled(),
+                        ),
+                        onMapReady: () {
+                          // Notify controller that map is ready
+                          if (!_isMapInitialized) {
+                            widget.controller.setMapReady();
+                            _isMapInitialized = true;
+                          }
+                        },
+                      ),
+                      children: [
+                        // Use raster layer for web, vector layer for mobile
+                        if (kIsWeb || kIsWasm)
+                          TileLayer(
+                            urlTemplate:
+                                'https://a32.fi/osm/tile/{z}/{x}/{y}.png',
+                            userAgentPackageName: 'com.sruusk.weather',
+                            tileSize: 256,
+                            zoomOffset: 0,
+                            // Add constraints to prevent NaN/Infinity values
+                            tileProvider: NetworkTileProvider(),
+                            maxNativeZoom: 12,
+                            minNativeZoom: 5,
+                            keepBuffer: 5,
+                            errorImage: NetworkImage(
+                                'https://a32.fi/osm/tile/10/588/282.png'), // Fallback image
+                          )
+                        else
+                          Theme.of(context).brightness == Brightness.light
+                              ? VectorTileLayer(
+                                  key: const Key('protomaps-light'),
+                                  tileProviders: TileProviders({
+                                    'protomaps': tileProvider!,
+                                  }),
+                                  theme: ProtomapsThemes.whiteV3(),
+                                  showTileDebugInfo: false,
+                                  // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
+                                  cacheFolder: () {
+                                    return getTemporaryDirectory()
+                                        .then((dir) {
+                                      return Directory(
+                                          '${dir.path}/pmtiles_white_v3');
+                                    });
+                                  },
+                                )
+                              : VectorTileLayer(
+                                  key: const Key('protomaps-black'),
+                                  tileProviders: TileProviders({
+                                    'protomaps': tileProvider!,
+                                  }),
+                                  theme: ProtomapsThemes.blackV3(
+                                      /*logger: Logger.console()*/),
+                                  showTileDebugInfo: false,
+                                  cacheFolder: () {
+                                    return getTemporaryDirectory()
+                                        .then((dir) {
+                                      return Directory(
+                                          '${dir.path}/pmtiles_black_v3');
+                                    });
+                                  },
+                                ),
+                        TileLayer(
+                          tileSize: 128,
+                          // Add constraints to prevent NaN/Infinity values
+                          tileProvider: CancellableNetworkTileProvider(
+                              silenceExceptions: true),
+                          maxNativeZoom: 12,
+                          minNativeZoom: 7,
+                          keepBuffer: 5,
+                          panBuffer: 1,
+                          wmsOptions: WMSTileLayerOptions(
+                              // baseUrl: 'https://openwms.fmi.fi/geoserver/wms?',
+                              baseUrl: 'https://wfs-proxy.a32.fi/wms?',
+                              // baseUrl: 'https://a32.fi/radar/wms?',
+                              layers: const ['Radar:suomi_rr_eureffin'],
+                              version: '1.3.0',
+                              crs: const Epsg3857(),
+                              format: 'image/geotiff',
+                              transparent: true,
+                              otherParameters: {
+                                'time': _currentTime.toIso8601String(),
+                              }),
+                          reset: _resetController.stream,
+                          userAgentPackageName: 'com.sruusk.weather',
+                          evictErrorTileStrategy:
+                              EvictErrorTileStrategy.dispose,
+                          errorTileCallback: (TileImage image, Object error,
+                              StackTrace? stackTrace) {
+                            if (kDebugMode) {
+                              print('Error loading tile: $error');
                             }
                           },
                         ),
-                        children: [
-                          // Use raster layer for web, vector layer for mobile
-                          if (kIsWeb || kIsWasm)
-                            TileLayer(
-                              urlTemplate:
-                                  'https://a32.fi/osm/tile/{z}/{x}/{y}.png',
-                              userAgentPackageName: 'com.sruusk.weather',
-                              tileSize: 256,
-                              zoomOffset: 0,
-                              // Add constraints to prevent NaN/Infinity values
-                              tileProvider: NetworkTileProvider(),
-                              maxNativeZoom: 12,
-                              minNativeZoom: 5,
-                              keepBuffer: 5,
-                              errorImage: NetworkImage(
-                                  'https://a32.fi/osm/tile/10/588/282.png'), // Fallback image
-                            )
-                          else
-                            Theme.of(context).brightness == Brightness.light
-                                ? VectorTileLayer(
-                                    key: const Key('protomaps-light'),
-                                    tileProviders: TileProviders({
-                                      'protomaps': tileProvider!,
-                                    }),
-                                    theme: ProtomapsThemes.blackV3(),
-                                    showTileDebugInfo: false,
-                                    // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
-                                    cacheFolder: () {
-                                      return getTemporaryDirectory()
-                                          .then((dir) {
-                                        return Directory(
-                                            '${dir.path}/pmtiles_white_v3_cache');
-                                      });
-                                    },
-                                  )
-                                : VectorTileLayer(
-                                    key: const Key('protomaps-black'),
-                                    tileProviders: TileProviders({
-                                      'protomaps': tileProvider!,
-                                    }),
-                                    theme: ProtomapsThemes.blackV3(
-                                        /*logger: Logger.console()*/),
-                                    showTileDebugInfo: false,
-                                    cacheFolder: () {
-                                      return getTemporaryDirectory()
-                                          .then((dir) {
-                                        return Directory(
-                                            '${dir.path}/pmtiles_black_v3_cache');
-                                      });
-                                    },
-                                  ),
-                          TileLayer(
-                            tileSize: 128,
-                            // Add constraints to prevent NaN/Infinity values
-                            tileProvider: CancellableNetworkTileProvider(
-                                silenceExceptions: true),
-                            maxNativeZoom: 12,
-                            minNativeZoom: 7,
-                            keepBuffer: 5,
-                            panBuffer: 1,
-                            wmsOptions: WMSTileLayerOptions(
-                                // baseUrl: 'https://openwms.fmi.fi/geoserver/wms?',
-                                baseUrl: 'https://wfs-proxy.a32.fi/wms?',
-                                // baseUrl: 'https://a32.fi/radar/wms?',
-                                layers: const ['Radar:suomi_rr_eureffin'],
-                                version: '1.3.0',
-                                crs: const Epsg3857(),
-                                format: 'image/geotiff',
-                                transparent: true,
-                                otherParameters: {
-                                  'time': _currentTime.toIso8601String(),
-                                }),
-                            reset: _resetController.stream,
-                            userAgentPackageName: 'com.sruusk.weather',
-                            evictErrorTileStrategy:
-                                EvictErrorTileStrategy.dispose,
-                            errorTileCallback: (TileImage image, Object error,
-                                StackTrace? stackTrace) {
-                              if (kDebugMode) {
-                                print('Error loading tile: $error');
-                              }
-                            },
-                          ),
-                          MarkerLayer(markers: [
-                            ..._pastLightningStrikes.map((strike) {
-                              return Marker(
-                                  point: LatLng(strike.lat, strike.lon),
-                                  width: 80,
-                                  height: 80,
-                                  child: WeatherSymbolWidget(
-                                      symbolName: 'lightning-bolt', size: 80));
-                            }),
-                            ..._currentLightningStrikes.map((strike) {
-                              return Marker(
-                                  point: LatLng(strike.lat, strike.lon),
-                                  width: 80,
-                                  height: 80,
-                                  child: WeatherSymbolWidget(
-                                      symbolName: 'lightning-bolt-red',
-                                      size: 80));
-                            }),
-                            Marker(
-                              point: widget.controller.currentCenter,
-                              alignment: Alignment.topCenter,
-                              child: Icon(
-                                Icons.location_on,
-                                color: (kIsWeb || kIsWasm)
-                                    ? Colors.black
-                                    : Theme.of(context).colorScheme.onSurface,
-                                size: 40,
-                              ),
+                        MarkerLayer(markers: [
+                          ..._pastLightningStrikes.map((strike) {
+                            return Marker(
+                                point: LatLng(strike.lat, strike.lon),
+                                width: 80,
+                                height: 80,
+                                child: WeatherSymbolWidget(
+                                    symbolName: 'lightning-bolt', size: 80));
+                          }),
+                          ..._currentLightningStrikes.map((strike) {
+                            return Marker(
+                                point: LatLng(strike.lat, strike.lon),
+                                width: 80,
+                                height: 80,
+                                child: WeatherSymbolWidget(
+                                    symbolName: 'lightning-bolt-red',
+                                    size: 80));
+                          }),
+                          Marker(
+                            point: widget.controller.currentCenter,
+                            alignment: Alignment.topCenter,
+                            child: Icon(
+                              Icons.location_on,
+                              color: (kIsWeb || kIsWasm)
+                                  ? Colors.black
+                                  : Theme.of(context).colorScheme.onSurface,
+                              size: 40,
                             ),
-                          ]),
-                          Transform.translate(
-                            offset: const Offset(0, -64),
-                            child: RichAttributionWidget(
-                              showFlutterMapAttribution: false,
-                              popupInitialDisplayDuration: Duration(seconds: 5),
-                              attributions: [
-                                TextSourceAttribution(
-                                  'OpenStreetMap [Map]',
-                                  onTap: () => launchUrl(Uri.parse(
-                                    'https://www.openstreetmap.org/copyright',
-                                  )),
-                                  prependCopyright: true,
-                                ),
-                                TextSourceAttribution(
-                                  'Finnish Meteorological Institute [Radar, Lightning]',
-                                  onTap: () => launchUrl(Uri.parse(
-                                    'https://en.ilmatieteenlaitos.fi/open-data',
-                                  )),
-                                ),
-                                LogoSourceAttribution(SvgPicture.asset(
-                                  'assets/about/fmiodata.svg',
-                                  height: 20,
-                                  colorFilter: ColorFilter.mode(
-                                    Theme.of(context).colorScheme.onSurface,
-                                    BlendMode.srcIn,
-                                  ),
+                          ),
+                        ]),
+                        Transform.translate(
+                          offset: const Offset(0, -64),
+                          child: RichAttributionWidget(
+                            showFlutterMapAttribution: false,
+                            popupInitialDisplayDuration: Duration(seconds: 5),
+                            attributions: [
+                              TextSourceAttribution(
+                                'OpenStreetMap [Map]',
+                                onTap: () => launchUrl(Uri.parse(
+                                  'https://www.openstreetmap.org/copyright',
                                 )),
-                              ],
-                            ),
+                                prependCopyright: true,
+                              ),
+                              TextSourceAttribution(
+                                'Finnish Meteorological Institute [Radar, Lightning]',
+                                onTap: () => launchUrl(Uri.parse(
+                                  'https://en.ilmatieteenlaitos.fi/open-data',
+                                )),
+                              ),
+                              LogoSourceAttribution(SvgPicture.asset(
+                                'assets/about/fmiodata.svg',
+                                height: 20,
+                                colorFilter: ColorFilter.mode(
+                                  Theme.of(context).colorScheme.onSurface,
+                                  BlendMode.srcIn,
+                                ),
+                              )),
+                            ],
                           ),
-                        ],
-                      );
-                    }
-                  }),
-            ),
-            Container(
-              height: 64,
-              color: Theme.of(context).colorScheme.surface.withAlpha(150),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                      onPressed: _togglePlayPause,
-                      tooltip:
-                          _isPlaying ? localizations.pause : localizations.play,
-                    ),
-                    Expanded(
-                      child: Slider(
-                          value: _sliderValue,
-                          min: 0,
-                          max: 5,
-                          divisions: 5,
-                          onChanged: _updateTime,
-                          label: localizations
-                              .minutesAgo(((5 - _sliderValue) * 15).toInt())),
-                    ),
-                    Text(
-                      '${_currentTime.toLocal().hour.toString()}:${_currentTime.toLocal().minute.toString().padLeft(2, '0')}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+                        ),
+                      ],
+                    );
+                  }
+                }),
+          ),
+          Container(
+            height: 64,
+            color: Theme.of(context).colorScheme.surface.withAlpha(150),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                    onPressed: _togglePlayPause,
+                    tooltip:
+                        _isPlaying ? localizations.pause : localizations.play,
+                  ),
+                  Expanded(
+                    child: Slider(
+                        value: _sliderValue,
+                        min: 0,
+                        max: 5,
+                        divisions: 5,
+                        onChanged: _updateTime,
+                        label: localizations
+                            .minutesAgo(((5 - _sliderValue) * 15).toInt())),
+                  ),
+                  Text(
+                    '${_currentTime.toLocal().hour.toString()}:${_currentTime.toLocal().minute.toString().padLeft(2, '0')}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     });
   }

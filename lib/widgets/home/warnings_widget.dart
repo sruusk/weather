@@ -113,7 +113,7 @@ class _WeatherWarningsState extends State<WeatherWarnings> with SingleTickerProv
 
   Widget _buildWarningsList(DateTime selectedDay) {
     final appState = Provider.of<AppState>(context);
-    final alerts = _weatherAlerts!.alertsForLocation(widget.location, selectedDay);
+    final alerts = _weatherAlerts!.getAlerts(location: widget.location, time: selectedDay);
 
     if (alerts.isEmpty) {
       return Padding(
