@@ -1,12 +1,22 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pmtiles/pmtiles.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
+import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
 import 'package:weather/app_state.dart';
-
-WebViewEnvironment? webViewEnvironment;
+import 'package:weather/data/map_themes.dart';
+import 'package:weather/data/weather_alert.dart';
+import 'package:weather/data/weather_alerts.dart';
+import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class WarningsPage extends StatefulWidget {
   const WarningsPage({super.key});
@@ -15,170 +25,446 @@ class WarningsPage extends StatefulWidget {
   State<WarningsPage> createState() => _WarningsPageState();
 }
 
-class _WarningsPageState extends State<WarningsPage>
-    with AutomaticKeepAliveClientMixin<WarningsPage> {
-  final GlobalKey webViewKey = GlobalKey();
-  String? theme;
-  String? language;
-  bool? isAmoledTheme;
-
-  InAppWebViewController? webViewController;
-  InAppWebViewSettings settings = InAppWebViewSettings(
-      isInspectable: kDebugMode,
-      mediaPlaybackRequiresUserGesture: false,
-      allowsInlineMediaPlayback: true);
-
-  String url = "";
-  double progress = 0;
-  final urlController = TextEditingController();
+class _WarningsPageState extends State<WarningsPage> {
+  PmTilesVectorTileProvider? _tileProvider;
+  DateTime _selectedDate = DateTime.now();
+  List<WeatherAlert> _weatherAlerts = [];
+  final LayerHitNotifier<WeatherAlert> hitNotifier = ValueNotifier(null);
+  bool showOverlay = false;
+  List<LatLng> markerPoints = [];
+  final launch = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
     super.initState();
 
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      InAppWebViewController.setWebContentsDebuggingEnabled(kDebugMode);
+    if (!kIsWeb && !kIsWasm) {
+      // Load PMTiles asset and write to temp file
+      rootBundle.load('assets/map/finland-z9.pmtiles').then((asset) async {
+        final bytes = asset.buffer.asUint8List();
+        final dir = await getTemporaryDirectory();
+        final file = File('${dir.path}/finland-z9.pmtiles');
+        await file.writeAsBytes(bytes, flush: true);
+        final archive = await PmTilesArchive.fromFile(file);
+        setState(() {
+          _tileProvider = PmTilesVectorTileProvider.fromArchive(archive);
+        });
+      });
+    }
+
+    // Load weather alerts
+    _loadWeatherAlerts();
+  }
+
+  void _loadWeatherAlerts() {
+    WeatherAlerts.instance().load().then((alerts) {
+      setState(() {
+        _weatherAlerts = alerts.getAlerts(time: _selectedDate);
+      });
+    });
+  }
+
+  void _updateSelectedDate(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+    });
+    _loadWeatherAlerts();
+  }
+
+  Widget _buildDaySelector({
+    required DateTime date,
+    required bool isSelected,
+    required double width,
+  }) {
+    // Get localized day name (Mon, Tue, etc.) using DateFormat
+    final appState = Provider.of<AppState>(context, listen: false);
+    final dayName = DateFormat.E(appState.locale.languageCode).format(date);
+
+    // Format date using locale-appropriate format for day and month
+    final dateStr = DateFormat.Md(appState.locale.languageCode).format(date);
+
+    return GestureDetector(
+      onTap: () => _updateSelectedDate(date),
+      child: Container(
+        width: width,
+        height: 60,
+        margin: const EdgeInsets.symmetric(horizontal: 5),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              dayName,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              dateStr,
+              style: TextStyle(
+                fontSize: 14,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color getColour(WeatherAlertSeverity? severity) {
+    switch (severity ?? WeatherAlertSeverity.unknown) {
+      case WeatherAlertSeverity.minor:
+        return Colors.lightGreenAccent.withAlpha(150);
+      case WeatherAlertSeverity.moderate:
+        return Color(0xFFD0CA00);
+      case WeatherAlertSeverity.severe:
+        return Color(0xFFDE8D00);
+      case WeatherAlertSeverity.extreme:
+        return Colors.red.withAlpha(150);
+      default:
+        return Colors.lightGreen;
     }
   }
 
-  @override
-  bool get wantKeepAlive => true;
+  String getAlertSymbol(WeatherAlertType type) {
+    switch (type) {
+      case WeatherAlertType.hotWeather:
+        return 'thermometer-warmer';
+      case WeatherAlertType.rain:
+        return 'raindrop';
+      case WeatherAlertType.seaWind:
+      case WeatherAlertType.wind:
+        return 'wind-alert';
+      case WeatherAlertType.seaWaveHeight:
+        return 'flag-small-craft-advisory';
+      case WeatherAlertType.uvNote:
+        return 'uv-index';
+      case WeatherAlertType.forestFireWeather:
+        return 'fire';
+      case WeatherAlertType.seaThunderstorm:
+        return 'lightning-bolt-red';
+      default:
+        if (kDebugMode) print('Unknown alert type: $type');
+        return 'code-red';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Call super to ensure keep alive works
-    bool needReload = false;
+    final localization = Localizations.localeOf(context);
+    markerPoints = []; // Reset marker points on rebuild
 
-    final appState = Provider.of<AppState>(context);
-    if (language != appState.locale.languageCode) {
-      setState(() {
-        language = appState.locale.languageCode;
-      });
-      needReload = true;
-    }
+    return Builder(builder: (context) {
+      return SafeArea(
+        child: LayoutBuilder(builder: (context, constraints) {
+          return SizedBox(
+            width: constraints.maxWidth,
+            child: SingleChildScrollView(
+              child: Column(
+                spacing: 10,
+                children: [
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (int i = 0; i < 5; i++)
+                          _buildDaySelector(
+                            date: DateTime.now().add(Duration(days: i)),
+                            isSelected: DateTime.now()
+                                        .add(Duration(days: i))
+                                        .day ==
+                                    _selectedDate.day &&
+                                DateTime.now().add(Duration(days: i)).month ==
+                                    _selectedDate.month &&
+                                DateTime.now().add(Duration(days: i)).year ==
+                                    _selectedDate.year,
+                            width: min(constraints.maxWidth / 5 - 15, 100),
+                          )
+                      ],
+                    ),
+                  ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      height: min(constraints.maxHeight - 100, 1220),
+                      child: FittedBox(
+                        child: SizedBox(
+                          width: 600,
+                          height: 1220,
+                          child: Stack(
+                            children: [
+                              FlutterMap(
+                                options: MapOptions(
+                                  initialCenter: const LatLng(65.0, 25.62),
+                                  initialZoom: 6,
+                                  backgroundColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  interactionOptions: InteractionOptions(
+                                    flags: InteractiveFlag.none,
+                                    rotationWinGestures:
+                                        MultiFingerGesture.none,
+                                    cursorKeyboardRotationOptions:
+                                        CursorKeyboardRotationOptions
+                                            .disabled(),
+                                  ),
+                                  onMapReady: () {
+                                    if (kDebugMode) {
+                                      print('Map is ready');
+                                    }
+                                  },
+                                ),
+                                children: [
+                                  // Use raster layer for web, vector layer for mobile
+                                  if (kIsWeb || kIsWasm)
+                                    TileLayer(
+                                      urlTemplate:
+                                          'https://a32.fi/osm/tile/{z}/{x}/{y}.png',
+                                      userAgentPackageName:
+                                          'com.sruusk.weather',
+                                      tileSize: 256,
+                                      zoomOffset: 0,
+                                      // Add constraints to prevent NaN/Infinity values
+                                      tileProvider: NetworkTileProvider(),
+                                      maxNativeZoom: 12,
+                                      minNativeZoom: 5,
+                                      keepBuffer: 5,
+                                      errorImage: NetworkImage(
+                                          'https://a32.fi/osm/tile/10/588/282.png'), // Fallback image
+                                    )
+                                  else if (_tileProvider != null)
+                                    Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? VectorTileLayer(
+                                            key: const Key('protomaps-light'),
+                                            tileProviders: TileProviders({
+                                              'protomaps': _tileProvider!,
+                                            }),
+                                            theme: ProtomapsThemes()
+                                                .build(themeMinimalWhite),
+                                            showTileDebugInfo: false,
+                                            // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
+                                            cacheFolder: () {
+                                              return getTemporaryDirectory()
+                                                  .then((dir) {
+                                                return Directory(
+                                                    '${dir.path}/pmtiles_white_v3_warnings$launch');
+                                              });
+                                            },
+                                          )
+                                        : VectorTileLayer(
+                                            key: const Key('protomaps-black'),
+                                            tileProviders: TileProviders({
+                                              'protomaps': _tileProvider!,
+                                            }),
+                                            theme: ProtomapsThemes()
+                                                .build(themeMinimalBlack),
+                                            showTileDebugInfo: false,
+                                            cacheFolder: () {
+                                              return getTemporaryDirectory()
+                                                  .then((dir) {
+                                                return Directory(
+                                                    '${dir.path}/pmtiles_black_v3_warnings$launch');
+                                              });
+                                            },
+                                          ),
+                                  MouseRegion(
+                                    hitTestBehavior:
+                                        HitTestBehavior.deferToChild,
+                                    cursor: SystemMouseCursors.click,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        final LayerHitResult<WeatherAlert>?
+                                            result = hitNotifier.value;
+                                        if (result == null) return;
 
-    if (theme !=
-        (Theme.of(context).brightness == Brightness.dark ? ".dark" : "")) {
-      setState(() {
-        theme = Theme.of(context).brightness == Brightness.dark ? ".dark" : "";
-      });
-      needReload = true;
-    }
+                                        for (final WeatherAlert hitValue
+                                            in result.hitValues) {
+                                          print(
+                                              'Tapped on a ${hitValue.fi.headline}');
+                                        }
+                                        print(
+                                            'Coords: ${result.coordinate}, Screen Point: ${result.point}');
+                                        setState(() {
+                                          showOverlay = true;
+                                        });
+                                      },
+                                      child: PolygonLayer(
+                                        hitNotifier: hitNotifier,
+                                        polygons: [
+                                          for (final alert in _weatherAlerts)
+                                            for (final polygon
+                                                in alert.polygons)
+                                              Polygon(
+                                                points: polygon
+                                                    .map((point) => LatLng(
+                                                        point.latitude,
+                                                        point.longitude))
+                                                    .toList(),
+                                                color:
+                                                    getColour(alert.severity),
+                                                borderColor: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface,
+                                                borderStrokeWidth: 1,
+                                                hitValue: alert,
+                                              ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  MarkerLayer(markers: [
+                                    for (final alert in _weatherAlerts)
+                                      ...alert.polygons.map((polygon) {
+                                        final minLat = polygon
+                                            .map((point) => point.latitude)
+                                            .reduce((a, b) => min(a, b));
+                                        final maxLat = polygon
+                                            .map((point) => point.latitude)
+                                            .reduce((a, b) => max(a, b));
+                                        final minLng = polygon
+                                            .map((point) => point.longitude)
+                                            .reduce((a, b) => min(a, b));
+                                        final maxLng = polygon
+                                            .map((point) => point.longitude)
+                                            .reduce((a, b) => max(a, b));
+                                        var point = LatLng(
+                                            (((minLat + maxLat) / 2) +
+                                                    (polygon
+                                                            .map((point) =>
+                                                                point.latitude)
+                                                            .reduce((a, b) =>
+                                                                a + b) /
+                                                        polygon.length)) /
+                                                2,
+                                            (((minLng + maxLng) / 2) +
+                                                        (polygon
+                                                                .map((point) =>
+                                                                    point
+                                                                        .longitude)
+                                                                .reduce(
+                                                                    (a, b) =>
+                                                                        a + b) /
+                                                            polygon.length)) /
+                                                    2 -
+                                                0.2);
 
-    if (isAmoledTheme != appState.isAmoledTheme) {
-      setState(() {
-        isAmoledTheme = appState.isAmoledTheme;
-      });
-      needReload = true;
-    }
+                                        if (markerPoints.any((p) =>
+                                            p.latitude == point.latitude &&
+                                            p.longitude == point.longitude)) {
+                                          point = LatLng(point.latitude,
+                                              point.longitude + 0.3);
+                                        }
 
-    if (needReload) _loadContent();
+                                        markerPoints.add(point);
 
-    return SafeArea(
-        child: Column(children: <Widget>[
-      Expanded(
-        child: InAppWebView(
-          key: webViewKey,
-          webViewEnvironment: webViewEnvironment,
-          initialSettings: settings,
-          onWebViewCreated: (controller) async {
-            webViewController = controller;
-            _loadContent();
-          },
-          onLoadStart: (controller, url) {
-            setState(() {
-              this.url = url.toString();
-              urlController.text = this.url;
-            });
-          },
-          onPermissionRequest: (controller, request) async {
-            return PermissionResponse(
-                resources: request.resources,
-                action: PermissionResponseAction.GRANT);
-          },
-          shouldOverrideUrlLoading: (controller, navigationAction) async {
-            var uri = navigationAction.request.url!;
+                                        return Marker(
+                                          width: 70,
+                                          height: 70,
+                                          point: point,
+                                          child: WeatherSymbolWidget(
+                                            useFilled: true,
+                                            symbolName:
+                                                getAlertSymbol(alert.type),
+                                          ),
+                                        );
+                                      })
+                                  ])
+                                ],
+                              ),
+                              if (showOverlay)
+                                Builder(builder: (context) {
+                                  final LayerHitResult<WeatherAlert>? result =
+                                      hitNotifier.value;
+                                  final f = DateFormat(
+                                      'hh:mm', localization.languageCode);
 
-            if (![
-              "http",
-              "https",
-              "file",
-              "chrome",
-              "data",
-              "javascript",
-              "about"
-            ].contains(uri.scheme)) {
-              if (await canLaunchUrl(uri)) {
-                // Launch the App
-                await launchUrl(
-                  uri,
-                );
-                // and cancel the request
-                return NavigationActionPolicy.CANCEL;
-              }
-            }
-
-            return NavigationActionPolicy.ALLOW;
-          },
-          onLoadStop: (controller, url) async {
-            setState(() {
-              this.url = url.toString();
-              urlController.text = this.url;
-            });
-          },
-          onReceivedError: (controller, request, error) {
-            if (kDebugMode) print('Error: $error');
-          },
-          onProgressChanged: (controller, progress) {
-            setState(() {
-              this.progress = progress / 100;
-              urlController.text = url;
-            });
-          },
-          onUpdateVisitedHistory: (controller, url, androidIsReload) {
-            setState(() {
-              this.url = url.toString();
-              urlController.text = this.url;
-            });
-          },
-          onConsoleMessage: (controller, consoleMessage) {
-            if (kDebugMode) {
-              print(consoleMessage);
-            }
-          },
-        ),
-      )
-    ]));
-  }
-
-  _loadContent() async {
-    if (kDebugMode) {
-      print(
-          "Loading warnings page content, theme: $theme, language: $language");
-    }
-    // Determine asset paths
-    if (theme == null) return;
-    final htmlPath = 'assets/smartmet-alert-client/index$theme.html';
-    final jsPath = 'assets/smartmet-alert-client/index.js';
-    // Load template and script
-    String htmlTemplate = await rootBundle.loadString(htmlPath);
-    String jsContent = await rootBundle.loadString(jsPath);
-    // Replace language attribute
-    htmlTemplate = htmlTemplate.replaceAll(
-        RegExp(r'language="[^"]*"'), 'language="$language"');
-    // Replace background color if amoled theme
-    if (isAmoledTheme == true) {
-      htmlTemplate = htmlTemplate.replaceAll(RegExp(r'#191b22'), '#000000');
-    }
-    // Inline JS by replacing external script tag
-    final html = htmlTemplate.replaceFirst(
-        RegExp(r'<script[^>]*src="./index\.js"[^>]*></script>'),
-        '<script type="module">$jsContent</script>');
-    // Load data into WebView
-    await webViewController!.loadData(
-      data: html,
-      baseUrl: WebUri('about:blank'),
-      historyUrl: WebUri('about:blank'),
-    );
+                                  return Positioned(
+                                    top: (result?.point.y ?? 0) - 10,
+                                    left: (result?.point.x ?? 0) / 2,
+                                    child: Card(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          spacing: 10,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            for (final WeatherAlert alert
+                                                in result?.hitValues ?? [])
+                                              RichText(
+                                                text: TextSpan(
+                                                  style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface,
+                                                  ),
+                                                  children: [
+                                                    TextSpan(
+                                                      text: alert.fi.event,
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                    TextSpan(
+                                                      text:
+                                                          '\n${DateFormat.Md(localization.languageCode).format(alert.onset)} '
+                                                          '${f.format(alert.onset)} - '
+                                                          '${DateFormat.Md(localization.languageCode).format(alert.expires)} '
+                                                          '${f.format(alert.expires)}',
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            // ListTile(
+                                            //   title: Text(alert.fi.event),
+                                            //   subtitle: Text(
+                                            //     '${DateFormat.yMMMd(localization.languageCode).format(alert.onset)} - ${DateFormat.yMMMd(localization.languageCode).format(alert.expires)}',
+                                            //     style: TextStyle(
+                                            //       color: Theme.of(context).colorScheme.onSurface,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        }),
+      );
+    });
   }
 }

@@ -8,6 +8,29 @@ enum WeatherAlertSeverity {
   extreme,
 }
 
+// This enum represents different types of weather alerts.
+// The value appears in the <eventCode><value> field of the alert xml.
+enum WeatherAlertType {
+  thunderstorm,
+  wind,
+  rain,
+  trafficWeather,
+  pedestrianSafety,
+  forestFireWeather,
+  grassFireWeather,
+  hotWeather,
+  coldWeather,
+  uvNote,
+  floodLevel,
+  seaWind,
+  seaThunderstorm,
+  seaWaterHeightHighWater,
+  seaWaterHeightShallowWater,
+  seaWaveHeight,
+  seaIcing,
+  unknown,
+}
+
 class WeatherEvent {
   final String event;
   final String headline;
@@ -46,6 +69,7 @@ class WeatherAlert {
   final WeatherEvent fi;
   final WeatherEvent sv;
   final WeatherEvent en;
+  final WeatherAlertType type;
 
   WeatherAlert({
     required this.severity,
@@ -55,6 +79,7 @@ class WeatherAlert {
     required this.fi,
     required this.sv,
     required this.en,
+    required this.type,
   });
 
   // Convert WeatherAlert to JSON
@@ -71,6 +96,7 @@ class WeatherAlert {
       'fi': fi.toJson(),
       'sv': sv.toJson(),
       'en': en.toJson(),
+      'type': type.index,
     };
   }
 
@@ -90,6 +116,7 @@ class WeatherAlert {
       fi: WeatherEvent.fromJson(json['fi'] as Map<String, dynamic>),
       sv: WeatherEvent.fromJson(json['sv'] as Map<String, dynamic>),
       en: WeatherEvent.fromJson(json['en'] as Map<String, dynamic>),
+      type: WeatherAlertType.values[json['type'] as int],
     );
   }
 }

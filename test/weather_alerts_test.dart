@@ -64,6 +64,7 @@ void main() {
           LatLng(60.0, 25.0),
         ]
       ],
+      type: WeatherAlertType.unknown,
       onset: yesterday,
       expires: tomorrow,
       fi: activeEventFi,
@@ -82,6 +83,7 @@ void main() {
           LatLng(60.0, 25.0),
         ]
       ],
+      type: WeatherAlertType.unknown,
       onset: tomorrow,
       expires: dayAfterTomorrow,
       fi: futureEventFi,

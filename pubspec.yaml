@@ -100,6 +100,7 @@ flutter:
   assets:
     - assets/symbols/
     - assets/symbols/fill/
+    - assets/symbols/fill/svg-static/
     - assets/symbols/line/
     - assets/symbols/line/svg-static/
     - assets/map/

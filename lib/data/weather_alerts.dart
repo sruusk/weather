@@ -115,11 +115,13 @@ class WeatherAlerts {
     }
 
     final fmiAlerts = await loadFmiAlerts();
-    final floodingAlerts = await loadFloodingAlerts();
+    // final floodingAlerts = await loadFloodingAlerts();
 
     // Update the singleton instance with merged alerts
     _instance = WeatherAlerts._(
-      alerts: [...fmiAlerts.alerts, ...floodingAlerts.alerts],
+      alerts: [
+        ...fmiAlerts, /*...floodingAlerts.alerts*/
+      ],
       hasLoaded: true,
     );
 
@@ -127,21 +129,18 @@ class WeatherAlerts {
   }
 
   /// Load weather alerts from FMI
-  Future<WeatherAlerts> loadFmiAlerts() async {
-    if(kDebugMode) {
+  Future<List<WeatherAlert>> loadFmiAlerts() async {
+    if (kDebugMode) {
       print('Loading FMI alerts...');
     }
 
-    const languageMap = {
-      "fi-FI": "fi",
-      "sv-FI": "sv",
-      "en-GB": "en"
-    };
+    const languageMap = {"fi-FI": "fi", "sv-FI": "sv", "en-GB": "en"};
 
     // Load cached data and etag
     final (cachedAlerts, etag) = await _loadFmiAlertsFromCache();
 
-    final url = 'https://a32.fi/proxy/proxy?apiKey=c2cf681ee102a815d7d8800a6aaa1de96998e66cb17bbcc8beb2a2d0268fd918&method=GET&url=${Uri.encodeComponent("https://alerts.fmi.fi/cap/feed/atom_fi-FI.xml")}';
+    final url =
+        'https://a32.fi/proxy/proxy?apiKey=c2cf681ee102a815d7d8800a6aaa1de96998e66cb17bbcc8beb2a2d0268fd918&method=GET&url=${Uri.encodeComponent("https://alerts.fmi.fi/cap/feed/atom_fi-FI.xml")}';
 
     try {
       http.Response response;
@@ -161,7 +160,7 @@ class WeatherAlerts {
           print('FMI alerts not modified, using cached data');
         }
         if (cachedAlerts != null) {
-          return WeatherAlerts(alerts: cachedAlerts);
+          return cachedAlerts;
         }
         // If we somehow got a 304 but don't have cached data, continue as if we got a 200
       }
@@ -190,14 +189,14 @@ class WeatherAlerts {
           DateTime? onset;
           DateTime? expires;
           List<List<LatLng>>? polygons;
+          WeatherAlertType? type;
 
           // Process each language
           for (final key in languageMap.keys) {
             final XmlElement? infoElement;
             try {
-              infoElement = infoElements.firstWhere(
-                      (element) => element.findElements('language').first.innerText == key
-              );
+              infoElement = infoElements.firstWhere((element) =>
+                  element.findElements('language').first.innerText == key);
             } catch (e) {
               // Skip if no info element for this language
               continue;
@@ -205,16 +204,32 @@ class WeatherAlerts {
 
             // Get common data from the first language we process
             if (severity == null) {
-              severity = _severityMap[infoElement.findElements('severity').first.innerText];
-              onset = DateTime.parse(infoElement.findElements('onset').first.innerText);
-              expires = DateTime.parse(infoElement.findElements('expires').first.innerText);
+              severity = _severityMap[
+                  infoElement.findElements('severity').first.innerText];
+              onset = DateTime.parse(
+                  infoElement.findElements('onset').first.innerText);
+              expires = DateTime.parse(
+                  infoElement.findElements('expires').first.innerText);
+
+              final String typeString = infoElement
+                  .findElements('eventCode')
+                  .first
+                  .findElements('value')
+                  .first
+                  .innerText;
+
+              type = WeatherAlertType.values.firstWhere(
+                  (type) =>
+                      type.toString() == 'WeatherAlertType.$typeString',
+                  orElse: () => WeatherAlertType.unknown);
 
               // Process polygons
               final areaElements = infoElement.findElements('area').toList();
               polygons = <List<LatLng>>[];
 
               for (final areaElement in areaElements) {
-                final polygonText = areaElement.findElements('polygon').first.innerText;
+                final polygonText =
+                    areaElement.findElements('polygon').first.innerText;
                 final points = polygonText.split(' ').map((point) {
                   final coords = point.split(',');
                   final lat = double.parse(coords[0]);
@@ -228,8 +243,10 @@ class WeatherAlerts {
 
             // Get language-specific data
             final event = infoElement.findElements('event').first.innerText;
-            final headline = infoElement.findElements('headline').first.innerText;
-            final description = infoElement.findElements('description').first.innerText;
+            final headline =
+                infoElement.findElements('headline').first.innerText;
+            final description =
+                infoElement.findElements('description').first.innerText;
 
             // Create WeatherEvent for this language
             eventsByLanguage[languageMap[key]!] = WeatherEvent(
@@ -240,16 +257,19 @@ class WeatherAlerts {
           }
 
           // Only create alert if we have data for all languages
-          if (severity != null && onset != null && expires != null && polygons != null &&
+          if (severity != null &&
+              onset != null &&
+              expires != null &&
+              polygons != null &&
               eventsByLanguage.containsKey('fi') &&
               eventsByLanguage.containsKey('sv') &&
               eventsByLanguage.containsKey('en')) {
-
             final alert = WeatherAlert(
               severity: severity,
               polygons: polygons,
               onset: onset,
               expires: expires,
+              type: type ?? WeatherAlertType.unknown,
               fi: eventsByLanguage['fi']!,
               sv: eventsByLanguage['sv']!,
               en: eventsByLanguage['en']!,
@@ -274,25 +294,25 @@ class WeatherAlerts {
         }
       }
 
-      return WeatherAlerts(alerts: alerts);
-
+      return alerts;
     } catch (e) {
       if (kDebugMode) {
         print('Error loading FMI alerts: $e');
       }
-      return WeatherAlerts(alerts: []);
+      return [];
     }
   }
 
   /// Load flooding alerts
-  Future<WeatherAlerts> loadFloodingAlerts() async {
+  Future<List<WeatherAlert>> loadFloodingAlerts() async {
     const url = 'https://wwwi2.ymparisto.fi/i2/vespa/alerts.json';
 
     try {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to load flooding alerts: ${response.statusCode}');
+        throw Exception(
+            'Failed to load flooding alerts: ${response.statusCode}');
       }
 
       final json = jsonDecode(response.body);
@@ -339,12 +359,14 @@ class WeatherAlerts {
         }
 
         // Create the alert with all language data
-        if(severity != null) {
+        if (severity != null) {
           alerts.add(WeatherAlert(
             severity: severity,
             polygons: polygons,
             onset: onset,
             expires: expires,
+            type: WeatherAlertType.unknown,
+            // TODO: Determine type
             fi: eventsByLanguage['fi']!,
             sv: eventsByLanguage['sv']!,
             en: eventsByLanguage['en']!,
@@ -352,13 +374,12 @@ class WeatherAlerts {
         }
       }
 
-      return WeatherAlerts(alerts: alerts);
-
+      return alerts;
     } catch (e) {
       if (kDebugMode) {
         print('Error loading flooding alerts: $e');
       }
-      return WeatherAlerts(alerts: []);
+      return [];
     }
   }
 
@@ -384,9 +405,9 @@ class WeatherAlerts {
     return alerts.where((alert) {
       // Check if the alert is active at the given time
       if (time != null) {
-        final startTime = DateTime(time.year, time.month, time.day, 23, 59, 59);
-        final endTime = DateTime(time.year, time.month, time.day, 0, 0, 1);
-        if (startTime.isBefore(alert.onset) || endTime.isAfter(alert.expires)) {
+        final dayEnd = DateTime(time.year, time.month, time.day, 23, 59, 59);
+        final dayStart = DateTime(time.year, time.month, time.day, 0, 0, 1);
+        if (dayEnd.isBefore(alert.onset) || dayStart.isAfter(alert.expires)) {
           return false;
         }
       }
@@ -405,7 +426,8 @@ class WeatherAlerts {
   }
 
   /// Get the highest severity for a specific location and time
-  WeatherAlertSeverity? severityForLocation(Location location, [DateTime? time]) {
+  WeatherAlertSeverity? severityForLocation(Location location,
+      [DateTime? time]) {
     final locAlerts = getAlerts(location: location, time: time);
     if (locAlerts.isEmpty) return null;
 
