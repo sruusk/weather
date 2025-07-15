@@ -89,8 +89,6 @@ class _ObservationChartWidgetState extends State<ObservationChartWidget> {
         return _buildTemperatureChart(context, station, localizations);
       case ChartType.wind:
         return _buildWindChart(context, station, localizations);
-      default:
-        return _buildTemperatureChart(context, station, localizations);
     }
   }
 

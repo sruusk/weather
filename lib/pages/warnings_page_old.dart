@@ -8,15 +8,15 @@ import 'package:weather/app_state.dart';
 
 WebViewEnvironment? webViewEnvironment;
 
-class WarningsPageOld extends StatefulWidget {
-  const WarningsPageOld({super.key});
+class WarningsPage extends StatefulWidget {
+  const WarningsPage({super.key});
 
   @override
-  State<WarningsPageOld> createState() => _WarningsPageOldState();
+  State<WarningsPage> createState() => _WarningsPageState();
 }
 
-class _WarningsPageOldState extends State<WarningsPageOld>
-    with AutomaticKeepAliveClientMixin<WarningsPageOld> {
+class _WarningsPageState extends State<WarningsPage>
+    with AutomaticKeepAliveClientMixin<WarningsPage> {
   final GlobalKey webViewKey = GlobalKey();
   String? theme;
   String? language;

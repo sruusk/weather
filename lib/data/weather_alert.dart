@@ -8,6 +8,11 @@ enum WeatherAlertSeverity {
   extreme,
 }
 
+enum GeocodeType {
+  iso3166_2, // ISO 3166-2 code (e.g., FI-01)
+  municipality, // Finnish municipality code (e.g., 123) "kuntanumero"
+}
+
 // This enum represents different types of weather alerts.
 // The value appears in the <eventCode><value> field of the alert xml.
 enum WeatherAlertType {
@@ -29,6 +34,76 @@ enum WeatherAlertType {
   seaWaveHeight,
   seaIcing,
   unknown,
+}
+
+class GeoCode {
+  final GeocodeType type;
+  final String code;
+
+  GeoCode({
+    required this.type,
+    required this.code,
+  });
+
+  // Convert GeoCode to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.index,
+      'code': code,
+    };
+  }
+
+  // Create GeoCode from JSON
+  factory GeoCode.fromJson(Map<String, dynamic> json) {
+    return GeoCode(
+      type: GeocodeType.values[json['type'] as int],
+      code: json['code'] as String,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'GeoCode(type: $type, code: $code)';
+  }
+}
+
+class Area {
+  final List<LatLng> points;
+  final GeoCode? geocode;
+
+  Area({
+    required this.points,
+    this.geocode,
+  });
+
+  // Convert Polygon to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'points': points
+          .map((point) => {'lat': point.latitude, 'lng': point.longitude})
+          .toList(),
+      'geocode': geocode?.toJson(),
+    };
+  }
+
+  // Create Polygon from JSON
+  factory Area.fromJson(Map<String, dynamic> json) {
+    return Area(
+      points: (json['points'] as List)
+          .map((pointJson) => LatLng(
+              (pointJson as Map<String, dynamic>)['lat'] as double,
+              (pointJson)['lng'] as double))
+          .toList(),
+      geocode: json['geocode'] != null
+          ? GeoCode.fromJson(json['geocode'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Polygon(points: $points, geocode: $geocode)';
+  }
 }
 
 class WeatherEvent {
@@ -63,7 +138,7 @@ class WeatherEvent {
 
 class WeatherAlert {
   final WeatherAlertSeverity severity;
-  final List<List<LatLng>> polygons;
+  final List<Area> areas;
   final DateTime onset;
   final DateTime expires;
   final WeatherEvent fi;
@@ -73,7 +148,7 @@ class WeatherAlert {
 
   WeatherAlert({
     required this.severity,
-    required this.polygons,
+    required this.areas,
     required this.onset,
     required this.expires,
     required this.fi,
@@ -86,11 +161,7 @@ class WeatherAlert {
   Map<String, dynamic> toJson() {
     return {
       'severity': severity.index,
-      'polygons': polygons
-          .map((polygon) => polygon
-              .map((point) => {'lat': point.latitude, 'lng': point.longitude})
-              .toList())
-          .toList(),
+      'areas': areas.map((area) => area.toJson()).toList(),
       'onset': onset.toIso8601String(),
       'expires': expires.toIso8601String(),
       'fi': fi.toJson(),
@@ -104,12 +175,8 @@ class WeatherAlert {
   factory WeatherAlert.fromJson(Map<String, dynamic> json) {
     return WeatherAlert(
       severity: WeatherAlertSeverity.values[json['severity'] as int],
-      polygons: (json['polygons'] as List)
-          .map((polygonJson) => (polygonJson as List)
-              .map((pointJson) => LatLng(
-                  (pointJson as Map<String, dynamic>)['lat'] as double,
-                  (pointJson)['lng'] as double))
-              .toList())
+      areas: (json['areas'] as List)
+          .map((areaJson) => Area.fromJson(areaJson as Map<String, dynamic>))
           .toList(),
       onset: DateTime.parse(json['onset'] as String),
       expires: DateTime.parse(json['expires'] as String),

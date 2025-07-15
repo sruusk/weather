@@ -44,8 +44,9 @@ class WeatherData {
   /// Clears cached data for a specific location
   void clearCacheForLocation(Location location) {
     final cacheKey = '${location.lat},${location.lon}';
-    if (kDebugMode)
+    if (kDebugMode) {
       print('Clearing cached forecast data for location $cacheKey');
+    }
     _openMeteoCache.remove(cacheKey);
     _harmonieCache.remove(cacheKey);
   }
@@ -339,8 +340,9 @@ class WeatherData {
 
     // Check if we have cached data for this location
     if (_harmonieCache.containsKey(cacheKey)) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('Using cached Harmonie forecast data for location $cacheKey');
+      }
       return _harmonieCache[cacheKey]!;
     }
 
@@ -477,13 +479,15 @@ class WeatherData {
 
     // Check if we have cached data for this location
     if (_openMeteoCache.containsKey(cacheKey)) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('Using cached open_meteo forecast data for location $cacheKey');
+      }
       return _openMeteoCache[cacheKey]!;
     }
 
-    if (kDebugMode)
+    if (kDebugMode) {
       print('Fetching new open_meteo forecast data for location $cacheKey');
+    }
 
     // Use the open_meteo package to make the request
     final response = await _weatherApi.request(

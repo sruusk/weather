@@ -188,7 +188,7 @@ class WeatherAlerts {
           WeatherAlertSeverity? severity;
           DateTime? onset;
           DateTime? expires;
-          List<List<LatLng>>? polygons;
+          List<Area>? areas;
           WeatherAlertType? type;
 
           // Process each language
@@ -225,7 +225,7 @@ class WeatherAlerts {
 
               // Process polygons
               final areaElements = infoElement.findElements('area').toList();
-              polygons = <List<LatLng>>[];
+              areas = <Area>[];
 
               for (final areaElement in areaElements) {
                 final polygonText =
@@ -237,7 +237,35 @@ class WeatherAlerts {
                   return LatLng(lat, lon);
                 }).toList();
 
-                polygons.add(points);
+                final String? geocodeText = areaElement
+                    .findElements('geocode')
+                    .first
+                    .firstElementChild
+                    ?.innerText;
+                final String? geocodeValue = areaElement
+                    .findElements('geocode')
+                    .first
+                    .findElements('value')
+                    .firstOrNull
+                    ?.innerText;
+                GeoCode? geoCode;
+                if (geocodeText != null && geocodeValue != null) {
+                  switch (geocodeText) {
+                    case "ISO 3166-2":
+                      geoCode = GeoCode(
+                          type: GeocodeType.iso3166_2, code: geocodeValue);
+                      break;
+                    case "FI-kuntanumero":
+                      geoCode = GeoCode(
+                          type: GeocodeType.municipality, code: geocodeValue);
+                      break;
+                    default:
+                      if (kDebugMode) {
+                        print('Unknown geocode type: $geocodeText');
+                      }
+                  }
+                }
+                areas.add(Area(points: points, geocode: geoCode));
               }
             }
 
@@ -260,13 +288,13 @@ class WeatherAlerts {
           if (severity != null &&
               onset != null &&
               expires != null &&
-              polygons != null &&
+              areas != null &&
               eventsByLanguage.containsKey('fi') &&
               eventsByLanguage.containsKey('sv') &&
               eventsByLanguage.containsKey('en')) {
             final alert = WeatherAlert(
               severity: severity,
-              polygons: polygons,
+              areas: areas,
               onset: onset,
               expires: expires,
               type: type ?? WeatherAlertType.unknown,
@@ -303,102 +331,6 @@ class WeatherAlerts {
     }
   }
 
-  /// Load flooding alerts
-  Future<List<WeatherAlert>> loadFloodingAlerts() async {
-    const url = 'https://wwwi2.ymparisto.fi/i2/vespa/alerts.json';
-
-    try {
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode != 200) {
-        throw Exception(
-            'Failed to load flooding alerts: ${response.statusCode}');
-      }
-
-      final json = jsonDecode(response.body);
-      final features = json['features'] as List;
-      final alerts = <WeatherAlert>[];
-
-      for (final feature in features) {
-        final properties = feature['properties'];
-        final geometry = feature['geometry'];
-
-        final onset = DateTime.parse(properties['onset']);
-        final expires = DateTime.parse(properties['expires']);
-        final severity = _severityMap[properties['severity']];
-
-        final coordinates = geometry['coordinates'] as List;
-        final polygons = <List<LatLng>>[];
-
-        for (final polygon in coordinates) {
-          final points = <LatLng>[];
-          for (final point in polygon) {
-            final lon = (point[0] as num).toDouble();
-            final lat = (point[1] as num).toDouble();
-
-            // Transform from EPSG:3067 to EPSG:4326
-            final transformed = _transformCoordinates(lon, lat);
-            points.add(LatLng(transformed[1], transformed[0]));
-          }
-          polygons.add(points);
-        }
-
-        // Create WeatherEvent objects for each language
-        final Map<String, WeatherEvent> eventsByLanguage = {};
-
-        for (final lang in ['fi', 'sv', 'en']) {
-          final event = properties['type_$lang'] ?? '';
-          final headline = properties['desc_$lang'] ?? '';
-          final description = properties['desc_$lang'] ?? '';
-
-          eventsByLanguage[lang] = WeatherEvent(
-            event: event,
-            headline: headline,
-            description: description,
-          );
-        }
-
-        // Create the alert with all language data
-        if (severity != null) {
-          alerts.add(WeatherAlert(
-            severity: severity,
-            polygons: polygons,
-            onset: onset,
-            expires: expires,
-            type: WeatherAlertType.unknown,
-            // TODO: Determine type
-            fi: eventsByLanguage['fi']!,
-            sv: eventsByLanguage['sv']!,
-            en: eventsByLanguage['en']!,
-          ));
-        }
-      }
-
-      return alerts;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error loading flooding alerts: $e');
-      }
-      return [];
-    }
-  }
-
-  /// Transform coordinates from EPSG:3067 to EPSG:4326
-  /// This is a simplified transformation and may not be accurate for all use cases
-  List<double> _transformCoordinates(double x, double y) {
-    // Constants for EPSG:3067 to EPSG:4326 transformation
-    // These are approximate values and should be replaced with a proper transformation library
-    const double centerLon = 27.0;
-    const double centerLat = 65.0;
-    const double scale = 0.000009;
-
-    // Simple linear transformation (this is a very rough approximation)
-    final lon = centerLon + (x - 3500000) * scale;
-    final lat = centerLat + (y - 7000000) * scale;
-
-    return [lon, lat];
-  }
-
   /// Get alerts for a specific location and time
   /// If only time is provided, returns all alerts active on that day regardless of location
   List<WeatherAlert> getAlerts({Location? location, DateTime? time}) {
@@ -419,8 +351,8 @@ class WeatherAlerts {
 
       // Check if the alert contains the location
       final position = LatLng(location.lat, location.lon);
-      return alert.polygons.any((polygon) {
-        return PolygonUtil.containsLocation(position, polygon, false);
+      return alert.areas.any((polygon) {
+        return PolygonUtil.containsLocation(position, polygon.points, false);
       });
     }).toList();
   }

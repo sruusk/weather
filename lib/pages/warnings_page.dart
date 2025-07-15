@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
 import 'package:weather/app_state.dart';
+import 'package:weather/data/constants.dart';
 import 'package:weather/data/map_themes.dart';
 import 'package:weather/data/weather_alert.dart';
 import 'package:weather/data/weather_alerts.dart';
@@ -29,7 +30,7 @@ class _WarningsPageState extends State<WarningsPage> {
   PmTilesVectorTileProvider? _tileProvider;
   DateTime _selectedDate = DateTime.now();
   List<WeatherAlert> _weatherAlerts = [];
-  final LayerHitNotifier<WeatherAlert> hitNotifier = ValueNotifier(null);
+  final LayerHitNotifier<HitValue> hitNotifier = ValueNotifier(null);
   bool showOverlay = false;
   List<LatLng> markerPoints = [];
   final launch = DateTime.now().millisecondsSinceEpoch;
@@ -133,7 +134,7 @@ class _WarningsPageState extends State<WarningsPage> {
       case WeatherAlertSeverity.minor:
         return Colors.lightGreenAccent.withAlpha(150);
       case WeatherAlertSeverity.moderate:
-        return Color(0xFFD0CA00);
+        return Colors.yellowAccent.withAlpha(150);
       case WeatherAlertSeverity.severe:
         return Color(0xFFDE8D00);
       case WeatherAlertSeverity.extreme:
@@ -160,10 +161,40 @@ class _WarningsPageState extends State<WarningsPage> {
         return 'fire';
       case WeatherAlertType.seaThunderstorm:
         return 'lightning-bolt-red';
-      default:
-        if (kDebugMode) print('Unknown alert type: $type');
-        return 'code-red';
+      case WeatherAlertType.thunderstorm:
+        return 'lightning-bolt-red';
+      case WeatherAlertType.trafficWeather:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case WeatherAlertType.pedestrianSafety:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case WeatherAlertType.grassFireWeather:
+        return 'fire';
+      case WeatherAlertType.coldWeather:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case WeatherAlertType.floodLevel:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case WeatherAlertType.seaWaterHeightHighWater:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case WeatherAlertType.seaWaterHeightShallowWater:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case WeatherAlertType.seaIcing:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case WeatherAlertType.unknown:
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
+  }
+
+  bool isPointOverlapping(LatLng point, List<LatLng> markerPoints) {
+    return markerPoints.any(
+        (p) => p.latitude == point.latitude && p.longitude == point.longitude);
   }
 
   @override
@@ -292,17 +323,20 @@ class _WarningsPageState extends State<WarningsPage> {
                                     cursor: SystemMouseCursors.click,
                                     child: GestureDetector(
                                       onTap: () {
-                                        final LayerHitResult<WeatherAlert>?
-                                            result = hitNotifier.value;
+                                        final LayerHitResult<HitValue>? result = hitNotifier.value;
                                         if (result == null) return;
 
-                                        for (final WeatherAlert hitValue
+                                        for (final HitValue hitValue
                                             in result.hitValues) {
-                                          print(
-                                              'Tapped on a ${hitValue.fi.headline}');
+                                          if (kDebugMode) {
+                                            print(
+                                                'Tapped on a ${hitValue.alert.fi.headline}');
+                                          }
                                         }
-                                        print(
-                                            'Coords: ${result.coordinate}, Screen Point: ${result.point}');
+                                        if (kDebugMode) {
+                                          print(
+                                              'Coords: ${result.coordinate}, Screen Point: ${result.point}');
+                                        }
                                         setState(() {
                                           showOverlay = true;
                                         });
@@ -311,10 +345,9 @@ class _WarningsPageState extends State<WarningsPage> {
                                         hitNotifier: hitNotifier,
                                         polygons: [
                                           for (final alert in _weatherAlerts)
-                                            for (final polygon
-                                                in alert.polygons)
+                                            for (final area in alert.areas)
                                               Polygon(
-                                                points: polygon
+                                                points: area.points
                                                     .map((point) => LatLng(
                                                         point.latitude,
                                                         point.longitude))
@@ -325,7 +358,8 @@ class _WarningsPageState extends State<WarningsPage> {
                                                     .colorScheme
                                                     .onSurface,
                                                 borderStrokeWidth: 1,
-                                                hitValue: alert,
+                                                hitValue: HitValue(alert,
+                                                    geocode: area.geocode),
                                               ),
                                         ],
                                       ),
@@ -333,7 +367,8 @@ class _WarningsPageState extends State<WarningsPage> {
                                   ),
                                   MarkerLayer(markers: [
                                     for (final alert in _weatherAlerts)
-                                      ...alert.polygons.map((polygon) {
+                                      ...alert.areas.map((Area alertArea) {
+                                        final polygon = alertArea.points;
                                         final minLat = polygon
                                             .map((point) => point.latitude)
                                             .reduce((a, b) => min(a, b));
@@ -346,6 +381,16 @@ class _WarningsPageState extends State<WarningsPage> {
                                         final maxLng = polygon
                                             .map((point) => point.longitude)
                                             .reduce((a, b) => max(a, b));
+
+                                        // Calculate an approximate surface area and
+                                        // use it to hide the marker if the area is too small
+                                        // This is done to avoid overlapping markers
+                                        // with multiple polygons
+                                        final area = (maxLat - minLat) *
+                                            (maxLng - minLng);
+                                        // print("Area: $area");
+                                        if (area < 1) return null;
+
                                         var point = LatLng(
                                             (((minLat + maxLat) / 2) +
                                                     (polygon
@@ -356,99 +401,183 @@ class _WarningsPageState extends State<WarningsPage> {
                                                         polygon.length)) /
                                                 2,
                                             (((minLng + maxLng) / 2) +
-                                                        (polygon
-                                                                .map((point) =>
-                                                                    point
-                                                                        .longitude)
-                                                                .reduce(
-                                                                    (a, b) =>
-                                                                        a + b) /
-                                                            polygon.length)) /
-                                                    2 -
-                                                0.2);
+                                                    (polygon
+                                                            .map((point) =>
+                                                                point.longitude)
+                                                            .reduce((a, b) =>
+                                                                a + b) /
+                                                        polygon.length)) /
+                                                2);
 
-                                        if (markerPoints.any((p) =>
-                                            p.latitude == point.latitude &&
-                                            p.longitude == point.longitude)) {
-                                          point = LatLng(point.latitude,
-                                              point.longitude + 0.3);
+                                        if (isPointOverlapping(
+                                            point, markerPoints)) {
+                                          // If point overlaps with existing markers, adjust it slightly
+                                          point = LatLng(
+                                            point.latitude + 0.15,
+                                            point.longitude + 0.35,
+                                          );
+                                          if (isPointOverlapping(
+                                              point, markerPoints)) {
+                                            return null;
+                                          }
+                                          markerPoints.add(point);
+                                          return Marker(
+                                            point: point,
+                                            child: Icon(Icons.add,
+                                                color: Colors.grey.shade800),
+                                          );
                                         }
 
                                         markerPoints.add(point);
 
                                         return Marker(
-                                          width: 70,
-                                          height: 70,
+                                          width: 0,
+                                          height: 0,
                                           point: point,
-                                          child: WeatherSymbolWidget(
-                                            useFilled: true,
-                                            symbolName:
-                                                getAlertSymbol(alert.type),
+                                          child: UnconstrainedBox(
+                                            child: WeatherSymbolWidget(
+                                              useFilled: true,
+                                              size: 70,
+                                              symbolName:
+                                                  getAlertSymbol(alert.type),
+                                            ),
                                           ),
                                         );
-                                      })
+                                      }).nonNulls
                                   ])
                                 ],
                               ),
                               if (showOverlay)
                                 Builder(builder: (context) {
-                                  final LayerHitResult<WeatherAlert>? result =
+                                  final LayerHitResult<HitValue>? result =
                                       hitNotifier.value;
                                   final f = DateFormat(
                                       'hh:mm', localization.languageCode);
 
+                                  final List<HitValue> hitValues =
+                                      result?.hitValues ?? [];
+
                                   return Positioned(
                                     top: (result?.point.y ?? 0) - 10,
-                                    left: (result?.point.x ?? 0) / 2,
+                                    left: (result?.point.x ?? 0) / 1.5,
+                                    width: min(
+                                      constraints.maxWidth - 20,
+                                      260,
+                                    ),
                                     child: Card(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          spacing: 10,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            for (final WeatherAlert alert
-                                                in result?.hitValues ?? [])
-                                              RichText(
-                                                text: TextSpan(
-                                                  style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .onSurface,
-                                                  ),
-                                                  children: [
-                                                    TextSpan(
-                                                      text: alert.fi.event,
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 16,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(0),
+                                      ),
+                                      elevation: 10,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            color: Colors.yellowAccent,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 2),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                if (hitValues
+                                                        .firstOrNull?.geocode ==
+                                                    null)
+                                                  SizedBox.shrink()
+                                                else
+                                                  switch (hitValues
+                                                      .first.geocode!.type) {
+                                                    GeocodeType.municipality =>
+                                                      Text(
+                                                        municipalities[
+                                                            int.parse(hitValues
+                                                                .first
+                                                                .geocode!
+                                                                .code)]!,
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium
+                                                            ?.copyWith(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
                                                       ),
-                                                    ),
-                                                    TextSpan(
-                                                      text:
-                                                          '\n${DateFormat.Md(localization.languageCode).format(alert.onset)} '
-                                                          '${f.format(alert.onset)} - '
-                                                          '${DateFormat.Md(localization.languageCode).format(alert.expires)} '
-                                                          '${f.format(alert.expires)}',
-                                                      style: TextStyle(
-                                                        fontSize: 14,
+                                                    GeocodeType.iso3166_2 =>
+                                                      Text(
+                                                        regions[localization
+                                                                .languageCode]![
+                                                            hitValues
+                                                                .first
+                                                                .geocode!
+                                                                .code]!,
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium
+                                                            ?.copyWith(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                  },
+                                                IconButton(
+                                                  icon: Icon(Icons.close),
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      showOverlay = false;
+                                                    });
+                                                  },
                                                 ),
-                                              )
-                                            // ListTile(
-                                            //   title: Text(alert.fi.event),
-                                            //   subtitle: Text(
-                                            //     '${DateFormat.yMMMd(localization.languageCode).format(alert.onset)} - ${DateFormat.yMMMd(localization.languageCode).format(alert.expires)}',
-                                            //     style: TextStyle(
-                                            //       color: Theme.of(context).colorScheme.onSurface,
-                                            //     ),
-                                            //   ),
-                                            // ),
-                                          ],
-                                        ),
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Column(
+                                              spacing: 8,
+                                              children: [
+                                                for (final WeatherAlert alert
+                                                    in hitValues
+                                                        .map((a) => a.alert))
+                                                  RichText(
+                                                    text: TextSpan(
+                                                      style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface,
+                                                      ),
+                                                      children: [
+                                                        TextSpan(
+                                                          text: alert.fi.event,
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .titleMedium,
+                                                        ),
+                                                        TextSpan(
+                                                            text:
+                                                                '\n${DateFormat.Md(localization.languageCode).format(alert.onset)} '
+                                                                '${f.format(alert.onset)} - '
+                                                                '${DateFormat.Md(localization.languageCode).format(alert.expires)} '
+                                                                '${f.format(alert.expires)}',
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .bodyMedium),
+                                                      ],
+                                                    ),
+                                                  )
+                                              ],
+                                            ),
+                                          )
+                                        ],
                                       ),
                                     ),
                                   );
@@ -467,4 +596,11 @@ class _WarningsPageState extends State<WarningsPage> {
       );
     });
   }
+}
+
+class HitValue {
+  final WeatherAlert alert;
+  final GeoCode? geocode;
+
+  HitValue(this.alert, {this.geocode});
 }

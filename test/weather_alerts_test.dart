@@ -55,14 +55,14 @@ void main() {
     // Create test alerts
     final activeAlert = WeatherAlert(
       severity: WeatherAlertSeverity.moderate,
-      polygons: [
-        [
+      areas: [
+        Area(points: [
           LatLng(60.0, 25.0),
           LatLng(60.0, 26.0),
           LatLng(61.0, 26.0),
           LatLng(61.0, 25.0),
           LatLng(60.0, 25.0),
-        ]
+        ])
       ],
       type: WeatherAlertType.unknown,
       onset: yesterday,
@@ -74,14 +74,14 @@ void main() {
 
     final futureAlert = WeatherAlert(
       severity: WeatherAlertSeverity.severe,
-      polygons: [
-        [
+      areas: [
+        Area(points: [
           LatLng(60.0, 25.0),
           LatLng(60.0, 26.0),
           LatLng(61.0, 26.0),
           LatLng(61.0, 25.0),
           LatLng(60.0, 25.0),
-        ]
+        ])
       ],
       type: WeatherAlertType.unknown,
       onset: tomorrow,
@@ -106,10 +106,13 @@ void main() {
       weatherAlerts = WeatherAlerts(alerts: [activeAlert, futureAlert]);
     });
 
-    test('alertsForLocation should return all alerts for a location without time filter', () {
+    test(
+        'alertsForLocation should return all alerts for a location without time filter',
+        () {
       final alerts = weatherAlerts.getAlerts(location: testLocation);
       expect(alerts.length, 2);
-      expect(alerts.map((a) => a.fi.event).toList(), ['Test Event', 'Future Event']);
+      expect(alerts.map((a) => a.fi.event).toList(),
+          ['Test Event', 'Future Event']);
     });
 
     test('alertsForLocation should filter alerts by time', () {
@@ -120,12 +123,15 @@ void main() {
 
       // Future time - should only return the future alert
       final futureAlerts = weatherAlerts.getAlerts(
-          location: testLocation, time: tomorrow.add(const Duration(hours: 24)));
+          location: testLocation,
+          time: tomorrow.add(const Duration(hours: 24)));
       expect(futureAlerts.length, 1);
       expect(futureAlerts.first.fi.event, 'Future Event');
     });
 
-    test('severityForLocation should return highest severity for a location without time filter', () {
+    test(
+        'severityForLocation should return highest severity for a location without time filter',
+        () {
       final severity = weatherAlerts.severityForLocation(testLocation);
       expect(severity, WeatherAlertSeverity.severe);
     });
@@ -136,7 +142,8 @@ void main() {
       expect(severity, WeatherAlertSeverity.moderate);
 
       // Future time - should return the future alert's severity
-      final futureSeverity = weatherAlerts.severityForLocation(testLocation, tomorrow.add(const Duration(hours: 12)));
+      final futureSeverity = weatherAlerts.severityForLocation(
+          testLocation, tomorrow.add(const Duration(hours: 12)));
       expect(futureSeverity, WeatherAlertSeverity.severe);
     });
   });
