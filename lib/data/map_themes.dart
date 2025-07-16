@@ -58,7 +58,6 @@ const themeMinimalBlack = [
     "type": "fill",
     "source": "protomaps",
     "source-layer": "earth",
-    "minzoom": 6,
     "paint": {"fill-color": "#141414"}
   },
   {
@@ -66,7 +65,6 @@ const themeMinimalBlack = [
     "type": "fill",
     "source": "protomaps",
     "source-layer": "water",
-    "minzoom": 6,
     "paint": {"fill-color": "#333333"}
   },
   {
@@ -74,7 +72,6 @@ const themeMinimalBlack = [
     "type": "line",
     "source": "protomaps",
     "source-layer": "boundaries",
-    "minzoom": 6,
     "filter": ["<=", "pmap:min_admin_level", 2],
     "paint": {
       "line-color": "#8c8c8c",
@@ -87,7 +84,6 @@ const themeMinimalBlack = [
     "type": "line",
     "source": "protomaps",
     "source-layer": "boundaries",
-    "minzoom": 6,
     "filter": [
       "all",
       [">", "pmap:min_admin_level", 2],

@@ -75,3 +75,51 @@ const Map<String, Map<String, String>> regions = {
     "FI-19": "Southwest Finland"
   }
 };
+
+const seaRegions = <String, Map<String, String>>{
+  'fi': {
+    'B5E': 'Suomenlahden itäosa',
+    'B5W': 'Suomenlahden länsiosa',
+    'B7E': 'Pohjois-Itämeren itäosa',
+    'B7W': 'Pohjois-Itämeren länsiosa',
+    'B4W': 'Ahvenanmeri',
+    'B4E': 'Saaristomeri',
+    'B3S': 'Selkämeren eteläosa',
+    'B3N': 'Selkämeren pohjoisosa',
+    'B2': 'Merenkurkku',
+    'B1S': 'Perämeren eteläosa',
+    'B1N': 'Perämeren pohjoisosa',
+    'south.FI-115978': 'Saimaan eteläosa',
+    'north.FI-115978': 'Saimaan pohjoisosa',
+  },
+  'sv': {
+    'B5E': 'Östra Finska viken',
+    'B5W': 'Västra Finska viken',
+    'B7E': 'Östra delen av Norra Östersjön',
+    'B7W': 'Västra delen av Norra Östersjön',
+    'B4W': 'Ålands hav',
+    'B4E': 'Skärgårdshavet',
+    'B3S': 'Södra Bottenhavet',
+    'B3N': 'Norra Bottenhavet',
+    'B2': 'Kvarken',
+    'B1S': 'Södra Bottenviken',
+    'B1N': 'Norra Bottenviken',
+    'south.FI-115978': 'Södra Saimen',
+    'north.FI-115978': 'Norra Saimen',
+  },
+  'en': {
+    'B5E': 'Eastern Gulf of Finland',
+    'B5W': 'Western Gulf of Finland',
+    'B7E': 'Eastern Part of Northern Baltic',
+    'B7W': 'Western Part of Northern Baltic',
+    'B4W': 'Sea of Åland',
+    'B4E': 'Sea of Archipelago',
+    'B3S': 'Southern Sea of Bothnia',
+    'B3N': 'Northern Sea of Bothnia',
+    'B2': 'Quark',
+    'B1S': 'Southern Bay of Bothnia',
+    'B1N': 'Northern Bay of Bothnia',
+    'south.FI-115978': 'Southern Lake Saimaa',
+    'north.FI-115978': 'Northern Lake Saimaa',
+  },
+};

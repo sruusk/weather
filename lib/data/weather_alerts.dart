@@ -192,11 +192,11 @@ class WeatherAlerts {
           WeatherAlertType? type;
 
           // Process each language
-          for (final key in languageMap.keys) {
+          for (final language in languageMap.keys) {
             final XmlElement? infoElement;
             try {
               infoElement = infoElements.firstWhere((element) =>
-                  element.findElements('language').first.innerText == key);
+                  element.findElements('language').first.innerText == language);
             } catch (e) {
               // Skip if no info element for this language
               continue;
@@ -219,8 +219,7 @@ class WeatherAlerts {
                   .innerText;
 
               type = WeatherAlertType.values.firstWhere(
-                  (type) =>
-                      type.toString() == 'WeatherAlertType.$typeString',
+                  (type) => type.toString() == 'WeatherAlertType.$typeString',
                   orElse: () => WeatherAlertType.unknown);
 
               // Process polygons
@@ -259,6 +258,9 @@ class WeatherAlerts {
                       geoCode = GeoCode(
                           type: GeocodeType.municipality, code: geocodeValue);
                       break;
+                    case "METAREA":
+                      geoCode = GeoCode(
+                          type: GeocodeType.metarea, code: geocodeValue);
                     default:
                       if (kDebugMode) {
                         print('Unknown geocode type: $geocodeText');
@@ -276,12 +278,29 @@ class WeatherAlerts {
             final description =
                 infoElement.findElements('description').first.innerText;
 
+            // Add language-specific impact description
+            String? impact;
+            final XmlElement typicalImpact = infoElement
+                .findElements('parameter')
+                .firstWhere(
+                    (element) =>
+                        element
+                            .findElements('valueName')
+                            .firstOrNull
+                            ?.innerText ==
+                        'typicalImpacts',
+                    orElse: () => XmlElement(XmlName('')));
+            if (typicalImpact.innerText.isNotEmpty) {
+              impact =
+                  typicalImpact.findElements('value').firstOrNull?.innerText;
+            }
+
             // Create WeatherEvent for this language
-            eventsByLanguage[languageMap[key]!] = WeatherEvent(
-              event: event,
+            eventsByLanguage[languageMap[language]!] = WeatherEvent(
+                event: event,
               headline: headline,
               description: description,
-            );
+                impact: impact);
           }
 
           // Only create alert if we have data for all languages

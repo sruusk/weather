@@ -33,7 +33,6 @@ class _WarningsPageState extends State<WarningsPage> {
   final LayerHitNotifier<HitValue> hitNotifier = ValueNotifier(null);
   bool showOverlay = false;
   List<LatLng> markerPoints = [];
-  final launch = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
@@ -130,11 +129,12 @@ class _WarningsPageState extends State<WarningsPage> {
   }
 
   Color getColour(WeatherAlertSeverity? severity) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     switch (severity ?? WeatherAlertSeverity.unknown) {
       case WeatherAlertSeverity.minor:
         return Colors.lightGreenAccent.withAlpha(150);
       case WeatherAlertSeverity.moderate:
-        return Colors.yellowAccent.withAlpha(150);
+        return isDark ? Color(0xFFAAAA1F) : Colors.yellowAccent;
       case WeatherAlertSeverity.severe:
         return Color(0xFFDE8D00);
       case WeatherAlertSeverity.extreme:
@@ -247,8 +247,7 @@ class _WarningsPageState extends State<WarningsPage> {
                                 options: MapOptions(
                                   initialCenter: const LatLng(65.0, 25.62),
                                   initialZoom: 6,
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
+                                  backgroundColor: Colors.transparent,
                                   interactionOptions: InteractionOptions(
                                     flags: InteractiveFlag.none,
                                     rotationWinGestures:
@@ -297,7 +296,7 @@ class _WarningsPageState extends State<WarningsPage> {
                                               return getTemporaryDirectory()
                                                   .then((dir) {
                                                 return Directory(
-                                                    '${dir.path}/pmtiles_white_v3_warnings$launch');
+                                                    '${dir.path}/pmtiles_white_v3_warnings');
                                               });
                                             },
                                           )
@@ -313,7 +312,7 @@ class _WarningsPageState extends State<WarningsPage> {
                                               return getTemporaryDirectory()
                                                   .then((dir) {
                                                 return Directory(
-                                                    '${dir.path}/pmtiles_black_v3_warnings$launch');
+                                                    '${dir.path}/pmtiles_black_v3_warnings');
                                               });
                                             },
                                           ),
@@ -323,7 +322,8 @@ class _WarningsPageState extends State<WarningsPage> {
                                     cursor: SystemMouseCursors.click,
                                     child: GestureDetector(
                                       onTap: () {
-                                        final LayerHitResult<HitValue>? result = hitNotifier.value;
+                                        final LayerHitResult<HitValue>? result =
+                                            hitNotifier.value;
                                         if (result == null) return;
 
                                         for (final HitValue hitValue
@@ -345,7 +345,10 @@ class _WarningsPageState extends State<WarningsPage> {
                                         hitNotifier: hitNotifier,
                                         polygons: [
                                           for (final alert in _weatherAlerts)
-                                            for (final area in alert.areas)
+                                            for (final area in alert.areas
+                                                .where((area) =>
+                                                    area.geocode?.type !=
+                                                    GeocodeType.metarea))
                                               Polygon(
                                                 points: area.points
                                                     .map((point) => LatLng(
@@ -357,6 +360,26 @@ class _WarningsPageState extends State<WarningsPage> {
                                                 borderColor: Theme.of(context)
                                                     .colorScheme
                                                     .onSurface,
+                                                borderStrokeWidth: 1,
+                                                hitValue: HitValue(alert,
+                                                    geocode: area.geocode),
+                                              ),
+                                          for (final alert in _weatherAlerts)
+                                            for (final area in alert.areas
+                                                .where((area) =>
+                                                    area.geocode?.type ==
+                                                    GeocodeType.metarea))
+                                              Polygon(
+                                                points: area.points
+                                                    .map((point) => LatLng(
+                                                        point.latitude,
+                                                        point.longitude))
+                                                    .toList(),
+                                                color:
+                                                    getColour(alert.severity),
+                                                borderColor: Theme.of(context)
+                                                    .colorScheme
+                                                    .surface,
                                                 borderStrokeWidth: 1,
                                                 hitValue: HitValue(alert,
                                                     geocode: area.geocode),
@@ -409,6 +432,15 @@ class _WarningsPageState extends State<WarningsPage> {
                                                         polygon.length)) /
                                                 2);
 
+                                        // Reposition specific marker to avoid overlap
+                                        if (['B2', 'B1S'].contains(
+                                            alertArea.geocode?.code ?? '')) {
+                                          point = LatLng(
+                                            point.latitude + 0.2,
+                                            point.longitude - 0.4,
+                                          );
+                                        }
+
                                         if (isPointOverlapping(
                                             point, markerPoints)) {
                                           // If point overlaps with existing markers, adjust it slightly
@@ -457,8 +489,18 @@ class _WarningsPageState extends State<WarningsPage> {
                                   final List<HitValue> hitValues =
                                       result?.hitValues ?? [];
 
+                                  if (hitValues.isEmpty) {
+                                    showOverlay = false;
+                                    return SizedBox.shrink();
+                                  }
+
+                                  // If opened too low, move the overlay up
+                                  // to avoid overflowing/clipping
+                                  double top = (result?.point.y ?? 0);
+                                  if (top > 1000) top -= 200;
+
                                   return Positioned(
-                                    top: (result?.point.y ?? 0) - 10,
+                                    top: top,
                                     left: (result?.point.x ?? 0) / 1.5,
                                     width: min(
                                       constraints.maxWidth - 20,
@@ -510,6 +552,24 @@ class _WarningsPageState extends State<WarningsPage> {
                                                     GeocodeType.iso3166_2 =>
                                                       Text(
                                                         regions[localization
+                                                                .languageCode]![
+                                                            hitValues
+                                                                .first
+                                                                .geocode!
+                                                                .code]!,
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium
+                                                            ?.copyWith(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                      ),
+                                                    GeocodeType.metarea => Text(
+                                                        seaRegions[localization
                                                                 .languageCode]![
                                                             hitValues
                                                                 .first

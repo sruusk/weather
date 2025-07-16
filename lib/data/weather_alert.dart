@@ -11,6 +11,7 @@ enum WeatherAlertSeverity {
 enum GeocodeType {
   iso3166_2, // ISO 3166-2 code (e.g., FI-01)
   municipality, // Finnish municipality code (e.g., 123) "kuntanumero"
+  metarea,
 }
 
 // This enum represents different types of weather alerts.
@@ -110,11 +111,13 @@ class WeatherEvent {
   final String event;
   final String headline;
   final String description;
+  final String? impact; // Optional field for impact description
 
   WeatherEvent({
     required this.event,
     required this.headline,
     required this.description,
+    this.impact,
   });
 
   // Convert WeatherEvent to JSON
@@ -123,6 +126,7 @@ class WeatherEvent {
       'event': event,
       'headline': headline,
       'description': description,
+      'impact': impact,
     };
   }
 
@@ -132,6 +136,7 @@ class WeatherEvent {
       event: json['event'] as String,
       headline: json['headline'] as String,
       description: json['description'] as String,
+      impact: json['impact'] as String?,
     );
   }
 }
