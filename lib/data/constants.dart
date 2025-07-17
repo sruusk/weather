@@ -1,9 +1,6 @@
-const List<String> radarEnabledCountries = [
-  'FI',
-  'AX',
-  'EE'
-]; // Finland, Åland Islands, Estonia
+// Finland, Åland Islands
 const List<String> observationsEnabledCountries = ['FI', 'AX'];
+const List<String> radarEnabledCountries = ['FI', 'AX'];
 
 // Finnish municipality codes
 const Map<int, String> municipalities = {

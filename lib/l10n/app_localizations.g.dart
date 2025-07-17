@@ -937,6 +937,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AMOLED Dark'**
   String get amoledTheme;
+
+  /// Time period when an alert is valid
+  ///
+  /// In en, this message translates to:
+  /// **'Valid: {startDate} - {endDate}'**
+  String alertValidPeriod(String startDate, String endDate);
+
+  /// Area code label with the code value
+  ///
+  /// In en, this message translates to:
+  /// **'Area Code: {code}'**
+  String areaCode(String code);
+
+  /// Message shown when there are no active alerts for the selected date
+  ///
+  /// In en, this message translates to:
+  /// **'No active alerts for the selected date'**
+  String get noActiveAlerts;
+
+  /// Title for the active weather alerts section
+  ///
+  /// In en, this message translates to:
+  /// **'Active Weather Alerts'**
+  String get activeWeatherAlerts;
 }
 
 class _AppLocalizationsDelegate

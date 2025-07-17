@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -453,4 +454,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get amoledTheme => 'AMOLED Dark';
+
+  @override
+  String alertValidPeriod(String startDate, String endDate) {
+    return 'Valid: $startDate - $endDate';
+  }
+
+  @override
+  String areaCode(String code) {
+    return 'Area Code: $code';
+  }
+
+  @override
+  String get noActiveAlerts => 'No active alerts for the selected date';
+
+  @override
+  String get activeWeatherAlerts => 'Active Weather Alerts';
 }

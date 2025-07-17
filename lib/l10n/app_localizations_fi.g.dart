@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -450,4 +451,20 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get amoledTheme => 'AMOLED Tumma';
+
+  @override
+  String alertValidPeriod(String startDate, String endDate) {
+    return 'Voimassa: $startDate - $endDate';
+  }
+
+  @override
+  String areaCode(String code) {
+    return 'Aluekoodi: $code';
+  }
+
+  @override
+  String get noActiveAlerts => 'Ei aktiivisia varoituksia valitulle päivälle';
+
+  @override
+  String get activeWeatherAlerts => 'Aktiiviset säävaroitukset';
 }

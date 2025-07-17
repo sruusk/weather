@@ -544,5 +544,37 @@
   "@ossLicenses": {
     "description": "Title for the open source licenses page"
   },
-  "amoledTheme": "AMOLED Tumma"
+  "amoledTheme": "AMOLED Tumma",
+  "alertValidPeriod": "Voimassa: {startDate} - {endDate}",
+  "@alertValidPeriod": {
+    "description": "Time period when an alert is valid",
+    "placeholders": {
+      "startDate": {
+        "type": "String",
+        "example": "2023-01-01 12:00"
+      },
+      "endDate": {
+        "type": "String",
+        "example": "2023-01-02 12:00"
+      }
+    }
+  },
+  "areaCode": "Aluekoodi: {code}",
+  "@areaCode": {
+    "description": "Area code label with the code value",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "FI-01"
+      }
+    }
+  },
+  "noActiveAlerts": "Ei aktiivisia varoituksia valitulle päivälle",
+  "@noActiveAlerts": {
+    "description": "Message shown when there are no active alerts for the selected date"
+  },
+  "activeWeatherAlerts": "Aktiiviset säävaroitukset",
+  "@activeWeatherAlerts": {
+    "description": "Title for the active weather alerts section"
+  }
 }
