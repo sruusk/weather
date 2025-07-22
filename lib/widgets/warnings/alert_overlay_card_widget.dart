@@ -83,7 +83,7 @@ class AlertOverlayCardWidget extends StatelessWidget {
               color: _getSeverityColor(
                 hitValues,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

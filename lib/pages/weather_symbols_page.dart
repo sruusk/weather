@@ -106,7 +106,7 @@ class _WeatherSymbolsPageState extends State<WeatherSymbolsPage> with AutomaticK
           children: [
             WeatherSymbolWidget(
               symbolName: symbolName,
-              useFilled: useFilled,
+              filled: useFilled,
               size: 60.0,
             ),
             // const SizedBox(height: 8),

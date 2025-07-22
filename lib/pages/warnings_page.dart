@@ -120,7 +120,7 @@ class _WarningsPageState extends State<WarningsPage> {
             decoration: BoxDecoration(
               color: isSelected
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.surfaceContainer,
+                  : Theme.of(context).colorScheme.onSurface,
             ),
             child: isSelected
                 ? Transform.translate(
@@ -151,28 +151,24 @@ class _WarningsPageState extends State<WarningsPage> {
               child: Column(
                 spacing: 10,
                 children: [
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 3,
-                      children: [
-                        for (int i = 0; i < 5; i++)
-                          _buildDaySelector(
-                            date: DateTime.now().add(Duration(days: i)),
-                            isSelected: DateTime.now()
-                                        .add(Duration(days: i))
-                                        .day ==
-                                    _selectedDate.day &&
-                                DateTime.now().add(Duration(days: i)).month ==
-                                    _selectedDate.month &&
-                                DateTime.now().add(Duration(days: i)).year ==
-                                    _selectedDate.year,
-                            width: min(constraints.maxWidth / 5 - 15, 100),
-                          )
-                      ],
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 3,
+                    children: [
+                      for (int i = 0; i < 5; i++)
+                        _buildDaySelector(
+                          date: DateTime.now().add(Duration(days: i)),
+                          isSelected: DateTime.now()
+                                      .add(Duration(days: i))
+                                      .day ==
+                                  _selectedDate.day &&
+                              DateTime.now().add(Duration(days: i)).month ==
+                                  _selectedDate.month &&
+                              DateTime.now().add(Duration(days: i)).year ==
+                                  _selectedDate.year,
+                          width: min(constraints.maxWidth / 5 - 3, 100),
+                        )
+                    ],
                   ),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),

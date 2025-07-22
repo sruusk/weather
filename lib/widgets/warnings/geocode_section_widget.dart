@@ -101,7 +101,8 @@ class _GeocodeSectionWidgetState extends State<GeocodeSectionWidget> {
                             ),
                           ),
                           child: WeatherSymbolWidget(
-                            useFilled: true,
+                            filled: true,
+                            static: true,
                             size: 40,
                             symbolName: alert.getAlertSymbol(),
                           ),

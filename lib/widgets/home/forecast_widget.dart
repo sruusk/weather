@@ -209,7 +209,7 @@ class _ForecastWidgetState extends State<ForecastWidget> {
                                 offset: const Offset(0, -6),
                                 child: WeatherSymbolWidget(
                                   symbolName: symbol,
-                                  useFilled: false,
+                                  filled: false,
                                   size: 50,
                                 ),
                               ),
@@ -290,7 +290,7 @@ class _ForecastWidgetState extends State<ForecastWidget> {
                           ),
                           WeatherSymbolWidget(
                             symbolName: data.weatherSymbol,
-                            useFilled: false,
+                            filled: false,
                             size: 60,
                           ),
                           WindArrow(

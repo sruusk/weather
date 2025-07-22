@@ -93,7 +93,8 @@ class AlertMarkerWidget extends StatelessWidget {
             point: point,
             child: UnconstrainedBox(
               child: WeatherSymbolWidget(
-                useFilled: true,
+                filled: true,
+                static: true,
                 size: 70,
                 symbolName: alert.getAlertSymbol(),
               ),

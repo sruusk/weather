@@ -87,18 +87,6 @@ class _AlertsByGeocodeWidgetState extends State<AlertsByGeocodeWidget> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
 
-    if (widget.alerts.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Text(
-            localizations.noActiveAlerts,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ),
-      );
-    }
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       child: Column(
@@ -114,14 +102,19 @@ class _AlertsByGeocodeWidgetState extends State<AlertsByGeocodeWidget> {
               ),
             ),
           ),
-          if (_groupedAlerts.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
+          if (widget.alerts.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: Center(
-                child: CircularProgressIndicator(),
+                child: Text(
+                  localizations.noActiveAlerts,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
               ),
-            )
-          else
+            ),
             ..._getSortedAlertEntries()
                 .map((entry) => GeocodeSectionWidget(
                       geocode: entry.key,
