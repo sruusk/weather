@@ -191,4 +191,38 @@ class WeatherAlert {
       type: WeatherAlertType.values[json['type'] as int],
     );
   }
+
+  String getAlertSymbol() {
+    switch (type) {
+      case WeatherAlertType.hotWeather:
+        return 'thermometer-warmer';
+      case WeatherAlertType.rain:
+        return 'raindrop';
+      case WeatherAlertType.seaWind:
+      case WeatherAlertType.wind:
+        return 'wind-alert';
+      case WeatherAlertType.seaWaveHeight:
+        return 'flag-small-craft-advisory';
+      case WeatherAlertType.uvNote:
+        return 'uv-index';
+      case WeatherAlertType.forestFireWeather:
+        return 'fire';
+      case WeatherAlertType.seaThunderstorm:
+        return 'lightning-bolt-red';
+      case WeatherAlertType.thunderstorm:
+        return 'lightning-bolt-red';
+      case WeatherAlertType.grassFireWeather:
+        return 'fire';
+      case WeatherAlertType.coldWeather:
+      case WeatherAlertType.floodLevel:
+      case WeatherAlertType.seaWaterHeightHighWater:
+      case WeatherAlertType.seaWaterHeightShallowWater:
+      case WeatherAlertType.seaIcing:
+      case WeatherAlertType.trafficWeather:
+      case WeatherAlertType.pedestrianSafety:
+      case WeatherAlertType.unknown:
+      // Default symbol for unimplemented types
+        return 'warning';
+    }
+  }
 }

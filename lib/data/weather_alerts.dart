@@ -376,11 +376,9 @@ class WeatherAlerts {
     }).toList();
   }
 
-  /// Get the highest severity for a specific location and time
-  WeatherAlertSeverity? severityForLocation(Location location,
-      [DateTime? time]) {
-    final locAlerts = getAlerts(location: location, time: time);
-    if (locAlerts.isEmpty) return null;
+  /// Sort a list of severities and return the highest one
+  static WeatherAlertSeverity? sortSeverities(List<WeatherAlertSeverity> severities) {
+    if (severities.isEmpty) return null;
 
     const severityRank = {
       WeatherAlertSeverity.unknown: 0,
@@ -390,14 +388,23 @@ class WeatherAlerts {
       WeatherAlertSeverity.extreme: 4,
     };
 
-    var highest = locAlerts.first;
-    for (var alert in locAlerts.skip(1)) {
-      final currentRank = severityRank[alert.severity] ?? -1;
-      final highestRank = severityRank[highest.severity] ?? -1;
+    var highest = severities.first;
+    for (var severity in severities.skip(1)) {
+      final currentRank = severityRank[severity] ?? -1;
+      final highestRank = severityRank[highest] ?? -1;
       if (currentRank > highestRank) {
-        highest = alert;
+        highest = severity;
       }
     }
-    return highest.severity;
+    return highest;
+  }
+
+  /// Get the highest severity for a specific location and time
+  WeatherAlertSeverity? severityForLocation(Location location,
+      [DateTime? time]) {
+    final locAlerts = getAlerts(location: location, time: time);
+    if (locAlerts.isEmpty) return null;
+
+    return sortSeverities(locAlerts.map((alert) => alert.severity).toList());
   }
 }

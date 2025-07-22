@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:weather/data/constants.dart';
 import 'package:weather/data/weather_alert.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
+import 'package:weather/widgets/warnings/geocode_section_widget.dart';
 
 class AlertsByGeocodeWidget extends StatefulWidget {
   final List<WeatherAlert> alerts;
@@ -74,162 +75,12 @@ class _AlertsByGeocodeWidgetState extends State<AlertsByGeocodeWidget> {
     setState(() {});
   }
 
-  // Get color based on alert severity
-  Color _getSeverityColor(WeatherAlertSeverity severity) {
-    switch (severity) {
-      case WeatherAlertSeverity.minor:
-        return Colors.green;
-      case WeatherAlertSeverity.moderate:
-        return Colors.yellowAccent;
-      case WeatherAlertSeverity.severe:
-        return Colors.orange;
-      case WeatherAlertSeverity.extreme:
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  // Build alert card
-  Widget _buildAlertCard(WeatherAlert alert) {
-    // Get the appropriate language based on device locale
-    final locale = Localizations.localeOf(context).languageCode;
-    WeatherEvent event;
-
-    // Select the appropriate language version
-    if (locale == 'sv') {
-      event = alert.sv;
-    } else if (locale == 'fi') {
-      event = alert.fi;
-    } else {
-      event = alert.en;
-    }
-
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: _getSeverityColor(alert.severity),
-          width: 2,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: _getSeverityColor(alert.severity),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    event.headline,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              event.description,
-              style: const TextStyle(fontSize: 14),
-            ),
-            if (event.impact != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                event.impact!,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
   // Get sorted entries of alerts by geocode
   List<MapEntry<String, List<WeatherAlert>>> _getSortedAlertEntries() {
     final sortedEntries = _groupedAlerts.entries.toList();
     sortedEntries.sort((a, b) => _getLocationName(a.key, context)
         .compareTo(_getLocationName(b.key, context)));
     return sortedEntries;
-  }
-
-  // Build geocode section
-  Widget _buildGeocodeSection(String geocode, List<WeatherAlert> alerts) {
-    // Initialize if not already in the map
-    _expandedSections.putIfAbsent(geocode, () => false);
-
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Always visible part (location name)
-          InkWell(
-            onTap: () {
-              setState(() {
-                // Toggle the expansion state for this section
-                _expandedSections[geocode] =
-                    !(_expandedSections[geocode] ?? false);
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      _getLocationName(geocode, context),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    _expandedSections[geocode] ?? false
-                        ? Icons.expand_less
-                        : Icons.expand_more,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Expandable part (alerts)
-          AnimatedCrossFade(
-            firstChild: const SizedBox(height: 0),
-            secondChild: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...alerts.map((alert) => _buildAlertCard(alert)),
-              ],
-            ),
-            crossFadeState: (_expandedSections[geocode] ?? false)
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 200),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -272,7 +123,11 @@ class _AlertsByGeocodeWidgetState extends State<AlertsByGeocodeWidget> {
             )
           else
             ..._getSortedAlertEntries()
-                .map((entry) => _buildGeocodeSection(entry.key, entry.value)),
+                .map((entry) => GeocodeSectionWidget(
+                      geocode: entry.key,
+                      alerts: entry.value,
+                      initiallyExpanded: _expandedSections[entry.key] ?? false,
+                    )),
         ],
       ),
     );

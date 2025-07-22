@@ -1,19 +1,19 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:weather/data/constants.dart';
 import 'package:weather/data/weather_alert.dart';
+import 'package:weather/data/weather_alerts.dart';
 import 'package:weather/widgets/warnings/warnings_map_widget.dart';
 
-class WarningsOverlayWidget extends StatelessWidget {
+class AlertOverlayCardWidget extends StatelessWidget {
   final dynamic hitResult;
   final String languageCode;
   final Map<int, String> municipalities;
   final double maxWidth;
   final VoidCallback onClose;
 
-  const WarningsOverlayWidget({
+  const AlertOverlayCardWidget({
     super.key,
     required this.hitResult,
     required this.languageCode,
@@ -22,10 +22,32 @@ class WarningsOverlayWidget extends StatelessWidget {
     required this.onClose,
   });
 
+  Color _getSeverityColor(List<HitValue> severity) {
+    switch (WeatherAlerts.sortSeverities(
+        severity.map((hit) => hit.alert.severity).toList())) {
+      case WeatherAlertSeverity.minor:
+        return Colors.green;
+      case WeatherAlertSeverity.moderate:
+        return Colors.yellowAccent;
+      case WeatherAlertSeverity.severe:
+        return Colors.orange;
+      case WeatherAlertSeverity.extreme:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String? _getLocationName(String geocode, BuildContext context) {
+    final localization = Localizations.localeOf(context);
+
+    return municipalities[int.tryParse(geocode)] ??
+        seaRegions[localization.languageCode]?[geocode] ??
+        regions[localization.languageCode]?[geocode];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final f = DateFormat('HH:mm', languageCode);
-
     final List<HitValue> hitValues = hitResult?.hitValues ?? [];
 
     if (hitValues.isEmpty) {
@@ -36,6 +58,11 @@ class WarningsOverlayWidget extends StatelessWidget {
     // to avoid overflowing/clipping
     double top = (hitResult?.point.y ?? 0);
     if (top > 1000) top -= 200;
+
+    final locationName = hitValues
+        .map((hit) => _getLocationName(hit.geocode?.code ?? '', context))
+        .nonNulls
+        .first;
 
     return Positioned(
       top: top,
@@ -53,8 +80,9 @@ class WarningsOverlayWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              // TODO: Get color according to alert severity
-              color: Colors.yellowAccent,
+              color: _getSeverityColor(
+                hitValues,
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -63,7 +91,7 @@ class WarningsOverlayWidget extends StatelessWidget {
                     SizedBox.shrink()
                   else
                     Text(
-                      _getLocationName(hitValues.first.geocode!, context),
+                      locationName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
@@ -105,20 +133,5 @@ class WarningsOverlayWidget extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _getLocationName(GeoCode geocode, BuildContext context) {
-    switch (geocode.type) {
-      case GeocodeType.municipality:
-        return municipalities[int.parse(geocode.code)] ?? geocode.code;
-      case GeocodeType.metarea:
-        final localization = Localizations.localeOf(context);
-        return seaRegions[localization.languageCode]?[geocode.code] ??
-            geocode.code;
-      case GeocodeType.iso3166_2:
-        final localization = Localizations.localeOf(context);
-        return regions[localization.languageCode]?[geocode.code] ??
-            geocode.code;
-    }
   }
 }
