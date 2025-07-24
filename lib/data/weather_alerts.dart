@@ -238,15 +238,16 @@ class WeatherAlerts {
 
                 final String? geocodeText = areaElement
                     .findElements('geocode')
-                    .first
-                    .firstElementChild
+                    .firstOrNull
+                    ?.firstElementChild
                     ?.innerText;
                 final String? geocodeValue = areaElement
                     .findElements('geocode')
-                    .first
-                    .findElements('value')
+                    .firstOrNull
+                    ?.findElements('value')
                     .firstOrNull
                     ?.innerText;
+
                 GeoCode? geoCode;
                 if (geocodeText != null && geocodeValue != null) {
                   switch (geocodeText) {
