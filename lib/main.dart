@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -220,6 +221,14 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Add meteocons to license registry
+  LicenseRegistry.addLicense(() async* {
+    final String license = await rootBundle.loadString(
+      'assets/symbols/LICENSE',
+    );
+    yield LicenseEntryWithLineBreaks(['meteocons'], license);
+  });
 
   // Initialize Appwrite Client
   AppwriteClient();

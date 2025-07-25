@@ -63,7 +63,6 @@ dependencies:
   appwrite: ^17.0.1
   flutter_web_auth_2: ^4.1.0
   dynamic_color: ^1.7.0
-  flutter_oss_licenses: ^3.0.4
 
 dev_dependencies:
   flutter_test:
