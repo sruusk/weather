@@ -1,16 +1,13 @@
 # Weather App for Finland
+<img style="width:100px;" src="assets/icon.png">
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.6.0+-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://flutter.dev/multi-platform/)
 [![Dart](https://img.shields.io/badge/Dart-3.6.0+-0175C2?logo=dart&logoColor=white)](https://dart.dev/)
-[![Appwrite](https://img.shields.io/badge/Appwrite-Cloud_Backend-F02E65?logo=appwrite&logoColor=white)](https://appwrite.io/)
+[![Appwrite](https://img.shields.io/badge/Appwrite_Backend-F02E65?logo=appwrite&logoColor=white)](https://appwrite.io/)
 
 A comprehensive weather application for Finland, providing accurate forecasts, weather warnings, and radar imagery. Built with Flutter and powered by Open-Meteo API and Finnish Meteorological Institute (FMI) Open Data.
-
-![Weather App Screenshot](assets/icon.png)
-
-> **Note:** Consider adding actual screenshots of the app here to showcase its UI and features.
 
 ## Features
 
