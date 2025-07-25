@@ -128,7 +128,7 @@ class _HomePageState extends State<HomePage>
     // so we wait a bit to ensure it is ready.
     final List<Location>locs = appState.favouriteLocations.isEmpty
         ? await () async {
-            await Future.delayed(const Duration(milliseconds: 100));
+            await Future.delayed(const Duration(milliseconds: 200));
             return appState.favouriteLocations;
           }()
         : appState.favouriteLocations;

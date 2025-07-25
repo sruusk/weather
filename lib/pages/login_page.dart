@@ -154,7 +154,9 @@ class _LoginPageState extends State<LoginPage> {
         client.subscribe();
       });
     }
-    context.goNamed('settings');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.goNamed('settings');
+    });
   }
 
   @override
