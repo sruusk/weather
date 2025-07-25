@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -224,16 +223,6 @@ void main() async {
 
   // Initialize Appwrite Client
   AppwriteClient();
-
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
-    final availableVersion = await WebViewEnvironment.getAvailableVersion();
-    assert(availableVersion != null,
-        'Failed to find an installed WebView2 Runtime or non-stable Microsoft Edge installation.');
-  }
-
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-    await InAppWebViewController.setWebContentsDebuggingEnabled(kDebugMode);
-  }
 
   runApp(
     ChangeNotifierProvider(
