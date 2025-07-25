@@ -20,8 +20,8 @@ class AppwriteClient {
 
   AppwriteClient._internal() {
     client = Client()
-        .setEndpoint("https://aw.a32.fi/v1") // Replace with your endpoint
-        .setProject("6843138e001dcb69f2be"); //// Replace with your project ID
+        .setEndpoint("https://aw.a32.fi/v1")
+        .setProject("6843138e001dcb69f2be");
     account = Account(client);
     realtime = Realtime(client);
   }
