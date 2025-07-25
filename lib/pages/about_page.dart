@@ -142,34 +142,6 @@ class _AboutPageState extends State<AboutPage>
                       fontSize: 28, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
-                // SmartMet Alert Client license entry
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          localizations.smartmetAlertClientName,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          localizations.smartmetAlertClientLicense,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                        TextButton(
-                          onPressed: () => launchUrl(Uri.parse(
-                              'https://github.com/fmidev/smartmet-alert-client/blob/6c8445634b2cea006ebad82ca219e1f822f43461/LICENSE')),
-                          child: Text(localizations.viewLicense),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
                 // Open Source Licenses button
                 ElevatedButton.icon(
                   onPressed: () {

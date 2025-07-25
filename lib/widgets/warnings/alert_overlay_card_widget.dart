@@ -11,6 +11,7 @@ class AlertOverlayCardWidget extends StatelessWidget {
   final String languageCode;
   final Map<int, String> municipalities;
   final double maxWidth;
+  final double parentHeight;
   final VoidCallback onClose;
 
   const AlertOverlayCardWidget({
@@ -19,6 +20,7 @@ class AlertOverlayCardWidget extends StatelessWidget {
     required this.languageCode,
     required this.municipalities,
     required this.maxWidth,
+    required this.parentHeight,
     required this.onClose,
   });
 
@@ -57,7 +59,8 @@ class AlertOverlayCardWidget extends StatelessWidget {
     // If opened too low, move the overlay up
     // to avoid overflowing/clipping
     double top = (hitResult?.point.y ?? 0);
-    if (top > 1000) top -= 200;
+    final double expectedHeight = hitValues.length * 100 + 120;
+    if (top > parentHeight - expectedHeight) top = parentHeight - expectedHeight;
 
     final locationName = hitValues
         .map((hit) => _getLocationName(hit.geocode?.code ?? '', context))
@@ -66,7 +69,7 @@ class AlertOverlayCardWidget extends StatelessWidget {
 
     return Positioned(
       top: top,
-      left: (hitResult?.point.x ?? 0) / 1.5,
+      left: (hitResult?.point.x ?? 0) / 2,
       width: min(
         maxWidth - 20,
         300,

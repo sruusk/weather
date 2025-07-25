@@ -145,6 +145,7 @@ class _WarningsPageState extends State<WarningsPage> {
     return Builder(builder: (context) {
       return SafeArea(
         child: LayoutBuilder(builder: (context, constraints) {
+          const double mapHeight = 1220; // Fixed height for the map
           return SizedBox(
             width: constraints.maxWidth,
             child: SingleChildScrollView(
@@ -173,11 +174,11 @@ class _WarningsPageState extends State<WarningsPage> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: SizedBox(
-                      height: min(constraints.maxHeight - 100, 1220),
+                      height: min(constraints.maxHeight - 100, mapHeight),
                       child: FittedBox(
                         child: SizedBox(
                           width: 600,
-                          height: 1220,
+                          height: mapHeight,
                           child: Stack(
                             children: [
                               WarningsMapWidget(
@@ -195,6 +196,7 @@ class _WarningsPageState extends State<WarningsPage> {
                                   languageCode: localization.languageCode,
                                   municipalities: municipalities,
                                   maxWidth: constraints.maxWidth,
+                                  parentHeight: mapHeight,
                                   onClose: () {
                                     setState(() {
                                       showOverlay = false;
