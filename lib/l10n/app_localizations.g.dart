@@ -98,6 +98,30 @@ abstract class AppLocalizations {
     Locale('fi')
   ];
 
+  /// Title for the web version performance warning dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Web Version Notice'**
+  String get webPerformanceWarningTitle;
+
+  /// Message explaining that the web version has limited performance
+  ///
+  /// In en, this message translates to:
+  /// **'This web version has sub-par performance and is only for demonstration purposes.'**
+  String get webPerformanceWarningMessage;
+
+  /// Message explaining that the web version uses different maps
+  ///
+  /// In en, this message translates to:
+  /// **'The web version uses a different base map for weather radar and warnings.'**
+  String get webMapDifferenceMessage;
+
+  /// Button text to acknowledge and close the warning dialog
+  ///
+  /// In en, this message translates to:
+  /// **'I Understand'**
+  String get acknowledge;
+
   /// Text for sign up button and title
   ///
   /// In en, this message translates to:

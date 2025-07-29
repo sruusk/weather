@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage>
   bool _isLoading = true;
   bool _isGeolocating = false;
   bool _geolocationTimedOut = false;
+  int _prevFavouriteLocationsLength = 0;
 
   @override
   void initState() {
@@ -83,10 +84,11 @@ class _HomePageState extends State<HomePage>
     final appState = Provider.of<AppState>(context, listen: false);
     if (_isLoading) return;
 
-    if (appState.favouriteLocations.length == 1) {
+    if (appState.favouriteLocations.length  != _prevFavouriteLocationsLength) {
       if (kDebugMode) {
-        print("Favourite locations changed, reloading forecasts");
+        print("Favourite locations changed, reloading forecasts (on change)");
       }
+      _prevFavouriteLocationsLength = appState.favouriteLocations.length;
       _loadForecasts();
     }
   }
@@ -308,6 +310,14 @@ class _HomePageState extends State<HomePage>
     List<Location> locations = appState.geoLocation != null
         ? [appState.geoLocation!, ...appState.favouriteLocations]
         : appState.favouriteLocations;
+
+    if(appState.favouriteLocations.length != _prevFavouriteLocationsLength) {
+      _prevFavouriteLocationsLength = appState.favouriteLocations.length;
+      if (kDebugMode) {
+        print("Favourite locations changed, reloading forecasts (build)");
+      }
+      _loadForecasts();
+    }
 
     if (_geolocationTimedOut) {
       // Show a message if geolocation timed out

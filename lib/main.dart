@@ -237,9 +237,77 @@ void main() async {
     ChangeNotifierProvider(
       create: (context) => AppState(),
       // Pass account from singleton // Removed account argument
-      child: const MyApp(),
+      child: const WebVersionCheck(
+        child: MyApp(),
+      ),
     ),
   );
+}
+
+// Widget to check if running on web and show a dialog
+class WebVersionCheck extends StatefulWidget {
+  final Widget child;
+
+  const WebVersionCheck({super.key, required this.child});
+
+  @override
+  State<WebVersionCheck> createState() => _WebVersionCheckState();
+}
+
+class _WebVersionCheckState extends State<WebVersionCheck> {
+  bool _dialogShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if running on web platform
+    if (kIsWeb) {
+      // Use a post-frame callback to ensure the context is valid
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showWebPerformanceDialog(context);
+      });
+    }
+  }
+
+  void _showWebPerformanceDialog(BuildContext context) {
+    if (_dialogShown) return;
+
+    setState(() {
+      _dialogShown = true;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User must tap button to close dialog
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text("Web Version Notice"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text("This web version has sub-par performance and is only for demonstration purposes."),
+              SizedBox(height: 16),
+              Text("The web version uses a different base map for weather radar and warnings."),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text("I Understand"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -345,6 +413,39 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  bool wasDisplayed = false;
+  // Show a dialog to inform users about web version limitations
+  void _showWebPerformanceDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User must tap button to close dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(localizations.webPerformanceWarningTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(localizations.webPerformanceWarningMessage),
+              const SizedBox(height: 16),
+              Text(localizations.webMapDifferenceMessage),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(localizations.acknowledge),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.toString();
 
@@ -405,6 +506,13 @@ class _MainScreenState extends State<MainScreen> {
         _sync(appState);
       });
       _syncComplete = true;
+    }
+
+    if(kIsWeb && !wasDisplayed) {
+      wasDisplayed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showWebPerformanceDialog(context);
+      });
     }
 
     return Scaffold(

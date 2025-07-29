@@ -9,6 +9,20 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get webPerformanceWarningTitle => 'Web Version Notice';
+
+  @override
+  String get webPerformanceWarningMessage =>
+      'This web version has sub-par performance and is only for demonstration purposes.';
+
+  @override
+  String get webMapDifferenceMessage =>
+      'The web version uses a different base map for weather radar and warnings.';
+
+  @override
+  String get acknowledge => 'I Understand';
+
+  @override
   String get signUp => 'Sign Up';
 
   @override

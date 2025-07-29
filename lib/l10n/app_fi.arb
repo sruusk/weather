@@ -1,5 +1,21 @@
 {
   "@@locale": "fi",
+  "webPerformanceWarningTitle": "Verkkosovelluksen suorituskykyvaroitus",
+  "@webPerformanceWarningTitle": {
+    "description": "Title for the web version performance warning dialog"
+  },
+  "webPerformanceWarningMessage": "Verkkosovelluksella on rajoitettu suorituskyky verrattuna mobiilisovellukseen, ja on tarkoitettu vain demonstratiivisiin tarkoituksiin.",
+  "@webPerformanceWarningMessage": {
+    "description": "Message explaining that the web version has limited performance"
+  },
+  "webMapDifferenceMessage": "Verkkosovelluksessa käytetään eri karttoja kuin mobiilisovelluksessa, joten karttatoiminnot ovat visuaalisesti erilaisia.",
+  "@webMapDifferenceMessage": {
+    "description": "Message explaining that the web version uses different maps"
+  },
+  "acknowledge": "Ymmärrän",
+  "@acknowledge": {
+    "description": "Button text to acknowledge and close the warning dialog"
+  },
   "signUp": "Rekisteröidy",
   "@signUp": {
     "description": "Text for sign up button and title"

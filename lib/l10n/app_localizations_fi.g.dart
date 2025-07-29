@@ -9,6 +9,21 @@ class AppLocalizationsFi extends AppLocalizations {
   AppLocalizationsFi([String locale = 'fi']) : super(locale);
 
   @override
+  String get webPerformanceWarningTitle =>
+      'Verkkosovelluksen suorituskykyvaroitus';
+
+  @override
+  String get webPerformanceWarningMessage =>
+      'Verkkosovelluksella on rajoitettu suorituskyky verrattuna mobiilisovellukseen, ja on tarkoitettu vain demonstratiivisiin tarkoituksiin.';
+
+  @override
+  String get webMapDifferenceMessage =>
+      'Verkkosovelluksessa käytetään eri karttoja kuin mobiilisovelluksessa, joten karttatoiminnot ovat visuaalisesti erilaisia.';
+
+  @override
+  String get acknowledge => 'Ymmärrän';
+
+  @override
   String get signUp => 'Rekisteröidy';
 
   @override
