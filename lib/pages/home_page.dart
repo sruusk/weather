@@ -125,15 +125,7 @@ class _HomePageState extends State<HomePage>
 
   Future<void> _loadForecasts() async {
     final appState = Provider.of<AppState>(context, listen: false);
-
-    // If the locations is empty, it might mean that the AppState has not been initialized yet
-    // so we wait a bit to ensure it is ready.
-    final List<Location>locs = appState.favouriteLocations.isEmpty
-        ? await () async {
-            await Future.delayed(const Duration(milliseconds: 200));
-            return appState.favouriteLocations;
-          }()
-        : appState.favouriteLocations;
+    final List<Location>locs = appState.favouriteLocations;
 
     if (kDebugMode) {
       print(

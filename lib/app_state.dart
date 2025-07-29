@@ -89,6 +89,9 @@ class AppState extends ChangeNotifier {
       if (b.index == null) return -1;
       return a.index!.compareTo(b.index!);
     });
+    // If no locations are available and running on web, return a default location
+    // This is for demonstration purposes on the web version
+    if(locations.isEmpty && kIsWeb) return [ Location(lat: 60.1699, lon: 24.9384, name: 'Helsinki', countryCode: 'FI') ];
     return locations;
   }
 
