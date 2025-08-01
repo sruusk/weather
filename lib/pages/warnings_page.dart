@@ -146,6 +146,11 @@ class _WarningsPageState extends State<WarningsPage> {
       return SafeArea(
         child: LayoutBuilder(builder: (context, constraints) {
           const double mapHeight = 1220; // Fixed height for the map
+          const double mapWidth = 700; // Fixed width for the map
+
+          final double inherentMapHeight = mapHeight/mapWidth * constraints.maxWidth;
+          final double mapParentHeight = min(inherentMapHeight, min(constraints.maxHeight - 100, mapHeight));
+
           return SizedBox(
             width: constraints.maxWidth,
             child: SingleChildScrollView(
@@ -172,16 +177,18 @@ class _WarningsPageState extends State<WarningsPage> {
                     ],
                   ),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                     child: SizedBox(
-                      height: min(constraints.maxHeight - 100, mapHeight),
-                      child: FittedBox(
-                        child: SizedBox(
-                          width: 600,
-                          height: mapHeight,
-                          child: Stack(
-                            children: [
-                              WarningsMapWidget(
+                      height: mapParentHeight,
+                      child: Stack(
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.cover,
+                            alignment: Alignment.center,
+                            child: SizedBox(
+                              width: mapWidth,
+                              height: mapHeight,
+                              child: WarningsMapWidget(
                                 weatherAlerts: _weatherAlerts,
                                 hitNotifier: hitNotifier,
                                 onOverlayVisibilityChanged: (visible) {
@@ -190,22 +197,24 @@ class _WarningsPageState extends State<WarningsPage> {
                                   });
                                 },
                               ),
-                              if (showOverlay)
-                                AlertOverlayCardWidget(
-                                  hitResult: hitNotifier.value,
-                                  languageCode: localization.languageCode,
-                                  municipalities: municipalities,
-                                  maxWidth: constraints.maxWidth,
-                                  parentHeight: mapHeight,
-                                  onClose: () {
-                                    setState(() {
-                                      showOverlay = false;
-                                    });
-                                  },
-                                ),
-                            ],
+                            ),
                           ),
-                        ),
+                          if (showOverlay)
+                            AlertOverlayCardWidget(
+                              hitResult: hitNotifier.value,
+                              languageCode: localization.languageCode,
+                              municipalities: municipalities,
+                              maxWidth: constraints.maxWidth,
+                              parentHeight: mapParentHeight,
+                              mapRenderHeight: mapHeight,
+                              mapRenderWidth: mapWidth,
+                              onClose: () {
+                                setState(() {
+                                  showOverlay = false;
+                                });
+                              },
+                            ),
+                        ],
                       ),
                     ),
                   ),

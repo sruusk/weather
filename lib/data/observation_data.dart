@@ -224,7 +224,7 @@ class ObservationData {
     // Check if we have cached data for this station
     if (_observationsCache.containsKey(cacheKey)) {
       if(kDebugMode) print('Using cached observations data for station ${station.name}');
-      return _observationsCache[cacheKey]!;
+      return _observationsCache[cacheKey]!.copyWith(location: station);
     }
 
     if(kDebugMode) print('Fetching new observations data for station ${station.name}');

@@ -62,7 +62,7 @@ class _WarningsMapWidgetState extends State<WarningsMapWidget> {
   Widget build(BuildContext context) {
     return FlutterMap(
       options: MapOptions(
-        initialCenter: const LatLng(65.0, 25.62),
+        initialCenter: const LatLng(65.2, 24.6),
         initialZoom: 6,
         backgroundColor: Colors.transparent,
         interactionOptions: InteractionOptions(

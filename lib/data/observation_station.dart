@@ -63,4 +63,22 @@ class ObservationStation {
   String toString() {
     return 'ObservationStation(location: ${location.name}, time: $time, temperature: $temperature)';
   }
+
+  ObservationStation copyWith({ObservationStationLocation? location}) {
+    return ObservationStation(
+      location: location ?? this.location,
+      time: time,
+      temperature: temperature,
+      humidity: humidity,
+      dewPoint: dewPoint,
+      snowDepth: snowDepth,
+      pressure: pressure,
+      visibility: visibility,
+      precipitation: precipitation,
+      cloudBase: cloudBase,
+      windDirection: windDirection,
+      windSpeed: windSpeed,
+      windGust: windGust,
+    );
+  }
 }

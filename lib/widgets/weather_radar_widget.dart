@@ -40,6 +40,7 @@ class WeatherRadar extends StatefulWidget {
 class _WeatherRadarState extends State<WeatherRadar> {
   late final Future<PmTilesVectorTileProvider?> _tileProviderFuture;
   late DateTime _currentTime;
+  late List<DateTime> _radarTimes;
   double _sliderValue =
       5; // 5 represents the latest time, 0 represents 75 minutes ago
   bool _isPlaying = false;
@@ -55,6 +56,10 @@ class _WeatherRadarState extends State<WeatherRadar> {
     super.initState();
     _resetController = StreamController<void>.broadcast();
     _currentTime = getTime();
+    _radarTimes = List.generate(6, (index) {
+      // Generate times for the last 75 minutes in 15 minute intervals
+      return _currentTime.subtract(Duration(minutes: index * 15));
+    });
     _updateLightningStrikes();
     _tileProviderFuture = () async {
       if (kIsWeb || kIsWasm) {
@@ -125,6 +130,12 @@ class _WeatherRadarState extends State<WeatherRadar> {
         // Get the base time and subtract the minutes
         final baseTime = getTime();
         _currentTime = baseTime.subtract(Duration(minutes: minutesToSubtract));
+        if (!_radarTimes.contains(_currentTime)) {
+          // If the time is not in the radar times, update the list
+          _radarTimes = List.generate(6, (index) {
+            return baseTime.subtract(Duration(minutes: index * 15));
+          });
+        }
       } catch (e) {
         // Fallback to current time if there's an error
         _currentTime = DateTime.now().toUtc();
@@ -231,8 +242,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                   showTileDebugInfo: false,
                                   // Set a custom cache folder, so it doesn't conflict with dark mode layer cache
                                   cacheFolder: () {
-                                    return getTemporaryDirectory()
-                                        .then((dir) {
+                                    return getTemporaryDirectory().then((dir) {
                                       return Directory(
                                           '${dir.path}/pmtiles_white_v3');
                                     });
@@ -247,45 +257,52 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                       /*logger: Logger.console()*/),
                                   showTileDebugInfo: false,
                                   cacheFolder: () {
-                                    return getTemporaryDirectory()
-                                        .then((dir) {
+                                    return getTemporaryDirectory().then((dir) {
                                       return Directory(
                                           '${dir.path}/pmtiles_black_v3');
                                     });
                                   },
                                 ),
-                        TileLayer(
-                          tileSize: 128,
-                          // Add constraints to prevent NaN/Infinity values
-                          tileProvider: CancellableNetworkTileProvider(
-                              silenceExceptions: true),
-                          maxNativeZoom: 12,
-                          minNativeZoom: 7,
-                          keepBuffer: 5,
-                          panBuffer: 1,
-                          wmsOptions: WMSTileLayerOptions(
-                              // baseUrl: 'https://openwms.fmi.fi/geoserver/wms?',
-                              baseUrl: 'https://wfs-proxy.a32.fi/wms?',
-                              // baseUrl: 'https://a32.fi/radar/wms?',
-                              layers: const ['Radar:suomi_rr_eureffin'],
-                              version: '1.3.0',
-                              crs: const Epsg3857(),
-                              format: 'image/geotiff',
-                              transparent: true,
-                              otherParameters: {
-                                'time': _currentTime.toIso8601String(),
-                              }),
-                          reset: _resetController.stream,
-                          userAgentPackageName: 'com.sruusk.weather',
-                          evictErrorTileStrategy:
-                              EvictErrorTileStrategy.dispose,
-                          errorTileCallback: (TileImage image, Object error,
-                              StackTrace? stackTrace) {
-                            if (kDebugMode) {
-                              print('Error loading tile: $error');
-                            }
-                          },
-                        ),
+
+                        for (final time in _radarTimes)
+                          Opacity(
+                            opacity: time == _currentTime ? 1.0 : 0,
+                            child: TileLayer(
+                              // tileSize: 128,
+                              tileSize: 512,
+                              tileProvider: CancellableNetworkTileProvider(
+                                  silenceExceptions: true),
+                              maxNativeZoom: 12,
+                              minNativeZoom: 7,
+                              keepBuffer: 2,
+                              panBuffer: 1,
+                              tileBounds: LatLngBounds( // 19.204102,59.578851,32.036133,70.259452
+                                  LatLng(59.578851, 19.204102),
+                                  LatLng(70.259452, 32.036133)
+                              ),
+                              wmsOptions: WMSTileLayerOptions(
+                                  // baseUrl: 'https://openwms.fmi.fi/geoserver/wms?',
+                                  baseUrl: 'https://wfs-proxy.a32.fi/wms?',
+                                  // baseUrl: 'http://localhost:8080/wms?',
+                                  layers: const ['Radar:suomi_rr_eureffin'],
+                                  version: '1.3.0',
+                                  crs: const Epsg3857(),
+                                  format: 'image/geotiff',
+                                  transparent: true,
+                                  otherParameters: {
+                                    'time': time.toIso8601String(),
+                                  }),
+                              userAgentPackageName: 'com.sruusk.weather',
+                              evictErrorTileStrategy:
+                                  EvictErrorTileStrategy.dispose,
+                              errorTileCallback: (TileImage image, Object error,
+                                  StackTrace? stackTrace) {
+                                if (kDebugMode) {
+                                  print('Error loading tile: $error');
+                                }
+                              },
+                            ),
+                          ),
                         MarkerLayer(markers: [
                           ..._pastLightningStrikes.map((strike) {
                             return Marker(
@@ -293,7 +310,10 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                 width: 80,
                                 height: 80,
                                 child: WeatherSymbolWidget(
-                                    symbolName: 'lightning-bolt', size: 80));
+                                  symbolName: 'lightning-bolt',
+                                  static: true,
+                                  size: 80,
+                                ));
                           }),
                           ..._currentLightningStrikes.map((strike) {
                             return Marker(
@@ -301,8 +321,10 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                 width: 80,
                                 height: 80,
                                 child: WeatherSymbolWidget(
-                                    symbolName: 'lightning-bolt-red',
-                                    size: 80));
+                                  symbolName: 'lightning-bolt-red',
+                                  static: true,
+                                  size: 80,
+                                ));
                           }),
                           Marker(
                             point: widget.controller.currentCenter,
@@ -355,8 +377,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
             height: 64,
             color: Theme.of(context).colorScheme.surface.withAlpha(150),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
               child: Row(
                 children: [
                   IconButton(

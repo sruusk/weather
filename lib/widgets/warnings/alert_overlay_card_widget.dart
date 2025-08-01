@@ -13,6 +13,8 @@ class AlertOverlayCardWidget extends StatelessWidget {
   final double maxWidth;
   final double parentHeight;
   final VoidCallback onClose;
+  final double mapRenderHeight;
+  final double mapRenderWidth;
 
   const AlertOverlayCardWidget({
     super.key,
@@ -22,6 +24,8 @@ class AlertOverlayCardWidget extends StatelessWidget {
     required this.maxWidth,
     required this.parentHeight,
     required this.onClose,
+    required this.mapRenderHeight,
+    required this.mapRenderWidth,
   });
 
   Color _getSeverityColor(List<HitValue> severity) {
@@ -59,8 +63,21 @@ class AlertOverlayCardWidget extends StatelessWidget {
     // If opened too low, move the overlay up
     // to avoid overflowing/clipping
     double top = (hitResult?.point.y ?? 0);
-    final double expectedHeight = hitValues.length * 100 + 120;
-    if (top > parentHeight - expectedHeight) top = parentHeight - expectedHeight;
+
+    // Scale the top to match the map scaling
+    top *= (parentHeight / mapRenderHeight);
+
+    final double expectedHeight = hitValues.length * 90 + 80;
+    if (top > parentHeight - expectedHeight) {
+      top = parentHeight - expectedHeight;
+    }
+
+    final double width = min(maxWidth - 20, 300);
+
+    // Scale the left position to match the map scaling
+    double left = (hitResult?.point.x ?? 0) / 2;
+    if (maxWidth < mapRenderWidth) left *= (maxWidth / mapRenderWidth);
+    if (left + width > maxWidth) left = maxWidth - width;
 
     final locationName = hitValues
         .map((hit) => _getLocationName(hit.geocode?.code ?? '', context))
@@ -69,11 +86,8 @@ class AlertOverlayCardWidget extends StatelessWidget {
 
     return Positioned(
       top: top,
-      left: (hitResult?.point.x ?? 0) / 2,
-      width: min(
-        maxWidth - 20,
-        300,
-      ),
+      left: left,
+      width: width,
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
