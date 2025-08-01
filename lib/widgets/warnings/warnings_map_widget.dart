@@ -71,6 +71,11 @@ class _WarningsMapWidgetState extends State<WarningsMapWidget> {
           cursorKeyboardRotationOptions:
               CursorKeyboardRotationOptions.disabled(),
         ),
+        onTap: (tapPosition, point) {
+          // Clear hit notifier on map tap
+          // This might cause a race condition if a polygon is tapped
+          widget.onOverlayVisibilityChanged(false);
+        },
       ),
       children: [
         // Use raster layer for web, vector layer for mobile

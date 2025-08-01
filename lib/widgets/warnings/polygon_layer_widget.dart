@@ -20,11 +20,11 @@ class PolygonLayerWidget extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     switch (severity ?? WeatherAlertSeverity.unknown) {
       case WeatherAlertSeverity.minor:
-        return Colors.lightGreenAccent.withAlpha(150);
+        return Color(0xFF2AC02A);
       case WeatherAlertSeverity.moderate:
-        return isDark ? Color(0xFFAAAA1F) : Colors.yellowAccent;
+        return isDark ? Color(0xFFBFAF1F) : Colors.yellowAccent.shade700;
       case WeatherAlertSeverity.severe:
-        return Color(0xFFDE8D00);
+        return isDark ? Color(0xFFDE8D00) : Colors.orangeAccent.shade400;
       case WeatherAlertSeverity.extreme:
         return Colors.red.withAlpha(150);
       default:

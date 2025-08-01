@@ -55,13 +55,13 @@ class _WarningsPageState extends State<WarningsPage> {
       case WeatherAlertSeverity.minor:
         return Colors.lightGreenAccent;
       case WeatherAlertSeverity.moderate:
-        return Colors.yellowAccent;
+        return Colors.yellowAccent.shade400;
       case WeatherAlertSeverity.severe:
         return Colors.orange;
       case WeatherAlertSeverity.extreme:
         return Colors.red;
       default:
-        return Colors.lightGreen;
+        return Color(0xFF2AC02A);
     }
   }
 

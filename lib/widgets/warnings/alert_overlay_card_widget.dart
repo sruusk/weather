@@ -77,7 +77,8 @@ class AlertOverlayCardWidget extends StatelessWidget {
     // Scale the left position to match the map scaling
     double left = (hitResult?.point.x ?? 0) / 2;
     if (maxWidth < mapRenderWidth) left *= (maxWidth / mapRenderWidth);
-    if (left + width > maxWidth) left = maxWidth - width;
+    // Ensure the left position does not overflow the screen. 20 padding is added
+    if (left + width > maxWidth - 20) left = maxWidth - width - 20;
 
     final locationName = hitValues
         .map((hit) => _getLocationName(hit.geocode?.code ?? '', context))
@@ -111,7 +112,6 @@ class AlertOverlayCardWidget extends StatelessWidget {
                       locationName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.black,
-                            fontWeight: FontWeight.bold,
                           ),
                     ),
                   IconButton(
@@ -119,6 +119,7 @@ class AlertOverlayCardWidget extends StatelessWidget {
                     onPressed: onClose,
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
+                    visualDensity: VisualDensity.compact,
                     iconSize: 20,
                   ),
                 ],
@@ -129,19 +130,19 @@ class AlertOverlayCardWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
                   children: [
                     Text(
                       languageCode == 'fi'
                           ? hitValue.alert.fi.event
                           : hitValue.alert.en.event,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    SizedBox(height: 4),
                     Text(
                       languageCode == 'fi'
                           ? hitValue.alert.fi.headline
                           : hitValue.alert.en.headline,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
                 ),
