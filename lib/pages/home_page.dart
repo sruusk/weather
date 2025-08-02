@@ -27,7 +27,6 @@ class _HomePageState extends State<HomePage>
   Forecast? _forecast;
   bool _isLoading = true;
   bool _isGeolocating = false;
-  bool _geolocationTimedOut = false;
   int _prevFavouriteLocationsLength = 0;
 
   @override
@@ -72,7 +71,7 @@ class _HomePageState extends State<HomePage>
     final appState = Provider.of<AppState>(context, listen: false);
     if (_isLoading) return;
     if (!appState.geolocationEnabled) {
-      appState.setGeoLocation(null);
+      appState.setGeolocation(null);
     }
     if (kDebugMode) {
       print("Geolocation changed, reloading forecasts");
@@ -106,6 +105,132 @@ class _HomePageState extends State<HomePage>
         _loadForecasts();
       }
       WidgetsBinding.instance.removeObserver(this);
+    }
+  }
+
+  void _handleGeolocationError(GeolocationResult result) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final localizations = AppLocalizations.of(context)!;
+      String errorMessage;
+
+      switch (result.status) {
+        case GeolocationStatus.locationServicesDisabled:
+          errorMessage = localizations.locationServicesDisabled;
+          break;
+        case GeolocationStatus.permissionDenied:
+          errorMessage = localizations.locationPermissionDenied;
+          break;
+        case GeolocationStatus.permissionDeniedForever:
+        // For permanently denied permissions, also disable geolocation in app state
+          appState.setGeolocationEnabled(false);
+          errorMessage =
+              localizations.locationPermissionPermanentlyDenied;
+          break;
+        default:
+          errorMessage = localizations.unknownError;
+      }
+
+      showGlobalSnackBar(
+        message: errorMessage,
+        duration: const Duration(seconds: 5),
+        action: result.status == GeolocationStatus.permissionDeniedForever
+            ? SnackBarAction(
+          label: localizations.openSettings,
+          onPressed: () {
+            // Open app settings
+            WidgetsBinding.instance.addObserver(this);
+            Geolocator.openAppSettings();
+          },
+        )
+            : result.status == GeolocationStatus.locationServicesDisabled
+            ? SnackBarAction(
+          label: localizations.openSettings,
+          onPressed: () {
+            // Open location settings
+            WidgetsBinding.instance.addObserver(this);
+            Geolocator.openLocationSettings();
+          },
+        )
+            : SnackBarAction(
+          label: localizations.retry,
+          onPressed: _loadForecasts,
+        ),
+      );
+    });
+  }
+
+  void _startGeolocation() async {
+    final appState = Provider.of<AppState>(context, listen: false);
+    try {
+      setState(() {
+        _isGeolocating = true;
+      });
+
+      final result =
+      await determinePosition().timeout(const Duration(seconds: 10));
+
+      if (result.isSuccess && result.position != null) {
+        // Use reverse geocoding to get location information
+        final geolocation = await _weatherData.reverseGeocoding(
+          result.position!.latitude,
+          result.position!.longitude,
+        );
+        setState(() {
+          _isGeolocating = false;
+        });
+        // Update the forecast if new location more than 500 different
+        if(appState.geoLocation == null ||
+            appState.geoLocation!.distanceTo(geolocation) > 500) {
+          _weatherData.getForecast(geolocation).then((forecast) {
+            if (mounted) {
+              setState(() {
+                _forecast = forecast;
+              });
+            }
+          }).catchError((e) {
+            if (kDebugMode) {
+              print('Error getting forecast for geolocation: $e');
+            }
+          });
+        }
+        appState.setGeolocation(geolocation);
+      } else {
+        // Handle geolocation errors
+        setState(() {
+          _isGeolocating = false;
+        });
+        appState.setGeolocation(null);
+
+        _handleGeolocationError(result);
+      }
+    } on TimeoutException {
+      // Handle timeout specifically
+      if (kDebugMode) {
+        print('Geolocation timed out, using first favorite location');
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final localizations = AppLocalizations.of(context)!;
+        showGlobalSnackBar(
+          message: localizations.geolocationTimeout,
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+              label: localizations.retry, onPressed: _loadForecasts),
+        );
+      });
+
+      setState(() {
+        _isGeolocating = false;
+      });
+    } catch (e) {
+      // Handle any other exceptions
+      if (kDebugMode) {
+        print('Geolocation failed, using first favorite location: $e');
+      }
+      setState(() {
+        _isGeolocating = false;
+      });
     }
   }
 
@@ -149,113 +274,19 @@ class _HomePageState extends State<HomePage>
     if (appState.geolocationEnabled && appState.geoLocation != null) {
       locationToLoad = appState.geoLocation;
     } else if (appState.geolocationEnabled) {
-      try {
-        setState(() {
-          _isGeolocating = true;
-        });
-
-        final result =
-            await determinePosition().timeout(const Duration(seconds: 10));
-
-        if (result.isSuccess && result.position != null) {
-          // Use reverse geocoding to get location information
-          locationToLoad = await _weatherData.reverseGeocoding(
-            result.position!.latitude,
-            result.position!.longitude,
-          );
-          setState(() {
-            _isGeolocating = false;
-          });
-          appState.setGeoLocation(locationToLoad);
-        } else {
-          // Handle geolocation errors
-          setState(() {
-            _isGeolocating = false;
-          });
-          appState.setGeoLocation(null);
-
-          // Show appropriate error message based on status
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final localizations = AppLocalizations.of(context)!;
-            String errorMessage;
-
-            switch (result.status) {
-              case GeolocationStatus.locationServicesDisabled:
-                errorMessage = localizations.locationServicesDisabled;
-                break;
-              case GeolocationStatus.permissionDenied:
-                errorMessage = localizations.locationPermissionDenied;
-                break;
-              case GeolocationStatus.permissionDeniedForever:
-                // For permanently denied permissions, also disable geolocation in app state
-                appState.setGeolocationEnabled(false);
-                errorMessage =
-                    localizations.locationPermissionPermanentlyDenied;
-                break;
-              default:
-                errorMessage = localizations.unknownError;
-            }
-
-            showGlobalSnackBar(
-              message: errorMessage,
-              duration: const Duration(seconds: 5),
-              action: result.status == GeolocationStatus.permissionDeniedForever
-                  ? SnackBarAction(
-                      label: localizations.openSettings,
-                      onPressed: () {
-                        // Open app settings
-                        WidgetsBinding.instance.addObserver(this);
-                        Geolocator.openAppSettings();
-                      },
-                    )
-                  : result.status == GeolocationStatus.locationServicesDisabled
-                      ? SnackBarAction(
-                          label: localizations.openSettings,
-                          onPressed: () {
-                            // Open location settings
-                            WidgetsBinding.instance.addObserver(this);
-                            Geolocator.openLocationSettings();
-                          },
-                        )
-                      : SnackBarAction(
-                          label: localizations.retry,
-                          onPressed: _loadForecasts,
-                        ),
-            );
-          });
-
-          // Fall back to first favorite location if available
-          if (locs.isNotEmpty) {
-            locationToLoad = locs.first;
-          }
-        }
-      } on TimeoutException {
-        // Handle timeout specifically
-        if (kDebugMode) {
-          print('Geolocation timed out, using first favorite location');
-        }
-        setState(() {
-          _isGeolocating = false;
-          _geolocationTimedOut = true;
-        });
-        appState.setGeoLocation(null);
-        // If geolocation times out, fall back to first favorite
-        if (locs.isNotEmpty) {
-          locationToLoad = locs.first;
-        }
-      } catch (e) {
-        // Handle any other exceptions
-        if (kDebugMode) {
-          print('Geolocation failed, using first favorite location: $e');
-        }
-        setState(() {
-          _isGeolocating = false;
-        });
-        appState.setGeoLocation(null);
-        // If geolocation fails for any reason, fall back to first favorite
-        if (locs.isNotEmpty) {
-          locationToLoad = locs.first;
-        }
+      final result = await getLastKnownPosition();
+      if(result.isSuccess && result.position != null) {
+        // Use reverse geocoding to get location information
+        final geolocation = await _weatherData.reverseGeocoding(
+          result.position!.latitude,
+          result.position!.longitude,
+        );
+        appState.setGeolocation(geolocation);
+        locationToLoad = geolocation;
+        _startGeolocation();
+      } else {
+        // Handle geolocation errors
+        _handleGeolocationError(result);
       }
     } else if (locs.isNotEmpty) {
       // If geolocation is disabled, use first favorite
@@ -309,19 +340,6 @@ class _HomePageState extends State<HomePage>
         print("Favourite locations changed, reloading forecasts (build)");
       }
       _loadForecasts();
-    }
-
-    if (_geolocationTimedOut) {
-      // Show a message if geolocation timed out
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showGlobalSnackBar(
-          message: localizations.geolocationTimeout,
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-              label: localizations.retry, onPressed: _loadForecasts),
-        );
-      });
-      _geolocationTimedOut = false; // Reset the flag after showing the message
     }
 
     return Scaffold(

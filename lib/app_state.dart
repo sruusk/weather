@@ -399,7 +399,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setGeoLocation(Location? location) {
+  void setGeolocation(Location? location) {
     _geoLocationNotifier.value = location;
     notifyListeners();
   }

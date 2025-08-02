@@ -1,3 +1,5 @@
+import 'dart:math';
+
 /// Represents a geographical location with coordinates and descriptive information
 class Location {
   /// Latitude coordinate
@@ -36,7 +38,8 @@ class Location {
   /// Note: region, country, and index can be null, in which case they're represented as empty strings
   @override
   String toString() {
-    return '$lat|$lon|$name|$countryCode|${region ?? ""}|${country ?? ""}|${index?.toString() ?? ""}';
+    return '$lat|$lon|$name|$countryCode|${region ?? ""}|${country ??
+        ""}|${index?.toString() ?? ""}';
   }
 
   /// Creates a Location object from its string representation
@@ -67,5 +70,28 @@ class Location {
   /// Returns a debug string representation of this location
   String toDebugString() {
     return 'Location(name: $name, lat: $lat, lon: $lon, region: $region, countryCode: $countryCode, country: $country, index: $index)';
+  }
+
+  /// Calculates the distance to another location in meters
+  /// Uses the Haversine formula to compute the distance between two points on the Earth
+  double distanceTo(Location other) {
+    return Location.distanceBetweenCoordinates(lat, lon, other.lat, other.lon);
+  }
+
+  /// Calculates the distance between two coordinates in meters
+  static double distanceBetweenCoordinates(double lat1, double lon1, double lat2,
+      double lon2) {
+    const R = 6371e3; // Earth radius in meters
+    final phi1 = lat1 * pi / 180; // φ, λ in radians
+    final phi2 = lat2 * pi / 180;
+    final deltaPhi = (lat2 - lat1) * pi / 180;
+    final deltaLambda = (lon2 - lon1) * pi / 180;
+
+    final a = sin(deltaPhi / 2) * sin(deltaPhi / 2) +
+        cos(phi1) * cos(phi2) *
+            sin(deltaLambda / 2) * sin(deltaLambda / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    return R * c; // in meters
   }
 }
