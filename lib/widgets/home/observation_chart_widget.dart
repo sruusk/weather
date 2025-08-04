@@ -223,6 +223,9 @@ class _ObservationChartWidgetState extends State<ObservationChartWidget> {
       ...station.windGust ?? [],
     ];
 
+    final double minY = _getMinY(allWindData);
+    final double maxY = _getMaxY(allWindData);
+
     return LineChart(
       LineChartData(
         gridData: FlGridData(
@@ -297,7 +300,7 @@ class _ObservationChartWidgetState extends State<ObservationChartWidget> {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 40,
-              interval: 2,
+              interval: maxY - minY > 10 ? 5 : 2,
             ),
           ),
         ),
@@ -308,8 +311,8 @@ class _ObservationChartWidgetState extends State<ObservationChartWidget> {
             width: 1,
           ),
         ),
-        minY: _getMinY(allWindData),
-        maxY: _getMaxY(allWindData),
+        minY: minY,
+        maxY: maxY,
         lineBarsData: [
           if (station.windSpeed != null && station.windSpeed!.isNotEmpty)
             LineChartBarData(
