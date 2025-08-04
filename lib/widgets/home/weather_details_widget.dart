@@ -121,7 +121,9 @@ class _WeatherDetailsState extends State<WeatherDetails> {
           children: children.map((child) {
             final isObservations = child.key == Key('observations');
             return SizedBox(
-              width: isObservations ? constraints.maxWidth : constraints.maxWidth / 2,
+              width: isObservations
+                  ? constraints.maxWidth
+                  : constraints.maxWidth / 2,
               child: child,
             );
           }).toList(),
@@ -187,7 +189,10 @@ class _WeatherDetailsState extends State<WeatherDetails> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Transform.translate(
                 offset: const Offset(0, -15),
-                child: ObservationsWidget(location: loc),
+                child: ObservationsWidget(
+                  location: loc,
+                  maxWidth: constraints.maxWidth,
+                ),
               )
             ],
           ),

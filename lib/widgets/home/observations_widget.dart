@@ -8,8 +8,9 @@ import 'package:weather/widgets/home/observation_chart_widget.dart';
 
 class ObservationsWidget extends StatefulWidget {
   final Location? location;
+  final double maxWidth;
 
-  const ObservationsWidget({super.key, this.location});
+  const ObservationsWidget({super.key, this.location, this.maxWidth = 600});
 
   @override
   State<ObservationsWidget> createState() => _ObservationsWidgetState();
@@ -61,6 +62,7 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
 
+    // This should not happen, but just in case
     if (widget.location == null) {
       return SizedBox(
         height: 100,
@@ -117,7 +119,7 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
             ),
             const SizedBox(height: 8),
             SizedBox(
-              height: 410,
+              height: widget.maxWidth > 390 ? 410 : 500,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: stations.length,

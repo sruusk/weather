@@ -183,7 +183,7 @@ class AppState extends ChangeNotifier {
 
     // Load favourite locations
     final String? favouriteLocationsStr = preferences[_favouriteLocationsKey];
-    if (favouriteLocationsStr != null) {
+    if (favouriteLocationsStr != null && favouriteLocationsStr.isNotEmpty) {
       try {
         final List<String> locationStrings = favouriteLocationsStr.split(',');
         final List<Location> locations = locationStrings
