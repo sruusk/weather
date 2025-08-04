@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:weather/appwrite_client.dart';
@@ -7,6 +9,14 @@ import 'preferences.dart';
 
 // App state provider
 class AppState extends ChangeNotifier {
+  // Completer to track initialization
+  final Completer<void> _initializedCompleter = Completer<void>();
+
+  Future<void> get initialized => _initializedCompleter.future;
+  bool _isInitialized = false;
+
+  bool get isInitialized => _isInitialized;
+
   // Keys for shared preferences
   static const String _localeKey = 'locale';
   static const String _temperatureUnitKey = 'temperatureUnit';
@@ -106,7 +116,16 @@ class AppState extends ChangeNotifier {
 
   AppState() {
     _preferencesNotifier.addListener(_updateFromPreferences);
+    _loadInitialPreferences();
+  }
+
+  Future<void> _loadInitialPreferences() async {
+    await _preferencesNotifier.loadPreferencesCompleted;
     _updateFromPreferences();
+    _isInitialized = true;
+    if (!_initializedCompleter.isCompleted) {
+      _initializedCompleter.complete();
+    }
   }
 
   @override

@@ -233,10 +233,15 @@ void main() async {
   // Initialize Appwrite Client
   AppwriteClient();
 
+  // Create AppState but don't use it yet
+  final appState = AppState();
+
+  // Wait for AppState to be initialized
+  await appState.initialized;
+
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AppState(),
-      // Pass account from singleton // Removed account argument
+    ChangeNotifierProvider.value(
+      value: appState,
       child: const WebVersionCheck(
         child: MyApp(),
       ),

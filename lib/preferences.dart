@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,6 +19,11 @@ class PreferencesModel {
 }
 
 class PreferencesNotifier extends ValueNotifier<PreferencesModel> {
+  // Add a Completer to track when preferences are loaded
+  final Completer<void> _loadCompleter = Completer<void>();
+
+  Future<void> get loadPreferencesCompleted => _loadCompleter.future;
+
   PreferencesNotifier() : super(PreferencesModel(preferences: {})) {
     _loadPreferences();
   }
@@ -31,12 +37,24 @@ class PreferencesNotifier extends ValueNotifier<PreferencesModel> {
   }
 
   Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys();
-    final preferences = <String, String?>{};
-    for (var key in keys) {
-      preferences[key] = prefs.getString(key);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys();
+      final preferences = <String, String?>{};
+      for (var key in keys) {
+        preferences[key] = prefs.getString(key);
+      }
+      value = value.copyWith(preferences: preferences);
+
+      // Complete the future when preferences are loaded
+      if (!_loadCompleter.isCompleted) {
+        _loadCompleter.complete();
+      }
+    } catch (e) {
+      // Complete with error if loading fails
+      if (!_loadCompleter.isCompleted) {
+        _loadCompleter.completeError(e);
+      }
     }
-    value = value.copyWith(preferences: preferences);
   }
 }
