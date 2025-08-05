@@ -91,7 +91,7 @@ Future<GeolocationResult> determinePosition() async {
   // continue accessing the position of the device.
   final position = await Geolocator.getCurrentPosition(
     locationSettings: LocationSettings(
-    accuracy: LocationAccuracy.medium,
+    accuracy: LocationAccuracy.high,
   )
   );
   return GeolocationResult(

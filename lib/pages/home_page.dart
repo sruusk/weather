@@ -143,7 +143,7 @@ class _HomePageState extends State<HomePage>
     final appState = Provider.of<AppState>(context, listen: false);
     try {
       final result =
-      await determinePosition().timeout(const Duration(seconds: 10));
+          await determinePosition().timeout(const Duration(seconds: 30));
 
       if (result.isSuccess && result.position != null) {
         // Use reverse geocoding to get location information
