@@ -15,6 +15,10 @@ class _AboutPageState extends State<AboutPage>
   @override
   bool get wantKeepAlive => true;
 
+  DateTime now = DateTime.now();
+  final String month = DateTime.now().month.toString();
+  final String year = DateTime.now().year.toString();
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -111,7 +115,9 @@ class _AboutPageState extends State<AboutPage>
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 20),
+
                 // OpenStreetMap vertical block
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -121,8 +127,11 @@ class _AboutPageState extends State<AboutPage>
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
+                          'OpenStreetMap',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        Text(
                           localizations.openStreetMapDescription,
-                          style: const TextStyle(fontSize: 16),
                           textAlign: TextAlign.center,
                         ),
                         TextButton(
@@ -134,7 +143,39 @@ class _AboutPageState extends State<AboutPage>
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 20),
+
+                // NLF data source vertical block
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            localizations.nlfDataSource,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          Text(
+                            localizations.nlfDescription(month, year),
+                            textAlign: TextAlign.center,
+                          ),
+                          TextButton(
+                            onPressed: () => launchUrl(Uri.parse(
+                                'https://www.maanmittauslaitos.fi/avoindata-lisenssi-cc40')),
+                            child: Text(localizations.visitWebsite),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
                 // Licenses section header
                 Text(
                   localizations.licensesHeader,

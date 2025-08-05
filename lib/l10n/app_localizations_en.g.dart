@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -303,7 +304,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataSourcesHeader => 'Data Sources';
 
   @override
-  String get openMeteoDescription => 'Weather data by Open-Meteo.com';
+  String get openMeteoDescription => 'Weather forecasts by Open-Meteo.com';
 
   @override
   String get fmiDescription =>
@@ -483,4 +484,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activeWeatherAlerts => 'Active Weather Alerts';
+
+  @override
+  String get nlfDataSource => 'National Land Survey of Finland';
+
+  @override
+  String nlfDescription(String month, String year) {
+    return 'Contains data from the National Land Survey of Finland Geographic names Database $month/$year';
+  }
 }

@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -303,14 +304,14 @@ class AppLocalizationsFi extends AppLocalizations {
   String get dataSourcesHeader => 'Tietolähteet';
 
   @override
-  String get openMeteoDescription => 'Säädata - Open-Meteo';
+  String get openMeteoDescription => 'Sääennusteet - Open-Meteo';
 
   @override
   String get fmiDescription =>
       'Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteen laitos.';
 
   @override
-  String get openStreetMapDescription => 'Karttadata - OpenStreetMap';
+  String get openStreetMapDescription => 'Karttadata';
 
   @override
   String get visitWebsite => 'Vieraile sivustolla';
@@ -481,4 +482,12 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get activeWeatherAlerts => 'Aktiiviset säävaroitukset';
+
+  @override
+  String get nlfDataSource => 'Maanmittauslaitos';
+
+  @override
+  String nlfDescription(String month, String year) {
+    return 'Sisältää Maanmittauslaitoksen Nimistötietokannan $month/$year aineistoa';
+  }
 }

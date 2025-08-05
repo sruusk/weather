@@ -31,7 +31,8 @@ This app uses the following data sources:
 - **[Finnish Meteorological Institute (FMI) Open Data](https://en.ilmatieteenlaitos.fi/open-data)**: For weather warnings and radar imagery
 - **[Appwrite](https://appwrite.io/)**: For user authentication and data synchronization
 - **[OpenStreetMap](https://www.openstreetmap.org/)**: For map data
-- **[OpenWeatherMap](https://openweathermap.org/api)**: For reverse geocoding
+- **[OpenWeatherMap](https://openweathermap.org/api)**: Reverse geocoding
+- **[National Land Survey of Finland](https://www.maanmittauslaitos.fi/en)**: Reverse geocoding
 
 ## Project Architecture
 

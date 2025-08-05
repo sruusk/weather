@@ -665,7 +665,7 @@ abstract class AppLocalizations {
   /// Description for Open-Meteo data source
   ///
   /// In en, this message translates to:
-  /// **'Weather data by Open-Meteo.com'**
+  /// **'Weather forecasts by Open-Meteo.com'**
   String get openMeteoDescription;
 
   /// Description for Finnish Meteorological Institute data source
@@ -985,6 +985,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Active Weather Alerts'**
   String get activeWeatherAlerts;
+
+  /// No description provided for @nlfDataSource.
+  ///
+  /// In en, this message translates to:
+  /// **'National Land Survey of Finland'**
+  String get nlfDataSource;
+
+  /// Description for the National Land Survey of Finland data source
+  ///
+  /// In en, this message translates to:
+  /// **'Contains data from the National Land Survey of Finland Geographic names Database {month}/{year}'**
+  String nlfDescription(String month, String year);
 }
 
 class _AppLocalizationsDelegate

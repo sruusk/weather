@@ -420,7 +420,7 @@
   "@dataSourcesHeader": {
     "description": "Header for data sources section"
   },
-  "openMeteoDescription": "Säädata - Open-Meteo",
+  "openMeteoDescription": "Sääennusteet - Open-Meteo",
   "@openMeteoDescription": {
     "description": "Description for Open-Meteo data source"
   },
@@ -428,7 +428,7 @@
   "@fmiDescription": {
     "description": "Description for Finnish Meteorological Institute data source"
   },
-  "openStreetMapDescription": "Karttadata - OpenStreetMap",
+  "openStreetMapDescription": "Karttadata",
   "@openStreetMapDescription": {
     "description": "Description for OpenStreetMap data source"
   },
@@ -592,5 +592,20 @@
   "activeWeatherAlerts": "Aktiiviset säävaroitukset",
   "@activeWeatherAlerts": {
     "description": "Title for the active weather alerts section"
+  },
+  "nlfDataSource": "Maanmittauslaitos",
+  "nlfDescription": "Sisältää Maanmittauslaitoksen Nimistötietokannan {month}/{year} aineistoa",
+  "@nlfDescription": {
+    "description": "Description for the National Land Survey of Finland data source",
+    "placeholders": {
+      "month": {
+        "type": "String",
+        "example": "01"
+      },
+      "year": {
+        "type": "String",
+        "example": "2023"
+      }
+    }
   }
 }

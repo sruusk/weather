@@ -388,7 +388,7 @@
   "@dataSourcesHeader": {
     "description": "Header for data sources section"
   },
-  "openMeteoDescription": "Weather data by Open-Meteo.com",
+  "openMeteoDescription": "Weather forecasts by Open-Meteo.com",
   "@openMeteoDescription": {
     "description": "Description for Open-Meteo data source"
   },
@@ -592,5 +592,20 @@
   "activeWeatherAlerts": "Active Weather Alerts",
   "@activeWeatherAlerts": {
     "description": "Title for the active weather alerts section"
+  },
+  "nlfDataSource": "National Land Survey of Finland",
+  "nlfDescription": "Contains data from the National Land Survey of Finland Geographic names Database {month}/{year}",
+  "@nlfDescription": {
+    "description": "Description for the National Land Survey of Finland data source",
+    "placeholders": {
+      "month": {
+        "type": "String",
+        "example": "01"
+      },
+      "year": {
+        "type": "String",
+        "example": "2023"
+      }
+    }
   }
 }
