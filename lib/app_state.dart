@@ -107,7 +107,7 @@ class AppState extends ChangeNotifier {
 
   Location? get activeLocation => _activeLocationNotifier.value;
 
-  Location? get geoLocation => _geoLocationNotifier.value;
+  Location? get geolocation => _geoLocationNotifier.value;
 
   bool get syncFavouritesToAppwrite => _syncFavouritesToAppwriteNotifier.value;
 
@@ -290,10 +290,7 @@ class AppState extends ChangeNotifier {
         List<Location>.from(_favouriteLocationsNotifier.value);
 
     // Check if location already exists
-    if (!currentLocations.any((loc) =>
-        loc.lat == location.lat &&
-        loc.lon == location.lon &&
-        loc.name == location.name)) {
+    if (!currentLocations.any((loc) => loc == location)) {
       // Create a new Location with an index if not provided
       final newIndex = location.index ??
           (currentLocations.isEmpty ? 0 : _getNextIndex(currentLocations));
@@ -370,7 +367,7 @@ class AppState extends ChangeNotifier {
         List<Location>.from(_favouriteLocationsNotifier.value);
     bool removed = false;
     currentLocations.removeWhere((loc) {
-      if (loc.lat == location.lat && loc.lon == location.lon) {
+      if (loc == location) {
         removed = true;
         return true;
       }
@@ -382,8 +379,7 @@ class AppState extends ChangeNotifier {
 
       // If the active location was removed, set a new active location
       if (_activeLocationNotifier.value != null &&
-          _activeLocationNotifier.value!.lat == location.lat &&
-          _activeLocationNotifier.value!.lon == location.lon &&
+          _activeLocationNotifier.value! == location &&
           _activeLocationNotifier.value!.name == location.name) {
         _activeLocationNotifier.value =
             currentLocations.isNotEmpty ? currentLocations.first : null;

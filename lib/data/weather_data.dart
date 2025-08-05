@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:open_meteo/open_meteo.dart';
+import 'package:weather/appwrite_client.dart';
 import 'package:weather/data/forecast_point.dart';
 import 'package:xml/xml.dart' as xml;
 
-import 'credentials.dart';
 import 'forecast.dart';
 import 'location.dart';
 
@@ -629,35 +629,26 @@ class WeatherData {
     return null;
   }
 
-  /// Returns top 5 locations matching [query], sorted by population.
-  /// Performs reverse geocoding using OpenWeatherMap API to get location information from coordinates
-  Future<Location> reverseGeocoding(double lat, double lon) async {
+  /// Performs reverse geocoding using an AppWrite function to get location information from coordinates
+  Future<Location> reverseGeocoding(double lat, double lon,
+      {String lang = 'fi'}) async {
     if (kDebugMode) {
       print('Performing reverse geocoding for lat: $lat, lon: $lon...');
     }
 
-    final url = Uri.parse(
-        'https://api.openweathermap.org/geo/1.0/reverse?lat=$lat&lon=$lon&limit=1&appid=$openWeatherMapApiKey');
-
-    final response = await get(url);
-    if (response.statusCode != 200) {
-      throw Exception('Failed to fetch reverse geocoding results');
-    }
-
-    final data = jsonDecode(response.body) as List<dynamic>;
-    if (data.isEmpty) {
+    final client = AppwriteClient();
+    final result = await client.getReverseGeocoding(lat, lon, lang: lang);
+    if (result.isEmpty) {
       throw Exception('No location found for the given coordinates');
     }
-
-    final locationData = data[0] as Map<String, dynamic>;
 
     return Location(
       lat: lat,
       lon: lon,
-      name: locationData['name'] as String,
-      countryCode: locationData['country'] as String,
-      country: locationData['country'] as String,
-      region: locationData['state'],
+      name: result['name'] as String,
+      countryCode: result['countryCode'] as String,
+      country: result['country'] as String?,
+      region: result['region'] as String?,
     );
   }
 

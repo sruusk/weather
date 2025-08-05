@@ -66,10 +66,6 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=/tmp/keystore.jks" >> android/key.properties
 
-      - name: Create credentials.dart
-        run: |
-          echo "const String openWeatherMapApiKey = '${{ secrets.OPENWEATHER_KEY }}';" >> lib/data/credentials.dart
-
       - name: Install Dependencies
         run: flutter pub get
 

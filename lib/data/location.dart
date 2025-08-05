@@ -72,6 +72,18 @@ class Location {
     return 'Location(name: $name, lat: $lat, lon: $lon, region: $region, countryCode: $countryCode, country: $country, index: $index)';
   }
 
+  /// Checks if two locations are equal based on their coordinates
+  /// Two locations are considered equal if their latitude and longitude are the same
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Location) return false;
+    return lat == other.lat && lon == other.lon;
+  }
+
+  @override
+  int get hashCode => lat.hashCode ^ lon.hashCode;
+
   /// Calculates the distance to another location in meters
   /// Uses the Haversine formula to compute the distance between two points on the Earth
   double distanceTo(Location other) {

@@ -150,23 +150,16 @@ class _HomePageState extends State<HomePage>
         final geolocation = await _weatherData.reverseGeocoding(
           result.position!.latitude,
           result.position!.longitude,
-        );
-        // Update the forecast if new location more than 500 meters away
-        if(appState.geoLocation == null ||
-            appState.geoLocation!.distanceTo(geolocation) > 500) {
-          _weatherData.getForecast(geolocation).then((forecast) {
-            if (mounted) {
-              setState(() {
-                _forecast = forecast;
-              });
-            }
-          }).catchError((e) {
-            if (kDebugMode) {
-              print('Error getting forecast for geolocation: $e');
-            }
-          });
+            lang: appState.locale.languageCode);
+
+        // Update the app state with the new geolocation
+        if (appState.geolocation == null ||
+            appState.geolocation!.distanceTo(geolocation) > 500) {
+          if (appState.geolocation == appState.activeLocation) {
+            appState.setActiveLocation(geolocation);
+          }
+          appState.setGeolocation(geolocation);
         }
-        appState.setGeolocation(geolocation);
       } else {
         // Handle geolocation errors
         appState.setGeolocation(null);
@@ -176,7 +169,7 @@ class _HomePageState extends State<HomePage>
     } on TimeoutException {
       // Handle timeout specifically
       if (kDebugMode) {
-        print('Geolocation timed out, using first favorite location');
+        print('Geolocation timed out');
       }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -191,7 +184,7 @@ class _HomePageState extends State<HomePage>
     } catch (e) {
       // Handle any other exceptions
       if (kDebugMode) {
-        print('Geolocation failed, using first favorite location: $e');
+        print('Geolocation failed: $e');
       }
     }
   }
@@ -236,8 +229,8 @@ class _HomePageState extends State<HomePage>
     Location? locationToLoad;
 
     // If geolocation is enabled, try to get current location
-    if (appState.geolocationEnabled && appState.geoLocation != null) {
-      locationToLoad = appState.geoLocation;
+    if (appState.geolocationEnabled && appState.geolocation != null) {
+      locationToLoad = appState.geolocation;
     } else if (appState.geolocationEnabled) {
       final result = await getLastKnownPosition();
       if(result.isSuccess && result.position != null) {
@@ -245,7 +238,7 @@ class _HomePageState extends State<HomePage>
         final geolocation = await _weatherData.reverseGeocoding(
           result.position!.latitude,
           result.position!.longitude,
-        );
+            lang: appState.locale.languageCode);
         appState.setGeolocation(geolocation);
         locationToLoad = geolocation;
         _startGeolocation();
@@ -295,8 +288,8 @@ class _HomePageState extends State<HomePage>
     final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
 
-    List<Location> locations = appState.geoLocation != null
-        ? [appState.geoLocation!, ...appState.favouriteLocations]
+    List<Location> locations = appState.geolocation != null
+        ? [appState.geolocation!, ...appState.favouriteLocations]
         : appState.favouriteLocations;
 
     if (!_isLoading &&

@@ -15,16 +15,15 @@ class LocationDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context)!;
-    final List<Location> locations = appState.geoLocation != null
-        ? [appState.geoLocation!, ...appState.favouriteLocations]
+    final List<Location> locations = appState.geolocation != null
+        ? [appState.geolocation!, ...appState.favouriteLocations]
         : appState.favouriteLocations;
 
     // Find the index of the active location in the locations list
     int activeIndex = 0;
     if (appState.activeLocation != null) {
       for (int i = 0; i < locations.length; i++) {
-        if (locations[i].lat == appState.activeLocation!.lat &&
-            locations[i].lon == appState.activeLocation!.lon) {
+        if (locations[i] == appState.activeLocation) {
           activeIndex = i;
           break;
         }
@@ -51,7 +50,7 @@ class LocationDropdown extends StatelessWidget {
                         children: [
                           Icon(i == 0 &&
                                   appState.geolocationEnabled &&
-                                  appState.geoLocation != null
+                                  appState.geolocation != null
                               ? Icons.my_location
                               : Icons.place),
                           SizedBox(width: 8),

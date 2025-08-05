@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
@@ -93,8 +95,7 @@ class AppwriteClient {
     // Compare and update local favourites
     for (final awFav in awFavourites) {
       final Location location = awFav.$2;
-      if (!localFavourites
-          .any((loc) => loc.lat == location.lat && loc.lon == location.lon)) {
+      if (!localFavourites.any((loc) => loc == location)) {
         switch (direction) {
           case SyncDirection.toAppwrite:
             // If the location is not in local favourites, remove it from Appwrite
@@ -112,8 +113,7 @@ class AppwriteClient {
       }
     }
     for (final Location location in localFavourites) {
-      if (!awFavourites.any(
-          (loc) => loc.$2.lat == location.lat && loc.$2.lon == location.lon)) {
+      if (!awFavourites.any((loc) => loc.$2 == location)) {
         // If the location is not in Appwrite, add it
         await databases.createDocument(
             databaseId: 'sync',
@@ -135,8 +135,7 @@ class AppwriteClient {
       } else {
         // If the location exists in both local and Appwrite, check if the index needs to be updated
         // Find the matching Appwrite document
-        final awFav = awFavourites.firstWhere(
-            (loc) => loc.$2.lat == location.lat && loc.$2.lon == location.lon);
+        final awFav = awFavourites.firstWhere((loc) => loc.$2 == location);
 
         // Check if the indexes are different
         if (location.index != awFav.$2.index) {
@@ -194,6 +193,37 @@ class AppwriteClient {
         print('Error deleting account: $e');
       }
       return false;
+    }
+  }
+
+  /// Fetches reverse geocoding data for the given latitude and longitude.
+  /// Should return a map of name, countryCode, country, and region.
+  Future<Map<String, dynamic>> getReverseGeocoding(double lat, double lon,
+      {String lang = 'fi'}) async {
+    final functions = Functions(client);
+    try {
+      final Execution response = await functions.createExecution(
+        functionId: 'reverse-geocode',
+        body: jsonEncode({
+          'lat': lat,
+          'lon': lon,
+          'lang': lang,
+        }),
+        xasync: false,
+      );
+
+      if (response.status == 'completed' &&
+          response.responseStatusCode == 200) {
+        final result = jsonDecode(response.responseBody);
+        return result;
+      } else {
+        throw Exception('Failed to reverse geocode: ${response.status}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in reverse geocoding: $e');
+      }
+      throw e;
     }
   }
 
