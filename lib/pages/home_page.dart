@@ -161,10 +161,11 @@ class _HomePageState extends State<HomePage>
           appState.setGeolocation(geolocation);
         }
       } else {
-        // Handle geolocation errors
-        appState.setGeolocation(null);
-
-        _handleGeolocationError(result);
+        if (result.isSuccess) {
+          _startGeolocation();
+        } else {
+          _handleGeolocationError(result);
+        }
       }
     } on TimeoutException {
       // Handle timeout specifically
