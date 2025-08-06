@@ -53,7 +53,9 @@ class _ObservationChartWidgetState extends State<ObservationChartWidget> {
             ],
           ),
         const SizedBox(height: 10),
-        Expanded(child: _buildChart(context, widget.station, localizations)),
+        Expanded(
+          child: _buildChart(context, widget.station, localizations),
+        ),
       ],
     );
   }

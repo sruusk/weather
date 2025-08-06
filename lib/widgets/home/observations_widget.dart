@@ -119,7 +119,11 @@ class _ObservationsWidgetState extends State<ObservationsWidget> {
             ),
             const SizedBox(height: 8),
             SizedBox(
-              height: widget.maxWidth > 390 ? 410 : 500,
+              height: widget.maxWidth < 400
+                  ? 500
+                  : widget.maxWidth < 500
+                      ? 450
+                      : 380,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: stations.length,
