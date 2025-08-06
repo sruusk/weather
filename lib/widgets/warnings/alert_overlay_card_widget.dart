@@ -75,10 +75,16 @@ class AlertOverlayCardWidget extends StatelessWidget {
     final double width = min(maxWidth - 20, 300);
 
     // Scale the left position to match the map scaling
-    double left = (hitResult?.point.x ?? 0) / 2;
-    if (maxWidth < mapRenderWidth) left *= (maxWidth / mapRenderWidth);
-    // Ensure the left position does not overflow the screen. 20 padding is added
-    if (left + width > maxWidth - 20) left = maxWidth - width - 20;
+    double left = (hitResult?.point.x ?? 0);
+    final double inherentMapWidth =
+        mapRenderWidth / mapRenderHeight * parentHeight;
+    left *= inherentMapWidth /
+        mapRenderWidth; // Scale left to match the map scaling
+    left += (maxWidth - inherentMapWidth) /
+        2; // Move left to 'start' at edge of the map
+    if (left + width > maxWidth) {
+      left = maxWidth - width;
+    }
 
     final locationName = hitValues
         .map((hit) => _getLocationName(hit.geocode?.code ?? '', context))

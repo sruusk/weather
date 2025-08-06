@@ -176,13 +176,16 @@ class _WarningsPageState extends State<WarningsPage> {
                         )
                     ],
                   ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: SizedBox(
-                      height: mapParentHeight,
-                      child: Stack(
-                        children: [
-                          FittedBox(
+                  SizedBox(
+                    height: mapParentHeight,
+                    width: constraints.maxWidth,
+                    child: Stack(
+                      alignment: AlignmentDirectional.center,
+                      fit: StackFit.loose,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: FittedBox(
                             fit: BoxFit.cover,
                             alignment: Alignment.center,
                             child: SizedBox(
@@ -199,23 +202,23 @@ class _WarningsPageState extends State<WarningsPage> {
                               ),
                             ),
                           ),
-                          if (showOverlay)
-                            AlertOverlayCardWidget(
-                              hitResult: hitNotifier.value,
-                              languageCode: localization.languageCode,
-                              municipalities: municipalities,
-                              maxWidth: constraints.maxWidth,
-                              parentHeight: mapParentHeight,
-                              mapRenderHeight: mapHeight,
-                              mapRenderWidth: mapWidth,
-                              onClose: () {
-                                setState(() {
-                                  showOverlay = false;
-                                });
-                              },
-                            ),
-                        ],
-                      ),
+                        ),
+                        if (showOverlay)
+                          AlertOverlayCardWidget(
+                            hitResult: hitNotifier.value,
+                            languageCode: localization.languageCode,
+                            municipalities: municipalities,
+                            maxWidth: constraints.maxWidth,
+                            parentHeight: mapParentHeight,
+                            mapRenderHeight: mapHeight,
+                            mapRenderWidth: mapWidth,
+                            onClose: () {
+                              setState(() {
+                                showOverlay = false;
+                              });
+                            },
+                          ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),
