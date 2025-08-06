@@ -420,11 +420,11 @@
   "@dataSourcesHeader": {
     "description": "Header for data sources section"
   },
-  "openMeteoDescription": "Sääennusteet - Open-Meteo",
+  "openMeteoDescription": "Open-Meteo\nSääennusteet.\nKäytämme Open-Meteon sääennusteita, kun HARMONIE-ennuste ei ole saatavilla.",
   "@openMeteoDescription": {
     "description": "Description for Open-Meteo data source"
   },
-  "fmiDescription": "Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteen laitos.",
+  "fmiDescription": "Ilmatieteen laitos\nHavainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste.\nKäytämme HARMONIE-ennusteita saatavilla olevissa maissa ja pidennämme niitä OpenMeteon datalla. Sateen todennäköisyys lisätään HARMONIE-ennusteisiin. HARMONIE-ennusteet ovat saatavilla pohjoismaissa ja Baltiassa.",
   "@fmiDescription": {
     "description": "Description for Finnish Meteorological Institute data source"
   },
@@ -593,9 +593,9 @@
   "@activeWeatherAlerts": {
     "description": "Title for the active weather alerts section"
   },
-  "nlfDataSource": "Maanmittauslaitos",
-  "nlfDescription": "Sisältää Maanmittauslaitoksen Nimistötietokannan {month}/{year} aineistoa",
-  "@nlfDescription": {
+  "nlsDataSource": "Maanmittauslaitos",
+  "nlsDescription": "Sisältää Maanmittauslaitoksen Nimistötietokannan {month}/{year} aineistoa",
+  "@nlsDescription": {
     "description": "Description for the National Land Survey of Finland data source",
     "placeholders": {
       "month": {

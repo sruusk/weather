@@ -665,13 +665,13 @@ abstract class AppLocalizations {
   /// Description for Open-Meteo data source
   ///
   /// In en, this message translates to:
-  /// **'Weather forecasts by Open-Meteo.com'**
+  /// **'Open-Meteo\nWeather forecasts.\nWe use Open-Meteo forecast data except where HARMONIE forecast is available.'**
   String get openMeteoDescription;
 
   /// Description for Finnish Meteorological Institute data source
   ///
   /// In en, this message translates to:
-  /// **'Observations, alerts, radar images and HARMONIE forecast by the Finnish Meteorological Institute.'**
+  /// **'Finnish Meteorological Institute\nObservations, alerts, radar images and HARMONIE forecast.\nHARMONIE forecasts are used where available and extended with OpenMeteo data. Precipitation probability is added to HARMONIE forecasts. HARMONIE forecasts are available for Finland, Sweden, Norway, Denmark, Estonia, Latvia and Lithuania.'**
   String get fmiDescription;
 
   /// Description for OpenStreetMap data source
@@ -986,17 +986,17 @@ abstract class AppLocalizations {
   /// **'Active Weather Alerts'**
   String get activeWeatherAlerts;
 
-  /// No description provided for @nlfDataSource.
+  /// No description provided for @nlsDataSource.
   ///
   /// In en, this message translates to:
   /// **'National Land Survey of Finland'**
-  String get nlfDataSource;
+  String get nlsDataSource;
 
   /// Description for the National Land Survey of Finland data source
   ///
   /// In en, this message translates to:
   /// **'Contains data from the National Land Survey of Finland Geographic names Database {month}/{year}'**
-  String nlfDescription(String month, String year);
+  String nlsDescription(String month, String year);
 }
 
 class _AppLocalizationsDelegate

@@ -304,11 +304,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataSourcesHeader => 'Data Sources';
 
   @override
-  String get openMeteoDescription => 'Weather forecasts by Open-Meteo.com';
+  String get openMeteoDescription =>
+      'Open-Meteo\nWeather forecasts.\nWe use Open-Meteo forecast data except where HARMONIE forecast is available.';
 
   @override
   String get fmiDescription =>
-      'Observations, alerts, radar images and HARMONIE forecast by the Finnish Meteorological Institute.';
+      'Finnish Meteorological Institute\nObservations, alerts, radar images and HARMONIE forecast.\nHARMONIE forecasts are used where available and extended with OpenMeteo data. Precipitation probability is added to HARMONIE forecasts. HARMONIE forecasts are available for Finland, Sweden, Norway, Denmark, Estonia, Latvia and Lithuania.';
 
   @override
   String get openStreetMapDescription => 'Map data by OpenStreetMap';
@@ -486,10 +487,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activeWeatherAlerts => 'Active Weather Alerts';
 
   @override
-  String get nlfDataSource => 'National Land Survey of Finland';
+  String get nlsDataSource => 'National Land Survey of Finland';
 
   @override
-  String nlfDescription(String month, String year) {
+  String nlsDescription(String month, String year) {
     return 'Contains data from the National Land Survey of Finland Geographic names Database $month/$year';
   }
 }

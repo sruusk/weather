@@ -304,11 +304,12 @@ class AppLocalizationsFi extends AppLocalizations {
   String get dataSourcesHeader => 'Tietolähteet';
 
   @override
-  String get openMeteoDescription => 'Sääennusteet - Open-Meteo';
+  String get openMeteoDescription =>
+      'Open-Meteo\nSääennusteet.\nKäytämme Open-Meteon sääennusteita, kun HARMONIE-ennuste ei ole saatavilla.';
 
   @override
   String get fmiDescription =>
-      'Havainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste - Ilmatieteen laitos.';
+      'Ilmatieteen laitos\nHavainnot, varoitukset, tutkakuvat ja HARMONIE sääennuste.\nKäytämme HARMONIE-ennusteita saatavilla olevissa maissa ja pidennämme niitä OpenMeteon datalla. Sateen todennäköisyys lisätään HARMONIE-ennusteisiin. HARMONIE-ennusteet ovat saatavilla pohjoismaissa ja Baltiassa.';
 
   @override
   String get openStreetMapDescription => 'Karttadata';
@@ -484,10 +485,10 @@ class AppLocalizationsFi extends AppLocalizations {
   String get activeWeatherAlerts => 'Aktiiviset säävaroitukset';
 
   @override
-  String get nlfDataSource => 'Maanmittauslaitos';
+  String get nlsDataSource => 'Maanmittauslaitos';
 
   @override
-  String nlfDescription(String month, String year) {
+  String nlsDescription(String month, String year) {
     return 'Sisältää Maanmittauslaitoksen Nimistötietokannan $month/$year aineistoa';
   }
 }

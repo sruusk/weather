@@ -388,11 +388,11 @@
   "@dataSourcesHeader": {
     "description": "Header for data sources section"
   },
-  "openMeteoDescription": "Weather forecasts by Open-Meteo.com",
+  "openMeteoDescription": "Open-Meteo\nWeather forecasts.\nWe use Open-Meteo forecast data except where HARMONIE forecast is available.",
   "@openMeteoDescription": {
     "description": "Description for Open-Meteo data source"
   },
-  "fmiDescription": "Observations, alerts, radar images and HARMONIE forecast by the Finnish Meteorological Institute.",
+  "fmiDescription": "Finnish Meteorological Institute\nObservations, alerts, radar images and HARMONIE forecast.\nHARMONIE forecasts are used where available and extended with OpenMeteo data. Precipitation probability is added to HARMONIE forecasts. HARMONIE forecasts are available for Finland, Sweden, Norway, Denmark, Estonia, Latvia and Lithuania.",
   "@fmiDescription": {
     "description": "Description for Finnish Meteorological Institute data source"
   },
@@ -593,9 +593,9 @@
   "@activeWeatherAlerts": {
     "description": "Title for the active weather alerts section"
   },
-  "nlfDataSource": "National Land Survey of Finland",
-  "nlfDescription": "Contains data from the National Land Survey of Finland Geographic names Database {month}/{year}",
-  "@nlfDescription": {
+  "nlsDataSource": "National Land Survey of Finland",
+  "nlsDescription": "Contains data from the National Land Survey of Finland Geographic names Database {month}/{year}",
+  "@nlsDescription": {
     "description": "Description for the National Land Survey of Finland data source",
     "placeholders": {
       "month": {
