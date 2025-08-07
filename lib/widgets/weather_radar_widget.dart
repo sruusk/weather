@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
@@ -270,8 +269,8 @@ class _WeatherRadarState extends State<WeatherRadar> {
                             child: TileLayer(
                               // tileSize: 128,
                               tileSize: 512,
-                              tileProvider: CancellableNetworkTileProvider(
-                                  silenceExceptions: true),
+                              tileProvider:
+                                  NetworkTileProvider(silenceExceptions: true),
                               maxNativeZoom: 12,
                               minNativeZoom: 7,
                               keepBuffer: 2,

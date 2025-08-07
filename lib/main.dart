@@ -7,7 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:weather/errors/error_handler.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
+import 'package:weather/services/service_locator.dart';
+import 'package:weather/utils/logger.dart';
+import 'package:weather/widgets/offline_indicator.dart';
 
 import 'app_state.dart';
 import 'appwrite_client.dart';
@@ -27,19 +31,32 @@ import 'routes.dart';
 final GlobalKey<ScaffoldMessengerState> globalScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
+// Global instance of ErrorHandler for centralized error handling
+final ErrorHandler errorHandler = ErrorHandler();
+
 // Utility function to show SnackBars from anywhere in the app
 void showGlobalSnackBar({
   required String message,
   Duration duration = const Duration(seconds: 5),
   SnackBarAction? action,
+  bool isError = false,
 }) {
-  globalScaffoldMessengerKey.currentState?.showSnackBar(
-    SnackBar(
-      content: Text(message),
-      duration: duration,
-      action: action,
-    ),
-  );
+  if (isError) {
+    // Use ErrorHandler for error messages
+    errorHandler.handleException(
+      message,
+      context: errorHandler.navigatorKey.currentContext,
+    );
+  } else {
+    // Use regular SnackBar for non-error messages
+    globalScaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: duration,
+        action: action,
+      ),
+    );
+  }
 }
 
 class NoTransitionPage<T> extends CustomTransitionPage<T> {
@@ -230,6 +247,10 @@ void main() async {
     yield LicenseEntryWithLineBreaks(['meteocons'], license);
   });
 
+  // Initialize service locator
+  Logger.debug('Initializing application');
+  setupServiceLocator();
+
   // Initialize Appwrite Client
   AppwriteClient();
 
@@ -243,7 +264,9 @@ void main() async {
     ChangeNotifierProvider.value(
       value: appState,
       child: const WebVersionCheck(
-        child: MyApp(),
+        child: OfflineIndicator(
+          child: MyApp(),
+        ),
       ),
     ),
   );

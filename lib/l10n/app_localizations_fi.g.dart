@@ -491,4 +491,77 @@ class AppLocalizationsFi extends AppLocalizations {
   String nlsDescription(String month, String year) {
     return 'Sisältää Maanmittauslaitoksen Nimistötietokannan $month/$year aineistoa';
   }
+
+  @override
+  String get noForecastDataAvailable => 'Ennustetietoja ei saatavilla';
+
+  @override
+  String failedToFetchHarmonieForecast(String statusCode) {
+    return 'HARMONIE-ennusteen haku epäonnistui: $statusCode';
+  }
+
+  @override
+  String get noForecastDataFromHarmonie =>
+      'Ennustetietoja ei saatavilla FMI HARMONIE-mallista';
+
+  @override
+  String get errorGettingHarmonieForecast => 'Virhe HARMONIE-ennusteen haussa';
+
+  @override
+  String get errorParsingTimeSeries => 'Virhe aikasarjan jäsentämisessä';
+
+  @override
+  String get noLocationFound =>
+      'Sijaintia ei löytynyt annetuilla koordinaateilla';
+
+  @override
+  String get failedToFetchAutocompleteResults =>
+      'Hakuehdotusten haku epäonnistui';
+
+  @override
+  String get authorizationError =>
+      'Käyttöoikeusvirhe. Kirjaudu uudelleen sisään.';
+
+  @override
+  String get resourceNotFoundError =>
+      'Resurssia ei löytynyt. Yritä myöhemmin uudelleen.';
+
+  @override
+  String get serverError => 'Palvelinvirhe. Yritä myöhemmin uudelleen.';
+
+  @override
+  String get networkError => 'Verkkoyhteysvirhe. Tarkista internet-yhteytesi.';
+
+  @override
+  String get dataError => 'Virhe tietojen käsittelyssä. Yritä uudelleen.';
+
+  @override
+  String get authError => 'Todennusvirhe. Kirjaudu uudelleen sisään.';
+
+  @override
+  String get locationError =>
+      'Virhe sijainnin käytössä. Tarkista sijaintiasetuksesi.';
+
+  @override
+  String get cacheError =>
+      'Virhe välimuistin käytössä. Yritä päivittää tiedot.';
+
+  @override
+  String get permissionError =>
+      'Käyttöoikeus evätty. Myönnä tarvittavat käyttöoikeudet.';
+
+  @override
+  String get errorCode => 'Virhekoodi';
+
+  @override
+  String get close => 'Sulje';
+
+  @override
+  String get hourly => 'Tunneittain';
+
+  @override
+  String get map => 'Kartta';
+
+  @override
+  String get accumulation => 'Kertymä';
 }

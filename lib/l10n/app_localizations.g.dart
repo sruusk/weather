@@ -997,6 +997,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Contains data from the National Land Survey of Finland Geographic names Database {month}/{year}'**
   String nlsDescription(String month, String year);
+
+  /// Error message when no forecast data is available
+  ///
+  /// In en, this message translates to:
+  /// **'No forecast data available'**
+  String get noForecastDataAvailable;
+
+  /// Error message when Harmonie forecast fetch fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch Harmonie forecast: {statusCode}'**
+  String failedToFetchHarmonieForecast(String statusCode);
+
+  /// Error message when no data is available from Harmonie model
+  ///
+  /// In en, this message translates to:
+  /// **'No forecast data available from FMI Harmonie model'**
+  String get noForecastDataFromHarmonie;
+
+  /// Error message when there's an issue getting Harmonie forecast
+  ///
+  /// In en, this message translates to:
+  /// **'Error getting Harmonie forecast'**
+  String get errorGettingHarmonieForecast;
+
+  /// Error message when there's an issue parsing time series data
+  ///
+  /// In en, this message translates to:
+  /// **'Error parsing time series'**
+  String get errorParsingTimeSeries;
+
+  /// Error message when no location is found for coordinates
+  ///
+  /// In en, this message translates to:
+  /// **'No location found for the given coordinates'**
+  String get noLocationFound;
+
+  /// Error message when autocomplete results fetch fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch autocomplete results'**
+  String get failedToFetchAutocompleteResults;
+
+  /// Error message when user is not authorized to access a resource
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization error. Please log in again.'**
+  String get authorizationError;
+
+  /// Error message when a requested resource is not found
+  ///
+  /// In en, this message translates to:
+  /// **'Resource not found. Please try again later.'**
+  String get resourceNotFoundError;
+
+  /// Error message when there's a server-side error
+  ///
+  /// In en, this message translates to:
+  /// **'Server error. Please try again later.'**
+  String get serverError;
+
+  /// Error message when there's a network connection issue
+  ///
+  /// In en, this message translates to:
+  /// **'Network connection error. Please check your internet connection.'**
+  String get networkError;
+
+  /// Error message when there's an issue processing data
+  ///
+  /// In en, this message translates to:
+  /// **'Error processing data. Please try again.'**
+  String get dataError;
+
+  /// Error message when there's an authentication issue
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication error. Please log in again.'**
+  String get authError;
+
+  /// Error message when there's an issue with location services
+  ///
+  /// In en, this message translates to:
+  /// **'Error accessing location. Please check your location settings.'**
+  String get locationError;
+
+  /// Error message when there's an issue with cached data
+  ///
+  /// In en, this message translates to:
+  /// **'Error accessing cached data. Please try refreshing.'**
+  String get cacheError;
+
+  /// Error message when a permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied. Please grant the required permissions.'**
+  String get permissionError;
+
+  /// Label for error code in error messages
+  ///
+  /// In en, this message translates to:
+  /// **'Error code'**
+  String get errorCode;
+
+  /// Button text to close a dialog or screen
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// Label for hourly forecast view
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly'**
+  String get hourly;
+
+  /// Label for map view
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get map;
+
+  /// Label for precipitation accumulation view
+  ///
+  /// In en, this message translates to:
+  /// **'Accumulation'**
+  String get accumulation;
 }
 
 class _AppLocalizationsDelegate

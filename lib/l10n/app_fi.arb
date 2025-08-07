@@ -607,5 +607,95 @@
         "example": "2023"
       }
     }
+  },
+  "noForecastDataAvailable": "Ennustetietoja ei saatavilla",
+  "@noForecastDataAvailable": {
+    "description": "Error message when no forecast data is available"
+  },
+  "failedToFetchHarmonieForecast": "HARMONIE-ennusteen haku epäonnistui: {statusCode}",
+  "@failedToFetchHarmonieForecast": {
+    "description": "Error message when Harmonie forecast fetch fails",
+    "placeholders": {
+      "statusCode": {
+        "type": "String",
+        "example": "404"
+      }
+    }
+  },
+  "noForecastDataFromHarmonie": "Ennustetietoja ei saatavilla FMI HARMONIE-mallista",
+  "@noForecastDataFromHarmonie": {
+    "description": "Error message when no data is available from Harmonie model"
+  },
+  "errorGettingHarmonieForecast": "Virhe HARMONIE-ennusteen haussa",
+  "@errorGettingHarmonieForecast": {
+    "description": "Error message when there's an issue getting Harmonie forecast"
+  },
+  "errorParsingTimeSeries": "Virhe aikasarjan jäsentämisessä",
+  "@errorParsingTimeSeries": {
+    "description": "Error message when there's an issue parsing time series data"
+  },
+  "noLocationFound": "Sijaintia ei löytynyt annetuilla koordinaateilla",
+  "@noLocationFound": {
+    "description": "Error message when no location is found for coordinates"
+  },
+  "failedToFetchAutocompleteResults": "Hakuehdotusten haku epäonnistui",
+  "@failedToFetchAutocompleteResults": {
+    "description": "Error message when autocomplete results fetch fails"
+  },
+  "authorizationError": "Käyttöoikeusvirhe. Kirjaudu uudelleen sisään.",
+  "@authorizationError": {
+    "description": "Error message when user is not authorized to access a resource"
+  },
+  "resourceNotFoundError": "Resurssia ei löytynyt. Yritä myöhemmin uudelleen.",
+  "@resourceNotFoundError": {
+    "description": "Error message when a requested resource is not found"
+  },
+  "serverError": "Palvelinvirhe. Yritä myöhemmin uudelleen.",
+  "@serverError": {
+    "description": "Error message when there's a server-side error"
+  },
+  "networkError": "Verkkoyhteysvirhe. Tarkista internet-yhteytesi.",
+  "@networkError": {
+    "description": "Error message when there's a network connection issue"
+  },
+  "dataError": "Virhe tietojen käsittelyssä. Yritä uudelleen.",
+  "@dataError": {
+    "description": "Error message when there's an issue processing data"
+  },
+  "authError": "Todennusvirhe. Kirjaudu uudelleen sisään.",
+  "@authError": {
+    "description": "Error message when there's an authentication issue"
+  },
+  "locationError": "Virhe sijainnin käytössä. Tarkista sijaintiasetuksesi.",
+  "@locationError": {
+    "description": "Error message when there's an issue with location services"
+  },
+  "cacheError": "Virhe välimuistin käytössä. Yritä päivittää tiedot.",
+  "@cacheError": {
+    "description": "Error message when there's an issue with cached data"
+  },
+  "permissionError": "Käyttöoikeus evätty. Myönnä tarvittavat käyttöoikeudet.",
+  "@permissionError": {
+    "description": "Error message when a permission is denied"
+  },
+  "errorCode": "Virhekoodi",
+  "@errorCode": {
+    "description": "Label for error code in error messages"
+  },
+  "close": "Sulje",
+  "@close": {
+    "description": "Button text to close a dialog or screen"
+  },
+  "hourly": "Tunneittain",
+  "@hourly": {
+    "description": "Label for hourly forecast view"
+  },
+  "map": "Kartta",
+  "@map": {
+    "description": "Label for map view"
+  },
+  "accumulation": "Kertymä",
+  "@accumulation": {
+    "description": "Label for precipitation accumulation view"
   }
 }

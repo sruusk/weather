@@ -6,17 +6,19 @@ import 'package:intl/intl.dart';
 import 'package:open_meteo/open_meteo.dart';
 import 'package:weather/appwrite_client.dart';
 import 'package:weather/data/forecast_point.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:weather/data/models/harmonie_response.dart';
+import 'package:weather/data/models/open_meteo_response.dart';
 
 import 'forecast.dart';
 import 'location.dart';
 
-/// A simple class to hold a time and a value
-class _TimeValue {
-  final DateTime time;
-  final double value;
+/// Enum to distinguish between different weather data sources
+enum WeatherDataSource {
+  /// OpenMeteo weather data source using WMO codes
+  openMeteo,
 
-  _TimeValue({required this.time, required this.value});
+  /// Harmonie weather data source using WeatherSymbol3 codes
+  harmonie
 }
 
 /// A singleton class for handling weather data
@@ -180,66 +182,55 @@ class WeatherData {
     return supportedCountries.contains(location.countryCode.toUpperCase());
   }
 
-  /// Maps OpenMeteo weather codes to weather symbols
-  String _mapWeatherCodeToSymbol(int weatherCode) {
-    // Simplified mapping based on WMO Weather interpretation codes
-    // https://open-meteo.com/en/docs/weather-api
-    switch (weatherCode) {
-      case 0:
-        return 'clear-day';
-      case 1:
-        return 'partly-cloudy-day';
-      case 2:
-        return 'cloudy';
-      case 3:
-        return 'overcast';
-      case 45:
-      case 48:
-        return 'fog';
-      case 51:
-      case 53:
-      case 55:
-        return 'drizzle';
-      case 56:
-      case 57:
-        // return 'freezing-drizzle'; // Doesn't exist in our weather symbols
-        return 'sleet';
-      case 61:
-        return 'rain';
-      case 63:
-        return 'overcast-rain';
-      case 65:
-        return 'extreme-rain';
-      case 66:
-        return 'sleet';
-      case 67:
-        return 'extreme-sleet';
-      case 71:
-        return 'snow';
-      case 73:
-        return 'overcast-snow';
-      case 75:
-        return 'extreme-snow';
-      case 77:
-        return 'snow';
-      case 80:
-      case 81:
-      case 82:
-        return 'partly-cloudy-day-rain';
-      case 85:
-      case 86:
-        return 'partly-cloudy-day-snow';
-      case 95:
-        return 'thunderstorms-extreme';
-      case 96:
-      case 99:
-        return 'thunderstorm-extreme-snow'; // Should be thunderstorms-hail
-      default:
-        return 'unknown';
+  /// Maps weather codes to weather symbols based on the data source
+  ///
+  /// This unified method replaces the separate mapping methods for OpenMeteo and Harmonie
+  /// weather codes, reducing code duplication while maintaining the distinct mappings.
+  String _mapWeatherCodeToSymbol(int weatherCode, WeatherDataSource source) {
+    switch (source) {
+      case WeatherDataSource.openMeteo:
+        return _openMeteoWeatherSymbols[weatherCode] ?? 'unknown';
+      case WeatherDataSource.harmonie:
+        return _harmonieWeatherSymbols[weatherCode] ?? 'unknown';
     }
   }
 
-  /// Maps Harmonie WeatherSymbol3 codes to weather symbols
+  /// Static map for OpenMeteo weather codes to weather symbols
+  ///
+  /// Based on WMO Weather interpretation codes
+  /// https://open-meteo.com/en/docs/weather-api
+  static final Map<int, String> _openMeteoWeatherSymbols = {
+    0: 'clear-day',
+    1: 'partly-cloudy-day',
+    2: 'cloudy',
+    3: 'overcast',
+    45: 'fog',
+    48: 'fog',
+    51: 'drizzle',
+    53: 'drizzle',
+    55: 'drizzle',
+    56: 'sleet', // freezing-drizzle doesn't exist in our weather symbols
+    57: 'sleet', // freezing-drizzle doesn't exist in our weather symbols
+    61: 'rain',
+    63: 'overcast-rain',
+    65: 'extreme-rain',
+    66: 'sleet',
+    67: 'extreme-sleet',
+    71: 'snow',
+    73: 'overcast-snow',
+    75: 'extreme-snow',
+    77: 'snow',
+    80: 'partly-cloudy-day-rain',
+    81: 'partly-cloudy-day-rain',
+    82: 'partly-cloudy-day-rain',
+    85: 'partly-cloudy-day-snow',
+    86: 'partly-cloudy-day-snow',
+    95: 'thunderstorms-extreme',
+    96: 'thunderstorm-extreme-snow', // Should be thunderstorms-hail
+    99: 'thunderstorm-extreme-snow', // Should be thunderstorms-hail
+  };
+
+  /// Static map for Harmonie WeatherSymbol3 codes to weather symbols
   ///
   /// WeatherSymbol3 descriptions:
   /// 1 selkeää (clear)
@@ -269,66 +260,35 @@ class WeatherData {
   /// 83 voimakasta räntäsadetta (heavy sleet)
   /// 91 utua (mist)
   /// 92 sumua (fog)
-  String _mapHarmonieWeatherCodeToSymbol(int weatherCode) {
-    switch (weatherCode) {
-      case 1:
-        return 'clear-day';
-      case 2:
-        return 'partly-cloudy-day';
-      case 21:
-        return 'partly-cloudy-day-rain';
-      case 22:
-        return 'partly-cloudy-day-rain';
-      case 23:
-        return 'extreme-rain';
-      case 3:
-        return 'cloudy';
-      case 31:
-        return 'rain';
-      case 32:
-        return 'overcast-rain';
-      case 33:
-        return 'extreme-rain';
-      case 41:
-        return 'partly-cloudy-day-snow';
-      case 42:
-        return 'partly-cloudy-day-snow';
-      case 43:
-        return 'extreme-snow';
-      case 51:
-        return 'snow';
-      case 52:
-        return 'overcast-snow';
-      case 53:
-        return 'extreme-snow';
-      case 61:
-        return 'thunderstorms';
-      case 62:
-        return 'thunderstorms-extreme';
-      case 63:
-        return 'thunderstorms';
-      case 64:
-        return 'thunderstorms-extreme';
-      case 71:
-        return 'sleet';
-      case 72:
-        return 'sleet';
-      case 73:
-        return 'extreme-sleet';
-      case 81:
-        return 'sleet';
-      case 82:
-        return 'sleet';
-      case 83:
-        return 'extreme-sleet';
-      case 91:
-        return 'fog';
-      case 92:
-        return 'fog';
-      default:
-        return 'unknown';
-    }
-  }
+  static final Map<int, String> _harmonieWeatherSymbols = {
+    1: 'clear-day',
+    2: 'partly-cloudy-day',
+    21: 'partly-cloudy-day-rain',
+    22: 'partly-cloudy-day-rain',
+    23: 'extreme-rain',
+    3: 'cloudy',
+    31: 'rain',
+    32: 'overcast-rain',
+    33: 'extreme-rain',
+    41: 'partly-cloudy-day-snow',
+    42: 'partly-cloudy-day-snow',
+    43: 'extreme-snow',
+    51: 'snow',
+    52: 'overcast-snow',
+    53: 'extreme-snow',
+    61: 'thunderstorms',
+    62: 'thunderstorms-extreme',
+    63: 'thunderstorms',
+    64: 'thunderstorms-extreme',
+    71: 'sleet',
+    72: 'sleet',
+    73: 'extreme-sleet',
+    81: 'sleet',
+    82: 'sleet',
+    83: 'extreme-sleet',
+    91: 'fog',
+    92: 'fog',
+  };
 
   /// Gets the Harmonie forecast from FMI for a given [location]
   ///
@@ -378,75 +338,50 @@ class WeatherData {
             'Failed to fetch Harmonie forecast: ${response.statusCode}');
       }
 
-      // Parse the XML response
-      final document = xml.XmlDocument.parse(response.body);
-      final members = document.findAllElements('wfs:member').toList();
+      // Parse the XML response using our model
+      final harmonieResponse = HarmonieResponse.fromXml(response.body);
 
-      if (members.isEmpty) {
-        throw Exception('No forecast data available from FMI Harmonie model');
-      }
-
-      // Parse the time series data for each parameter
-      final humidityData = _parseHarmonieTimeSeries(members[0]);
-      final temperatureData = _parseHarmonieTimeSeries(members[1]);
-      final windDirectionData = _parseHarmonieTimeSeries(members[2]);
-      final windSpeedData = _parseHarmonieTimeSeries(members[3]);
-      final windGustData = _parseHarmonieTimeSeries(members[4]);
-      final precipitationData = _parseHarmonieTimeSeries(members[5]);
-      final weatherSymbolData = _parseHarmonieTimeSeries(members[6]);
-      final feelsLikeData = _parseHarmonieTimeSeries(members[7]);
-
-      // Create a set of all time points
-      final allTimePoints = <DateTime>{};
-      for (final series in [
-        humidityData,
-        temperatureData,
-        windDirectionData,
-        windSpeedData,
-        windGustData,
-        precipitationData,
-        weatherSymbolData,
-        feelsLikeData
-      ]) {
-        for (final point in series) {
-          allTimePoints.add(point.time);
-        }
-      }
-
-      // Sort time points chronologically
-      final sortedTimePoints = allTimePoints.toList()..sort();
+      // Get all time points
+      final sortedTimePoints = harmonieResponse.getAllTimePoints();
 
       // Create forecast points for each time point
       final forecastPoints = <ForecastPoint>[];
 
       for (final time in sortedTimePoints) {
-        // Find data for this time point in each series
-        final humidity = _findValueForTime(humidityData, time);
-        final temperature = _findValueForTime(temperatureData, time);
-        final windDirection = _findValueForTime(windDirectionData, time);
-        final windSpeed = _findValueForTime(windSpeedData, time);
-        final windGust = _findValueForTime(windGustData, time);
-        final precipitation = _findValueForTime(precipitationData, time);
-        final weatherSymbolCode =
-            _findValueForTime(weatherSymbolData, time)?.toInt();
-        final feelsLike = _findValueForTime(feelsLikeData, time);
+        // Find data for this time point for each parameter
+        final humidity =
+            harmonieResponse.findValueForTime('Humidity', time) ?? 0.0;
+        final temperature =
+            harmonieResponse.findValueForTime('Temperature', time) ?? 0.0;
+        final windDirection =
+            harmonieResponse.findValueForTime('WindDirection', time) ?? 0.0;
+        final windSpeed =
+            harmonieResponse.findValueForTime('WindSpeedMS', time) ?? 0.0;
+        final windGust =
+            harmonieResponse.findValueForTime('WindGust', time) ?? 0.0;
+        final precipitation =
+            harmonieResponse.findValueForTime('Precipitation1h', time) ?? 0.0;
+        final weatherSymbolCode = harmonieResponse
+                .findValueForTime('WeatherSymbol3', time)
+                ?.toInt() ??
+            0;
+        final feelsLike = harmonieResponse.findValueForTime('feelslike', time);
 
         // Convert weather symbol code to symbol name
-        final weatherSymbol = weatherSymbolCode != null
-            ? _mapHarmonieWeatherCodeToSymbol(weatherSymbolCode)
-            : null;
+        final weatherSymbol = _mapWeatherCodeToSymbol(
+            weatherSymbolCode, WeatherDataSource.harmonie);
 
         // Create a forecast point
         forecastPoints.add(ForecastPoint(
           time: time,
-          temperature: temperature!,
-          humidity: humidity!,
-          windDirection: windDirection!,
-          windSpeed: windSpeed!,
-          windGust: windGust!,
-          precipitation: precipitation!,
-          weatherSymbol: weatherSymbol!,
-          weatherSymbolCode: weatherSymbolCode!,
+          temperature: temperature,
+          humidity: humidity,
+          windDirection: windDirection,
+          windSpeed: windSpeed,
+          windGust: windGust,
+          precipitation: precipitation,
+          weatherSymbol: weatherSymbol,
+          weatherSymbolCode: weatherSymbolCode,
           feelsLike: feelsLike,
           // probabilityOfPrecipitation is not available in Harmonie model
           probabilityOfPrecipitation: 0,
@@ -490,7 +425,7 @@ class WeatherData {
     }
 
     // Use the open_meteo package to make the request
-    final response = await _weatherApi.request(
+    final apiResponse = await _weatherApi.request(
         latitude: location.lat,
         longitude: location.lon,
         hourly: {
@@ -507,40 +442,59 @@ class WeatherData {
         pastDays: 1,
         forecastDays: 7);
 
+    // Convert the API response to our model
+    final response = OpenMeteoResponse.fromApiResponse(apiResponse);
+
     // Convert the response to our Forecast model
     final forecastPoints = <ForecastPoint>[];
 
-    // Get the hourly data
+    // Get the hourly data for temperature to determine the time points
     final temperatureData = response.hourlyData[WeatherHourly.temperature_2m];
-    final humidityData =
-        response.hourlyData[WeatherHourly.relative_humidity_2m];
-    final precipitationProbData =
-        response.hourlyData[WeatherHourly.precipitation_probability];
-    final precipitationData = response.hourlyData[WeatherHourly.precipitation];
-    final weatherCodeData = response.hourlyData[WeatherHourly.weather_code];
-    final windDirectionData =
-        response.hourlyData[WeatherHourly.wind_direction_10m];
-    final windSpeedData = response.hourlyData[WeatherHourly.wind_speed_10m];
-    final windGustData = response.hourlyData[WeatherHourly.wind_gusts_10m];
-    final apparentTempData =
-        response.hourlyData[WeatherHourly.apparent_temperature];
+    if (temperatureData == null || temperatureData.values.isEmpty) {
+      throw Exception('No temperature data available');
+    }
 
     // Process each hourly data point
-    for (var currentTime in temperatureData!.values.keys) {
+    for (var currentTime in temperatureData.values.keys) {
       // Get the weather data for this time point
       final temperature = temperatureData.values[currentTime]!.toDouble();
-      final humidity = humidityData!.values[currentTime]!.toDouble();
-      final precipitationProb =
-          precipitationProbData!.values[currentTime]!.toDouble();
-      final precipitation = precipitationData!.values[currentTime]!.toDouble();
-      final weatherCode = weatherCodeData!.values[currentTime]!.toInt();
-      final windDirection = windDirectionData!.values[currentTime]!.toDouble();
-      final windSpeed = windSpeedData!.values[currentTime]!.toDouble();
-      final windGust = windGustData!.values[currentTime]!.toDouble();
-      final feelsLike = apparentTempData!.values[currentTime]!.toDouble();
+      final humidity = response.hourlyData[WeatherHourly.relative_humidity_2m]
+              ?.values[currentTime]
+              ?.toDouble() ??
+          0.0;
+      final precipitationProb = response
+              .hourlyData[WeatherHourly.precipitation_probability]
+              ?.values[currentTime]
+              ?.toDouble() ??
+          0.0;
+      final precipitation = response
+              .hourlyData[WeatherHourly.precipitation]?.values[currentTime]
+              ?.toDouble() ??
+          0.0;
+      final weatherCode = response
+              .hourlyData[WeatherHourly.weather_code]?.values[currentTime]
+              ?.toInt() ??
+          0;
+      final windDirection = response
+              .hourlyData[WeatherHourly.wind_direction_10m]?.values[currentTime]
+              ?.toDouble() ??
+          0.0;
+      final windSpeed = response
+              .hourlyData[WeatherHourly.wind_speed_10m]?.values[currentTime]
+              ?.toDouble() ??
+          0.0;
+      final windGust = response
+              .hourlyData[WeatherHourly.wind_gusts_10m]?.values[currentTime]
+              ?.toDouble() ??
+          0.0;
+      final feelsLike = response.hourlyData[WeatherHourly.apparent_temperature]
+              ?.values[currentTime]
+              ?.toDouble() ??
+          temperature;
 
       // Convert weather code to symbol name
-      final weatherSymbol = _mapWeatherCodeToSymbol(weatherCode);
+      final weatherSymbol =
+          _mapWeatherCodeToSymbol(weatherCode, WeatherDataSource.openMeteo);
 
       // Create a forecast point
       forecastPoints.add(ForecastPoint(
@@ -569,65 +523,7 @@ class WeatherData {
     return forecast;
   }
 
-  /// Parses time series data from a member element
-  List<_TimeValue> _parseHarmonieTimeSeries(xml.XmlElement member) {
-    final result = <_TimeValue>[];
-
-    try {
-      final points = member
-          .findAllElements('omso:PointTimeSeriesObservation')
-          .first
-          .findAllElements('om:result')
-          .first
-          .findAllElements('wml2:MeasurementTimeseries')
-          .first
-          .findAllElements('wml2:point');
-
-      for (final point in points) {
-        try {
-          final timeElement = point
-              .findAllElements('wml2:MeasurementTVP')
-              .first
-              .findAllElements('wml2:time')
-              .first;
-
-          final valueElement = point
-              .findAllElements('wml2:MeasurementTVP')
-              .first
-              .findAllElements('wml2:value')
-              .first;
-
-          final time = DateTime.parse(timeElement.innerText);
-          final value = double.tryParse(valueElement.innerText);
-
-          if (value != null && !value.isNaN) {
-            result.add(_TimeValue(time: time, value: value));
-          }
-        } catch (e) {
-          // Skip this point if there's an error
-          if (kDebugMode) {
-            print('Error parsing time series point: $e');
-          }
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error parsing time series: $e');
-      }
-    }
-
-    return result;
-  }
-
-  /// Finds a value for a specific time in a list of time-value pairs
-  double? _findValueForTime(List<_TimeValue> data, DateTime time) {
-    for (final point in data) {
-      if (point.time.isAtSameMomentAs(time)) {
-        return point.value;
-      }
-    }
-    return null;
-  }
+  // These methods have been replaced by the HarmonieResponse and OpenMeteoResponse models
 
   /// Performs reverse geocoding using an AppWrite function to get location information from coordinates
   Future<Location> reverseGeocoding(double lat, double lon,

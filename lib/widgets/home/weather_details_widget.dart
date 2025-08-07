@@ -6,13 +6,9 @@ import 'package:weather/app_state.dart';
 import 'package:weather/data/constants.dart';
 import 'package:weather/data/forecast.dart';
 import 'package:weather/data/location.dart';
-import 'package:weather/l10n/app_localizations.g.dart';
-import 'package:weather/widgets/home/current_forecast_widget.dart';
-import 'package:weather/widgets/home/warnings_widget.dart';
+import 'package:weather/widgets/home/weather_content_widget.dart';
+import 'package:weather/widgets/skeleton/weather_skeleton.dart';
 import 'package:weather/widgets/weather_radar_widget.dart';
-
-import 'forecast_widget.dart';
-import 'observations_widget.dart';
 
 class WeatherDetails extends StatefulWidget {
   final Forecast forecast;
@@ -91,17 +87,22 @@ class _WeatherDetailsState extends State<WeatherDetails> {
 
   @override
   Widget build(BuildContext context) {
+    // Show skeleton loading screen if data is loading
     if (widget.isLoading) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(child: CircularProgressIndicator()),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final isWideScreen = constraints.maxWidth > 900;
+          return WeatherSkeleton(isWideScreen: isWideScreen);
+        },
       );
     }
+
+    // Show empty state if no locations are available
     if (widget.locations.isEmpty) {
-      return Card(
+      return const Card(
         elevation: 4,
-        margin: const EdgeInsets.all(16),
-        child: const Padding(
+        margin: EdgeInsets.all(16),
+        child: Padding(
           padding: EdgeInsets.all(16),
           child: Center(
             child: Text(
@@ -114,119 +115,17 @@ class _WeatherDetailsState extends State<WeatherDetails> {
       );
     }
 
+    // Use LayoutBuilder to adapt to different screen sizes
     return LayoutBuilder(builder: (builderContext, constraints) {
-      final children = _buildChildren(builderContext, constraints);
-      if (constraints.maxWidth > 900) {
-        return Wrap(
-          children: children.map((child) {
-            final isObservations = child.key == Key('observations');
-            return SizedBox(
-              width: isObservations
-                  ? constraints.maxWidth
-                  : constraints.maxWidth / 2,
-              child: child,
-            );
-          }).toList(),
-        );
-      } else {
-        return Column(
-          children: [...children, SizedBox(height: 8)],
-        );
-      }
+      final isWideScreen = constraints.maxWidth > 900;
+
+      // Use the extracted WeatherContentWidget to build the content
+      return WeatherContentWidget(
+        forecast: widget.forecast,
+        locations: widget.locations,
+        isWideScreen: isWideScreen,
+      );
     });
   }
-
-  List<Widget> _buildChildren(
-      BuildContext context, BoxConstraints constraints) {
-    final localizations = AppLocalizations.of(context)!;
-    final appState = Provider.of<AppState>(context);
-
-    final loc = appState.activeLocation;
-    final f = widget.forecast;
-    final countryCode = loc?.countryCode;
-
-    // Create a list of widgets to return
-    final List<Widget> children = [
-      ChildCardWidget(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // const SizedBox(height: 10),
-          CurrentForecast(
-            forecast: f,
-            locations: widget.locations,
-            height: constraints.maxWidth > 900 ? 335 : 300,
-          ),
-        ],
-      )),
-      if (observationsEnabledCountries.contains(countryCode) &&
-          constraints.maxWidth < 900)
-        ChildCardWidget(child: WeatherWarnings(location: f.location)),
-      ChildCardWidget(child: ForecastWidget(forecast: f)),
-/*      if (radarEnabledCountries.contains(countryCode))
-        ChildCardWidget(
-          padding:
-              EdgeInsetsGeometry.only(top: 16, left: 10, right: 10, bottom: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(localizations.radar,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              WeatherRadar(controller: _radarCtrl, flags: InteractiveFlag.none),
-            ],
-          ),
-        ),*/
-      if (observationsEnabledCountries.contains(countryCode))
-        ChildCardWidget(
-          key: Key('observations'),
-          padding: EdgeInsetsGeometry.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(localizations.observations,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Transform.translate(
-                offset: const Offset(0, -15),
-                child: ObservationsWidget(
-                  location: loc,
-                  maxWidth: constraints.maxWidth,
-                ),
-              )
-            ],
-          ),
-        )
-    ];
-
-    return children;
-  }
 }
 
-class ChildCardWidget extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry margin;
-  final EdgeInsetsGeometry padding;
-
-  const ChildCardWidget({
-    super.key,
-    required this.child,
-    this.margin = const EdgeInsetsGeometry.only(top: 8, left: 8, right: 8),
-    this.padding = const EdgeInsets.all(8),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      // shape: RoundedRectangleBorder(
-      //   borderRadius: BorderRadius.zero,
-      // ),
-      margin: margin,
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
-    );
-  }
-}

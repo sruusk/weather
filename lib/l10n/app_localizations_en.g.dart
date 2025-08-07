@@ -493,4 +493,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String nlsDescription(String month, String year) {
     return 'Contains data from the National Land Survey of Finland Geographic names Database $month/$year';
   }
+
+  @override
+  String get noForecastDataAvailable => 'No forecast data available';
+
+  @override
+  String failedToFetchHarmonieForecast(String statusCode) {
+    return 'Failed to fetch Harmonie forecast: $statusCode';
+  }
+
+  @override
+  String get noForecastDataFromHarmonie =>
+      'No forecast data available from FMI Harmonie model';
+
+  @override
+  String get errorGettingHarmonieForecast => 'Error getting Harmonie forecast';
+
+  @override
+  String get errorParsingTimeSeries => 'Error parsing time series';
+
+  @override
+  String get noLocationFound => 'No location found for the given coordinates';
+
+  @override
+  String get failedToFetchAutocompleteResults =>
+      'Failed to fetch autocomplete results';
+
+  @override
+  String get authorizationError => 'Authorization error. Please log in again.';
+
+  @override
+  String get resourceNotFoundError =>
+      'Resource not found. Please try again later.';
+
+  @override
+  String get serverError => 'Server error. Please try again later.';
+
+  @override
+  String get networkError =>
+      'Network connection error. Please check your internet connection.';
+
+  @override
+  String get dataError => 'Error processing data. Please try again.';
+
+  @override
+  String get authError => 'Authentication error. Please log in again.';
+
+  @override
+  String get locationError =>
+      'Error accessing location. Please check your location settings.';
+
+  @override
+  String get cacheError =>
+      'Error accessing cached data. Please try refreshing.';
+
+  @override
+  String get permissionError =>
+      'Permission denied. Please grant the required permissions.';
+
+  @override
+  String get errorCode => 'Error code';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get hourly => 'Hourly';
+
+  @override
+  String get map => 'Map';
+
+  @override
+  String get accumulation => 'Accumulation';
 }

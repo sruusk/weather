@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:weather/appwrite_client.dart';
+import 'package:weather/utils/logger.dart';
 
 import 'data/location.dart';
 import 'preferences.dart';
@@ -44,8 +45,8 @@ class AppState extends ChangeNotifier {
       ValueNotifier<List<Location>>([]);
   final ValueNotifier<Location?> _activeLocationNotifier =
       ValueNotifier<Location?>(null);
-  final ValueNotifier<Location?> _geoLocationNotifier =
-  ValueNotifier<Location?>(null);
+  final ValueNotifier<Location?> _geolocationNotifier =
+      ValueNotifier<Location?>(null);
   final ValueNotifier<bool> _geolocationEnabledNotifier =
       ValueNotifier<bool>(true);
   final ValueNotifier<bool> _syncFavouritesToAppwriteNotifier =
@@ -72,7 +73,7 @@ class AppState extends ChangeNotifier {
   ValueNotifier<Location?> get activeLocationNotifier =>
       _activeLocationNotifier;
 
-  ValueNotifier<Location?> get geoLocationNotifier => _geoLocationNotifier;
+  ValueNotifier<Location?> get geoLocationNotifier => _geolocationNotifier;
 
   ValueNotifier<bool> get syncFavouritesToAppwriteNotifier =>
       _syncFavouritesToAppwriteNotifier;
@@ -107,7 +108,7 @@ class AppState extends ChangeNotifier {
 
   Location? get activeLocation => _activeLocationNotifier.value;
 
-  Location? get geolocation => _geoLocationNotifier.value;
+  Location? get geolocation => _geolocationNotifier.value;
 
   bool get syncFavouritesToAppwrite => _syncFavouritesToAppwriteNotifier.value;
 
@@ -138,7 +139,7 @@ class AppState extends ChangeNotifier {
     _isAmoledThemeNotifier.dispose();
     _favouriteLocationsNotifier.dispose();
     _activeLocationNotifier.dispose();
-    _geoLocationNotifier.dispose();
+    _geolocationNotifier.dispose();
     _geolocationEnabledNotifier.dispose();
     _syncFavouritesToAppwriteNotifier.dispose();
     super.dispose();
@@ -183,21 +184,22 @@ class AppState extends ChangeNotifier {
     }
 
     // Load geolocation setting
-    final String? geolocVal = preferences[_geolocationEnabledKey];
-    if (geolocVal != null) {
-      _geolocationEnabledNotifier.value = geolocVal == 'true';
+    final String? geolocationEnabledValue = preferences[_geolocationEnabledKey];
+    if (geolocationEnabledValue != null) {
+      _geolocationEnabledNotifier.value = geolocationEnabledValue == 'true';
     }
 
     // Load sync favourites to Appwrite setting
-    final String? syncFavouritesVal = preferences[_syncFavouritesToAppwriteKey];
-    if (syncFavouritesVal != null) {
-      _syncFavouritesToAppwriteNotifier.value = syncFavouritesVal == 'true';
+    final String? syncFavouritesValue =
+        preferences[_syncFavouritesToAppwriteKey];
+    if (syncFavouritesValue != null) {
+      _syncFavouritesToAppwriteNotifier.value = syncFavouritesValue == 'true';
     }
 
     // Load AMOLED theme setting
-    final String? isAmoledVal = preferences[_isAmoledThemeKey];
-    if (isAmoledVal != null) {
-      _isAmoledThemeNotifier.value = isAmoledVal == 'true';
+    final String? isAmoledValue = preferences[_isAmoledThemeKey];
+    if (isAmoledValue != null) {
+      _isAmoledThemeNotifier.value = isAmoledValue == 'true';
     }
 
     // Load favourite locations
@@ -216,9 +218,7 @@ class AppState extends ChangeNotifier {
         }
       } catch (e) {
         // Handle parsing errors
-        if (kDebugMode) {
-          print('Error parsing favourite locations: $e');
-        }
+        Logger.error('Error parsing favourite locations', e);
       }
     }
 
@@ -316,20 +316,13 @@ class AppState extends ChangeNotifier {
       _saveFavouriteLocations(); // Save to local preferences
 
       if (syncFavouritesToAppwrite && sync) {
-        if (kDebugMode) {
-          print("Syncing new favourite to Appwrite...");
-        }
+        Logger.debug("Syncing new favourite to Appwrite...");
         _appwriteClient
             .syncFavourites(this, direction: SyncDirection.toAppwrite)
             .then((_) {
-          if (kDebugMode) {
-            print("Favourite added and synced to Appwrite.");
-          }
+          Logger.debug("Favourite added and synced to Appwrite.");
         }).catchError((e, s) {
-          if (kDebugMode) {
-            print("Error syncing favourite to Appwrite after adding: $e");
-            print("Stack trace: $s");
-          }
+          Logger.error("Error syncing favourite to Appwrite after adding", e);
         });
       }
       notifyListeners();
@@ -389,20 +382,13 @@ class AppState extends ChangeNotifier {
       _saveFavouriteLocations(); // Save to local preferences
 
       if (syncFavouritesToAppwrite && sync) {
-        if (kDebugMode) {
-          print("Syncing favourite removal to Appwrite...");
-        }
+        Logger.debug("Syncing favourite removal to Appwrite...");
         _appwriteClient
             .syncFavourites(this, direction: SyncDirection.toAppwrite)
             .then((_) {
-          if (kDebugMode) {
-            print("Favourite removed and synced to Appwrite.");
-          }
+          Logger.debug("Favourite removed and synced to Appwrite.");
         }).catchError((e, s) {
-          if (kDebugMode) {
-            print("Error syncing favourite to Appwrite after removing: $e");
-            print("Stack trace: $s");
-          }
+          Logger.error("Error syncing favourite to Appwrite after removing", e);
         });
       }
       notifyListeners();
@@ -415,7 +401,7 @@ class AppState extends ChangeNotifier {
   }
 
   void setGeolocation(Location? location) {
-    _geoLocationNotifier.value = location;
+    _geolocationNotifier.value = location;
     notifyListeners();
   }
 
@@ -463,20 +449,13 @@ class AppState extends ChangeNotifier {
 
     // Sync to Appwrite if enabled
     if (syncFavouritesToAppwrite) {
-      if (kDebugMode) {
-        print("Syncing reordered favourites to Appwrite...");
-      }
+      Logger.debug("Syncing reordered favourites to Appwrite...");
       _appwriteClient
           .syncFavourites(this, direction: SyncDirection.toAppwrite)
           .then((_) {
-        if (kDebugMode) {
-          print("Reordered favourites synced to Appwrite.");
-        }
+        Logger.debug("Reordered favourites synced to Appwrite.");
       }).catchError((e, s) {
-        if (kDebugMode) {
-          print("Error syncing reordered favourites to Appwrite: $e");
-          print("Stack trace: $s");
-        }
+        Logger.error("Error syncing reordered favourites to Appwrite", e);
       });
     }
 

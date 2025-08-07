@@ -607,5 +607,95 @@
         "example": "2023"
       }
     }
+  },
+  "noForecastDataAvailable": "No forecast data available",
+  "@noForecastDataAvailable": {
+    "description": "Error message when no forecast data is available"
+  },
+  "failedToFetchHarmonieForecast": "Failed to fetch Harmonie forecast: {statusCode}",
+  "@failedToFetchHarmonieForecast": {
+    "description": "Error message when Harmonie forecast fetch fails",
+    "placeholders": {
+      "statusCode": {
+        "type": "String",
+        "example": "404"
+      }
+    }
+  },
+  "noForecastDataFromHarmonie": "No forecast data available from FMI Harmonie model",
+  "@noForecastDataFromHarmonie": {
+    "description": "Error message when no data is available from Harmonie model"
+  },
+  "errorGettingHarmonieForecast": "Error getting Harmonie forecast",
+  "@errorGettingHarmonieForecast": {
+    "description": "Error message when there's an issue getting Harmonie forecast"
+  },
+  "errorParsingTimeSeries": "Error parsing time series",
+  "@errorParsingTimeSeries": {
+    "description": "Error message when there's an issue parsing time series data"
+  },
+  "noLocationFound": "No location found for the given coordinates",
+  "@noLocationFound": {
+    "description": "Error message when no location is found for coordinates"
+  },
+  "failedToFetchAutocompleteResults": "Failed to fetch autocomplete results",
+  "@failedToFetchAutocompleteResults": {
+    "description": "Error message when autocomplete results fetch fails"
+  },
+  "authorizationError": "Authorization error. Please log in again.",
+  "@authorizationError": {
+    "description": "Error message when user is not authorized to access a resource"
+  },
+  "resourceNotFoundError": "Resource not found. Please try again later.",
+  "@resourceNotFoundError": {
+    "description": "Error message when a requested resource is not found"
+  },
+  "serverError": "Server error. Please try again later.",
+  "@serverError": {
+    "description": "Error message when there's a server-side error"
+  },
+  "networkError": "Network connection error. Please check your internet connection.",
+  "@networkError": {
+    "description": "Error message when there's a network connection issue"
+  },
+  "dataError": "Error processing data. Please try again.",
+  "@dataError": {
+    "description": "Error message when there's an issue processing data"
+  },
+  "authError": "Authentication error. Please log in again.",
+  "@authError": {
+    "description": "Error message when there's an authentication issue"
+  },
+  "locationError": "Error accessing location. Please check your location settings.",
+  "@locationError": {
+    "description": "Error message when there's an issue with location services"
+  },
+  "cacheError": "Error accessing cached data. Please try refreshing.",
+  "@cacheError": {
+    "description": "Error message when there's an issue with cached data"
+  },
+  "permissionError": "Permission denied. Please grant the required permissions.",
+  "@permissionError": {
+    "description": "Error message when a permission is denied"
+  },
+  "errorCode": "Error code",
+  "@errorCode": {
+    "description": "Label for error code in error messages"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Button text to close a dialog or screen"
+  },
+  "hourly": "Hourly",
+  "@hourly": {
+    "description": "Label for hourly forecast view"
+  },
+  "map": "Map",
+  "@map": {
+    "description": "Label for map view"
+  },
+  "accumulation": "Accumulation",
+  "@accumulation": {
+    "description": "Label for precipitation accumulation view"
   }
 }
