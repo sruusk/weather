@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:weather/data/forecast.dart';
-import 'package:weather/data/location.dart';
 import 'package:weather/widgets/home/precipitation.dart';
 import 'package:weather/widgets/home/sunrise_sunset_widget.dart';
 import 'package:weather/widgets/home/wind_arrow.dart';
@@ -9,13 +8,11 @@ import 'package:weather/widgets/weather_symbol_widget.dart';
 
 class CurrentForecast extends StatelessWidget {
   final Forecast forecast;
-  final List<Location> locations;
   final double height;
 
   const CurrentForecast({
     super.key,
     required this.forecast,
-    required this.locations,
     this.height = 300,
   });
 

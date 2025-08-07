@@ -28,18 +28,15 @@ HomePage
 │           └── RefreshIndicator (when data available)
 │               └── SingleChildScrollView
 │                   └── Column
-│                       └── WeatherDetails
+│                       └── WeatherContentWidget
 │                           └── LayoutBuilder
-│                               ├── WeatherSkeleton (when loading)
-│                               ├── Card (when no locations)
-│                               └── WeatherContentWidget
-│                                   ├── Wrap (for wide screens)
-│                                   │   └── SizedBox (for each child)
-│                                   │       └── ChildCardWidget
-│                                   │           └── [Weather Components]
-│                                   └── Column (for narrow screens)
-│                                       └── ChildCardWidget
-│                                           └── [Weather Components]
+│                               ├── Wrap (for wide screens)
+│                               │   └── SizedBox (for each child)
+│                               │       └── ChildCardWidget
+│                               │           └── [Weather Components]
+│                               └── Column (for narrow screens)
+│                                   └── ChildCardWidget
+│                                       └── [Weather Components]
 ```
 
 ### Key Components

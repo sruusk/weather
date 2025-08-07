@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:weather/app_state.dart';
 import 'package:weather/data/constants.dart';
 import 'package:weather/data/forecast.dart';
-import 'package:weather/data/location.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/widgets/common/child_card_widget.dart';
 import 'package:weather/widgets/home/current_forecast_widget.dart';
@@ -19,52 +18,48 @@ class WeatherContentWidget extends StatelessWidget {
   /// The forecast data to display.
   final Forecast forecast;
 
-  /// The list of available locations.
-  final List<Location> locations;
-
-  /// Whether the content is in a wide screen layout.
-  final bool isWideScreen;
-
   /// Creates a WeatherContentWidget.
   ///
-  /// The [forecast], [locations], and [isWideScreen] parameters are required.
+  /// The [forecast] parameter is required.
   const WeatherContentWidget({
     super.key,
     required this.forecast,
-    required this.locations,
-    required this.isWideScreen,
   });
 
   @override
   Widget build(BuildContext context) {
-    final children = _buildChildren(context);
+    // Use LayoutBuilder to adapt to different screen sizes
+    return LayoutBuilder(builder: (builderContext, constraints) {
+      final isWideScreen = constraints.maxWidth > 900;
+      final children = _buildChildren(context, isWideScreen);
 
-    // Use different layouts based on screen width
-    if (isWideScreen) {
-      return Wrap(
-        children: children.map((child) {
-          // Check if this is the observations widget which should take full width
-          final isObservations = child.key == const Key('observations');
-          return SizedBox(
-            width: isObservations
-                ? double.infinity
-                : MediaQuery.of(context).size.width / 2,
-            child: child,
-          );
-        }).toList(),
-      );
-    } else {
-      return Column(
-        children: [
-          ...children,
-          const SizedBox(height: 8),
-        ],
-      );
-    }
+      // Use different layouts based on screen width
+      if (isWideScreen) {
+        return Wrap(
+          children: children.map((child) {
+            // Check if this is the observations widget which should take full width
+            final isObservations = child.key == const Key('observations');
+            return SizedBox(
+              width: isObservations
+                  ? constraints.maxWidth
+                  : constraints.maxWidth / 2,
+              child: child,
+            );
+          }).toList(),
+        );
+      } else {
+        return Column(
+          children: [
+            ...children,
+            const SizedBox(height: 8),
+          ],
+        );
+      }
+    });
   }
 
   /// Builds the list of child widgets based on the forecast and location data.
-  List<Widget> _buildChildren(BuildContext context) {
+  List<Widget> _buildChildren(BuildContext context, bool isWideScreen) {
     final localizations = AppLocalizations.of(context)!;
     final appState = Provider.of<AppState>(context, listen: false);
 
@@ -79,7 +74,6 @@ class WeatherContentWidget extends StatelessWidget {
           children: [
             CurrentForecast(
               forecast: forecast,
-              locations: locations,
               height: isWideScreen ? 335 : 300,
             ),
           ],

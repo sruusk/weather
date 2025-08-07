@@ -30,10 +30,10 @@
 
 ## Testing
 
-- [ ] Increase unit test coverage, especially for core business logic
+- [x] Increase unit test coverage, especially for core business logic
 - [ ] Add integration tests for critical user flows
 - [ ] Implement widget tests for complex UI components
-- [ ] Create mocks for external dependencies to enable better testing
+- [x] Create mocks for external dependencies to enable better testing
 - [ ] Add automated UI tests for different screen sizes and orientations
 - [ ] Implement performance benchmarks to prevent regressions
 

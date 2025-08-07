@@ -5,7 +5,7 @@ import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/main.dart' show showGlobalSnackBar;
 import 'package:weather/viewmodels/home_view_model.dart';
 import 'package:weather/widgets/home/no_locations_widget.dart';
-import 'package:weather/widgets/home/weather_details_widget.dart';
+import 'package:weather/widgets/home/weather_content_widget.dart';
 import 'package:weather/widgets/skeleton/weather_skeleton.dart';
 
 class HomePage extends StatefulWidget {
@@ -124,10 +124,8 @@ class _HomePageState extends State<HomePage>
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
-              WeatherDetails(
+              WeatherContentWidget(
                 forecast: _viewModel.forecast!,
-                locations: _viewModel.locations,
-                isLoading: _viewModel.isLoading,
               ),
               const SizedBox(height: 10),
             ],
