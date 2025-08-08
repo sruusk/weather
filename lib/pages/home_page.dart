@@ -82,6 +82,7 @@ class _HomePageState extends State<HomePage>
         if (kDebugMode) {
           print("App resumed, reloading forecasts");
         }
+        _locationDenied = false;
         _loadInitialForecast();
       }
       WidgetsBinding.instance.removeObserver(this);
