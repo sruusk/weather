@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage>
   final WeatherData _weatherData = WeatherData();
   Forecast? _forecast;
   bool _isLoading = false;
+  bool _locationDenied = false; // Prevents causing loops
 
   @override
   void initState() {
@@ -89,54 +90,60 @@ class _HomePageState extends State<HomePage>
 
   void _handleGeolocationError(GeolocationResult result) {
     final appState = Provider.of<AppState>(context, listen: false);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final localizations = AppLocalizations.of(context)!;
-      String errorMessage;
+    final localizations = AppLocalizations.of(context)!;
+    String errorMessage;
 
-      switch (result.status) {
-        case GeolocationStatus.locationServicesDisabled:
-          errorMessage = localizations.locationServicesDisabled;
-          break;
-        case GeolocationStatus.permissionDenied:
-          errorMessage = localizations.locationPermissionDenied;
-          break;
-        case GeolocationStatus.permissionDeniedForever:
+    switch (result.status) {
+      case GeolocationStatus.locationServicesDisabled:
+        errorMessage = localizations.locationServicesDisabled;
+        setState(() {
+          _locationDenied = true;
+        });
+        break;
+      case GeolocationStatus.permissionDenied:
+        errorMessage = localizations.locationPermissionDenied;
+        setState(() {
+          _locationDenied = true;
+        });
+        break;
+      case GeolocationStatus.permissionDeniedForever:
         // For permanently denied permissions, also disable geolocation in app state
-          appState.setGeolocationEnabled(false);
-          errorMessage =
-              localizations.locationPermissionPermanentlyDenied;
-          break;
-        default:
-          errorMessage = localizations.unknownError;
-      }
+        appState.setGeolocationEnabled(false);
+        errorMessage = localizations.locationPermissionPermanentlyDenied;
+        break;
+      default:
+        errorMessage = localizations.unknownError;
+        setState(() {
+          _locationDenied = true;
+        });
+    }
 
-      showGlobalSnackBar(
-        message: errorMessage,
-        duration: const Duration(seconds: 5),
-        action: result.status == GeolocationStatus.permissionDeniedForever
-            ? SnackBarAction(
-          label: localizations.openSettings,
-          onPressed: () {
-            // Open app settings
-            WidgetsBinding.instance.addObserver(this);
-            Geolocator.openAppSettings();
-          },
-        )
-            : result.status == GeolocationStatus.locationServicesDisabled
-            ? SnackBarAction(
-          label: localizations.openSettings,
-          onPressed: () {
-            // Open location settings
-            WidgetsBinding.instance.addObserver(this);
-            Geolocator.openLocationSettings();
-          },
-        )
-            : SnackBarAction(
-          label: localizations.retry,
-                    onPressed: _startGeolocation,
-                  ),
-      );
-    });
+    showGlobalSnackBar(
+      message: errorMessage,
+      duration: const Duration(seconds: 5),
+      action: result.status == GeolocationStatus.permissionDeniedForever
+          ? SnackBarAction(
+              label: localizations.openSettings,
+              onPressed: () {
+                // Open app settings
+                WidgetsBinding.instance.addObserver(this);
+                Geolocator.openAppSettings();
+              },
+            )
+          : result.status == GeolocationStatus.locationServicesDisabled
+              ? SnackBarAction(
+                  label: localizations.openSettings,
+                  onPressed: () {
+                    // Open location settings
+                    WidgetsBinding.instance.addObserver(this);
+                    Geolocator.openLocationSettings();
+                  },
+                )
+              : SnackBarAction(
+                  label: localizations.retry,
+                  onPressed: _startGeolocation,
+                ),
+    );
   }
 
   void _startGeolocation() async {
@@ -159,12 +166,20 @@ class _HomePageState extends State<HomePage>
             appState.setActiveLocation(geolocation);
           }
           appState.setGeolocation(geolocation);
+          setState(() {
+            _isLoading = false;
+            _locationDenied = false;
+          });
         }
       } else {
         if (result.isSuccess) {
+          // This case should not happen, but handle it gracefully
           _startGeolocation();
         } else {
           _handleGeolocationError(result);
+          setState(() {
+            _isLoading = false;
+          });
         }
       }
     } on TimeoutException {
@@ -244,8 +259,20 @@ class _HomePageState extends State<HomePage>
         locationToLoad = geolocation;
         _startGeolocation();
       } else {
-        // Handle geolocation errors
-        _handleGeolocationError(result);
+        if (result.isSuccess) {
+          _startGeolocation();
+        } else {
+          _handleGeolocationError(result);
+          if (locs.isNotEmpty) {
+            locationToLoad = locs.first;
+          } else {
+            setState(() {
+              _forecast = null;
+              _isLoading = false;
+            });
+            return;
+          }
+        }
       }
     } else if (locs.isNotEmpty) {
       // If geolocation is disabled, use first favorite
@@ -274,11 +301,6 @@ class _HomePageState extends State<HomePage>
           _isLoading = false;
         });
       }
-    } else {
-      setState(() {
-        _forecast = null;
-        _isLoading = false;
-      });
     }
   }
 
@@ -295,7 +317,8 @@ class _HomePageState extends State<HomePage>
 
     if (!_isLoading &&
         _forecast == null &&
-        (locations.isNotEmpty || appState.geolocationEnabled)) {
+        (locations.isNotEmpty ||
+            (appState.geolocationEnabled && !_locationDenied))) {
       setState(() {
         _isLoading = true;
       });
