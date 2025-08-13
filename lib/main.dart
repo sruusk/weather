@@ -263,79 +263,11 @@ void main() async {
   runApp(
     ChangeNotifierProvider.value(
       value: appState,
-      child: const WebVersionCheck(
-        child: OfflineIndicator(
-          child: MyApp(),
-        ),
+      child: OfflineIndicator(
+        child: MyApp(),
       ),
     ),
   );
-}
-
-// Widget to check if running on web and show a dialog
-class WebVersionCheck extends StatefulWidget {
-  final Widget child;
-
-  const WebVersionCheck({super.key, required this.child});
-
-  @override
-  State<WebVersionCheck> createState() => _WebVersionCheckState();
-}
-
-class _WebVersionCheckState extends State<WebVersionCheck> {
-  bool _dialogShown = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Check if running on web platform
-    if (kIsWeb) {
-      // Use a post-frame callback to ensure the context is valid
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showWebPerformanceDialog(context);
-      });
-    }
-  }
-
-  void _showWebPerformanceDialog(BuildContext context) {
-    if (_dialogShown) return;
-
-    setState(() {
-      _dialogShown = true;
-    });
-
-    showDialog(
-      context: context,
-      barrierDismissible: false, // User must tap button to close dialog
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text("Web Version Notice"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text("This web version has sub-par performance and is only for demonstration purposes."),
-              SizedBox(height: 16),
-              Text("The web version uses a different base map for weather radar and warnings."),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text("I Understand"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
 }
 
 class MyApp extends StatelessWidget {
@@ -442,9 +374,11 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   bool wasDisplayed = false;
+
   // Show a dialog to inform users about web version limitations
   void _showWebPerformanceDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    const isRunningWithWasm = bool.fromEnvironment('dart.tool.dart2wasm');
 
     showDialog(
       context: context,
@@ -455,10 +389,15 @@ class _MainScreenState extends State<MainScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
             children: [
               Text(localizations.webPerformanceWarningMessage),
-              const SizedBox(height: 16),
               Text(localizations.webMapDifferenceMessage),
+              isRunningWithWasm
+                  ? Text(
+                      localizations.webWasmPerformanceMessage,
+                    )
+                  : const SizedBox.shrink(),
             ],
           ),
           actions: [
@@ -536,10 +475,14 @@ class _MainScreenState extends State<MainScreen> {
       _syncComplete = true;
     }
 
-    if(kIsWeb && !wasDisplayed) {
+    if ((kIsWeb || kIsWasm) && !wasDisplayed) {
       wasDisplayed = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showWebPerformanceDialog(context);
+        if (mounted) {
+          _showWebPerformanceDialog(context);
+        } else {
+          wasDisplayed = false;
+        }
       });
     }
 
@@ -547,9 +490,7 @@ class _MainScreenState extends State<MainScreen> {
       body: Row(
         children: [
           if (isWideScreen) _buildNavigationRail(context, currentIndex),
-          Expanded(
-            child: widget.child
-          ),
+          Expanded(child: widget.child),
         ],
       ),
       bottomNavigationBar: isWideScreen

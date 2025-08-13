@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -19,6 +18,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get webMapDifferenceMessage =>
       'The web version uses a different base map for weather radar and warnings.';
+
+  @override
+  String get webWasmPerformanceMessage =>
+      'The app is running using WebAssembly, offering better performance than the web version.';
 
   @override
   String get acknowledge => 'I Understand';

@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.g.dart';
 
 // ignore_for_file: type=lint
@@ -20,6 +19,10 @@ class AppLocalizationsFi extends AppLocalizations {
   @override
   String get webMapDifferenceMessage =>
       'Verkkosovelluksessa käytetään eri karttoja kuin mobiilisovelluksessa, joten karttatoiminnot ovat visuaalisesti erilaisia.';
+
+  @override
+  String get webWasmPerformanceMessage =>
+      'Sovellusta ajetaan WebAssemblyn avulla paremman suorituskyvyn saavuttamiseksi.';
 
   @override
   String get acknowledge => 'Ymmärrän';

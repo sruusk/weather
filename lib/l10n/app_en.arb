@@ -12,6 +12,10 @@
   "@webMapDifferenceMessage": {
     "description": "Message explaining that the web version uses different maps"
   },
+  "webWasmPerformanceMessage": "The app is running using WebAssembly, offering better performance than the web version.",
+  "@webWasmPerformanceMessage": {
+    "description": "Message explaining that the app is running with WebAssembly for better performance"
+  },
   "acknowledge": "I Understand",
   "@acknowledge": {
     "description": "Button text to acknowledge and close the warning dialog"
