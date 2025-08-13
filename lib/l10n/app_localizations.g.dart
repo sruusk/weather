@@ -116,6 +116,12 @@ abstract class AppLocalizations {
   /// **'The web version uses a different base map for weather radar and warnings.'**
   String get webMapDifferenceMessage;
 
+  /// Message explaining that the app is running with WebAssembly for better performance
+  ///
+  /// In en, this message translates to:
+  /// **'The app is running using WebAssembly, offering better performance than the web version.'**
+  String get webWasmPerformanceMessage;
+
   /// Button text to acknowledge and close the warning dialog
   ///
   /// In en, this message translates to:
