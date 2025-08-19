@@ -1003,6 +1003,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Contains data from the National Land Survey of Finland Geographic names Database {month}/{year}'**
   String nlsDescription(String month, String year);
+
+  /// No description provided for @geocodingError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unknown error occurred while geocoding'**
+  String get geocodingError;
 }
 
 class _AppLocalizationsDelegate

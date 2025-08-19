@@ -223,7 +223,7 @@ class AppwriteClient {
       if (kDebugMode) {
         print('Error in reverse geocoding: $e');
       }
-      throw e;
+      rethrow;
     }
   }
 

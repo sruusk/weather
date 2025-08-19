@@ -252,13 +252,38 @@ class _HomePageState extends State<HomePage>
       final result = await getLastKnownPosition();
       if(result.isSuccess && result.position != null) {
         // Use reverse geocoding to get location information
-        final geolocation = await _weatherData.reverseGeocoding(
-          result.position!.latitude,
-          result.position!.longitude,
-            lang: appState.locale.languageCode);
-        appState.setGeolocation(geolocation);
-        locationToLoad = geolocation;
-        _startGeolocation();
+        try {
+          final geolocation = await _weatherData.reverseGeocoding(
+            result.position!.latitude,
+            result.position!.longitude,
+              lang: appState.locale.languageCode);
+          appState.setGeolocation(geolocation);
+          locationToLoad = geolocation;
+          _startGeolocation();
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error during reverse geocoding: ' + e.toString());
+          }
+          if(mounted) {
+            final localizations = AppLocalizations.of(context)!;
+            showGlobalSnackBar(
+              message: localizations.geocodingError,
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                  label: localizations.retry, onPressed: _startGeolocation),
+            );
+          }
+          // Fallback: use first favorite location if available; otherwise stop loading
+          if (locs.isNotEmpty) {
+            locationToLoad = locs.first;
+          } else {
+            setState(() {
+              _forecast = null;
+              _isLoading = false;
+            });
+            return;
+          }
+        }
       } else {
         if (result.isSuccess) {
           _startGeolocation();

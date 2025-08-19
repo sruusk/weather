@@ -494,4 +494,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String nlsDescription(String month, String year) {
     return 'Sisältää Maanmittauslaitoksen Nimistötietokannan $month/$year aineistoa';
   }
+
+  @override
+  String get geocodingError => 'Tuntematon virhe geokoodatessa';
 }

@@ -496,4 +496,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String nlsDescription(String month, String year) {
     return 'Contains data from the National Land Survey of Finland Geographic names Database $month/$year';
   }
+
+  @override
+  String get geocodingError => 'An unknown error occurred while geocoding';
 }
