@@ -112,6 +112,8 @@ class _HomePageState extends State<HomePage>
         appState.setGeolocationEnabled(false);
         errorMessage = localizations.locationPermissionPermanentlyDenied;
         break;
+      case GeolocationStatus.unknown:
+        return; // No action needed
       default:
         errorMessage = localizations.unknownError;
         setState(() {
@@ -249,7 +251,16 @@ class _HomePageState extends State<HomePage>
     if (appState.geolocationEnabled && appState.geolocation != null) {
       locationToLoad = appState.geolocation;
     } else if (appState.geolocationEnabled) {
-      final result = await getLastKnownPosition();
+      GeolocationResult result;
+      try {
+        result = await getLastKnownPosition();
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error getting last known position: $e');
+        }
+        result = GeolocationResult(
+            status: GeolocationStatus.unknown, position: null);
+      }
       if(result.isSuccess && result.position != null) {
         // Use reverse geocoding to get location information
         try {

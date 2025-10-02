@@ -12,7 +12,10 @@ enum GeolocationStatus {
   permissionDeniedForever,
 
   /// Success - no error
-  success
+  success,
+
+  /// Unknown error
+  unknown,
 }
 
 /// Class to hold the result of a geolocation attempt
