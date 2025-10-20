@@ -269,7 +269,7 @@ class _ForecastWidgetState extends State<ForecastWidget> {
                 return Card(
                   margin: const EdgeInsets.only(
                       top: 10, left: 2, right: 2, bottom: 2),
-                  color: Theme.of(context).colorScheme.surfaceDim,
+                  // color: Theme.of(context).colorScheme.surfaceDim,
                   child: SizedBox(
                     width: 71,
                     child: Padding(

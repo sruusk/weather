@@ -250,6 +250,142 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  static ThemeData _buildModernTheme(ColorScheme scheme, {bool isDark = false, bool amoled = false}) {
+    final colorScheme = scheme;
+
+    final roundedShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+    );
+
+    Color surfaceBase() => amoled ? Colors.black : colorScheme.surface;
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      brightness: colorScheme.brightness,
+      scaffoldBackgroundColor: amoled ? Colors.black : (isDark ? colorScheme.surface : Colors.blueGrey[50]),
+      appBarTheme: AppBarTheme(
+        backgroundColor: surfaceBase(),
+        foregroundColor: colorScheme.onSurface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        titleTextStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+      ),
+      cardTheme: CardThemeData(
+        color: surfaceBase(),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        margin: const EdgeInsets.all(8),
+        shape: roundedShape.copyWith(
+          side: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        clipBehavior: Clip.antiAlias,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Color.alphaBlend(colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.12), surfaceBase()),
+        contentTextStyle: TextStyle(color: colorScheme.onSurface),
+        actionTextColor: colorScheme.primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 6,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return Color.alphaBlend(colorScheme.onSurface.withValues(alpha: 0.06), surfaceBase());
+            }
+            return colorScheme.primary;
+          }),
+          foregroundColor: WidgetStatePropertyAll(colorScheme.onPrimary),
+          elevation: WidgetStatePropertyAll(0),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 20, vertical: 14)),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: ButtonStyle(
+          side: WidgetStatePropertyAll(BorderSide(color: colorScheme.outlineVariant)),
+          foregroundColor: WidgetStatePropertyAll(colorScheme.primary),
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 20, vertical: 14)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStatePropertyAll(colorScheme.primary),
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Color.alphaBlend(colorScheme.primary.withValues(alpha: isDark ? 0.10 : 0.04), surfaceBase()),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: colorScheme.primary),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surfaceBase(),
+        indicatorColor: colorScheme.primaryContainer.withValues(alpha: 0.35),
+        labelTextStyle: WidgetStatePropertyAll(const TextStyle(fontWeight: FontWeight.w600)),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: selected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+          );
+        }),
+        elevation: 1,
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: surfaceBase(),
+        selectedItemColor: colorScheme.primary,
+        unselectedItemColor: colorScheme.onSurfaceVariant,
+        type: BottomNavigationBarType.fixed,
+        elevation: 1,
+        selectedIconTheme: IconThemeData(color: colorScheme.primary),
+        unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Color.alphaBlend(colorScheme.primary.withValues(alpha: isDark ? 0.10 : 0.05), surfaceBase()),
+        selectedColor: colorScheme.secondaryContainer,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
+      dividerTheme: DividerThemeData(
+        color: colorScheme.outlineVariant,
+        thickness: 1,
+        space: 1,
+      ),
+      switchTheme: SwitchThemeData(
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected)
+              ? colorScheme.primary.withValues(alpha: 0.50)
+              : colorScheme.outlineVariant.withValues(alpha: 0.40);
+        }),
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected)
+              ? colorScheme.primary
+              : surfaceBase();
+        }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
@@ -276,31 +412,10 @@ class MyApp extends StatelessWidget {
               title: 'Weather App',
               debugShowCheckedModeBanner: true,
               scaffoldMessengerKey: globalScaffoldMessengerKey,
-              theme: ThemeData(
-                colorScheme: lightScheme.copyWith(
-                  surfaceDim: Colors.white,
-                  errorContainer: Colors.red,
-                ),
-                scaffoldBackgroundColor: Colors.blueGrey[50],
-                cardTheme: CardThemeData(
-                  color: Colors.white,
-                  surfaceTintColor: Colors.white,
-                ),
-              ),
+              theme: _buildModernTheme(lightScheme, isDark: false),
               darkTheme: appState.isAmoledTheme
-                  ? ThemeData(
-                      colorScheme: darkScheme.copyWith(
-                        surfaceDim: Colors.black,
-                        surfaceContainer: Colors.black,
-                      ),
-                      scaffoldBackgroundColor: Colors.black,
-                      cardTheme: CardThemeData(
-                        color: Colors.black,
-                        surfaceTintColor: Colors.black,
-                      ))
-                  : ThemeData(
-                      colorScheme: darkScheme,
-                    ),
+                  ? _buildModernTheme(darkScheme, isDark: true, amoled: true)
+                  : _buildModernTheme(darkScheme, isDark: true),
               themeMode: appState.themeMode,
               locale: appState.locale,
               localizationsDelegates: const [

@@ -273,7 +273,7 @@ class _HomePageState extends State<HomePage>
           _startGeolocation();
         } catch (e) {
           if (kDebugMode) {
-            print('Error during reverse geocoding: ' + e.toString());
+            print('Error during reverse geocoding: $e');
           }
           if(mounted) {
             final localizations = AppLocalizations.of(context)!;
