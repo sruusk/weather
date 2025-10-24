@@ -261,7 +261,9 @@ class MyApp extends StatelessWidget {
 
     return ThemeData(
       useMaterial3: true,
-      colorScheme: colorScheme,
+      colorScheme: colorScheme.copyWith(
+        errorContainer: Colors.red,
+      ),
       brightness: colorScheme.brightness,
       scaffoldBackgroundColor: amoled ? Colors.black : (isDark ? colorScheme.surface : Colors.blueGrey[50]),
       appBarTheme: AppBarTheme(
@@ -289,54 +291,6 @@ class MyApp extends StatelessWidget {
         actionTextColor: colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 6,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) {
-              return Color.alphaBlend(colorScheme.onSurface.withValues(alpha: 0.06), surfaceBase());
-            }
-            return colorScheme.primary;
-          }),
-          foregroundColor: WidgetStatePropertyAll(colorScheme.onPrimary),
-          elevation: WidgetStatePropertyAll(0),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 20, vertical: 14)),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: ButtonStyle(
-          side: WidgetStatePropertyAll(BorderSide(color: colorScheme.outlineVariant)),
-          foregroundColor: WidgetStatePropertyAll(colorScheme.primary),
-          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 20, vertical: 14)),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          foregroundColor: WidgetStatePropertyAll(colorScheme.primary),
-          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Color.alphaBlend(colorScheme.primary.withValues(alpha: isDark ? 0.10 : 0.04), surfaceBase()),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: colorScheme.primary),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surfaceBase(),
@@ -370,18 +324,6 @@ class MyApp extends StatelessWidget {
         color: colorScheme.outlineVariant,
         thickness: 1,
         space: 1,
-      ),
-      switchTheme: SwitchThemeData(
-        trackColor: WidgetStateProperty.resolveWith((states) {
-          return states.contains(WidgetState.selected)
-              ? colorScheme.primary.withValues(alpha: 0.50)
-              : colorScheme.outlineVariant.withValues(alpha: 0.40);
-        }),
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          return states.contains(WidgetState.selected)
-              ? colorScheme.primary
-              : surfaceBase();
-        }),
       ),
     );
   }
