@@ -272,7 +272,13 @@ class MyApp extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-        titleTextStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+        titleTextStyle: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 18,
+          color: colorScheme.onSurface,
+        ),
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        actionsIconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       cardTheme: CardThemeData(
         color: surfaceBase(),
