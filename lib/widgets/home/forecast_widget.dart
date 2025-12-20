@@ -130,8 +130,9 @@ class _ForecastWidgetState extends State<ForecastWidget> {
       });
 
       // Find the highest temperature
-      double highestTemp = points.fold(
-          0, (maxTemp, p) => p.temperature > maxTemp ? p.temperature : maxTemp);
+      double highestTemp = points.isEmpty
+          ? 0
+          : points.map((p) => p.temperature).reduce((a, b) => a > b ? a : b);
 
       return (mostFrequentSymbol, highestTemp.toStringAsFixed(0));
     }
