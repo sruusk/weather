@@ -233,7 +233,7 @@ class WeatherData {
         return 'thunderstorms-extreme';
       case 96:
       case 99:
-        return 'thunderstorm-extreme-snow'; // Should be thunderstorms-hail
+        return 'thunderstorms-extreme'; // Should be thunderstorms-hail
       default:
         return 'unknown';
     }
