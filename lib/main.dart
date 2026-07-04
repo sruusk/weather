@@ -9,6 +9,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
 
+import 'package:home_widget/home_widget.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:weather/data/location.dart';
+import 'package:weather/data/weather_data.dart';
+import 'package:weather/data/widget_updater.dart';
+import 'package:intl/intl.dart';
+
 import 'app_state.dart';
 import 'appwrite_client.dart';
 import 'pages/about_page.dart';
@@ -219,8 +227,34 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    await updateWeatherWidget();
+    return Future.value(true);
+  });
+}
+
+@pragma('vm:entry-point')
+Future<void> backgroundCallback(Uri? uri) async {
+  await updateWeatherWidget();
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Workmanager
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
+  
+  // Register periodic task (Android restricts this to minimum 15 minutes)
+  Workmanager().registerPeriodicTask(
+    "1",
+    "weatherUpdate",
+    frequency: const Duration(minutes: 15),
+  );
+
+  // Register HomeWidget background callback
+  HomeWidget.registerBackgroundCallback(backgroundCallback);
 
   // Add meteocons to license registry
   LicenseRegistry.addLicense(() async* {
@@ -232,6 +266,11 @@ void main() async {
 
   // Initialize Appwrite Client
   AppwriteClient();
+  
+  // Force an immediate widget update when the app starts
+  if (!kIsWeb) {
+    updateWeatherWidget();
+  }
 
   // Create AppState but don't use it yet
   final appState = AppState();

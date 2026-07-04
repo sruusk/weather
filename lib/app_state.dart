@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:weather/appwrite_client.dart';
+import 'package:weather/data/widget_updater.dart';
 
 import 'data/location.dart';
 import 'preferences.dart';
@@ -411,6 +412,9 @@ class AppState extends ChangeNotifier {
 
   void setActiveLocation(Location location) {
     _activeLocationNotifier.value = location;
+    if (!kIsWeb) {
+      updateWeatherWidget();
+    }
     notifyListeners();
   }
 
