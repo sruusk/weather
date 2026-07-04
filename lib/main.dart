@@ -296,49 +296,69 @@ class MyApp extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
     );
 
-    Color surfaceBase() => amoled ? Colors.black : colorScheme.surface;
+    // In normal dark mode, use a deep navy tone inspired by the mockup. 
+    // In light mode, use a very faint grey/white. 
+    // In AMOLED, pitch black.
+    final Color surfaceBaseColor = amoled 
+        ? Colors.black 
+        : (isDark ? const Color(0xFF111424) : Colors.white);
+        
+    // Scaffold background is the same as surface
+    final Color scaffoldBgColor = surfaceBaseColor;
+    
+    // Divider and faint lines
+    final Color outlineColor = isDark ? const Color(0xFF1E2235) : Colors.grey.shade200;
+    
+    // Segmented button background
+    final Color segmentedBgColor = isDark ? const Color(0xFF1F2437) : Colors.grey.shade200;
+    final Color segmentedActiveBg = isDark ? Colors.white : Colors.black;
+    final Color segmentedActiveText = isDark ? Colors.black : Colors.white;
+    final Color segmentedInactiveText = isDark ? const Color(0xFF8A8D9F) : Colors.grey.shade600;
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme.copyWith(
-        errorContainer: Colors.red,
+        surface: surfaceBaseColor,
+        errorContainer: Colors.red.shade500, // Bright red for delete buttons
+        onSurfaceVariant: isDark ? const Color(0xFF8A8D9F) : Colors.grey.shade600, // Subtitles
+        outlineVariant: outlineColor,
       ),
       brightness: colorScheme.brightness,
-      scaffoldBackgroundColor: amoled ? Colors.black : (isDark ? colorScheme.surface : Colors.blueGrey[50]),
+      scaffoldBackgroundColor: scaffoldBgColor,
       appBarTheme: AppBarTheme(
-        backgroundColor: surfaceBase(),
+        backgroundColor: scaffoldBgColor,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
         systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         titleTextStyle: TextStyle(
           fontWeight: FontWeight.w600,
-          fontSize: 18,
+          fontSize: 22,
           color: colorScheme.onSurface,
         ),
         iconTheme: IconThemeData(color: colorScheme.onSurface),
         actionsIconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       cardTheme: CardThemeData(
-        color: surfaceBase(),
+        color: surfaceBaseColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: const EdgeInsets.all(8),
         shape: roundedShape.copyWith(
-          side: BorderSide(color: colorScheme.outlineVariant),
+          side: BorderSide(color: outlineColor),
         ),
         clipBehavior: Clip.antiAlias,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Color.alphaBlend(colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.12), surfaceBase()),
+        backgroundColor: Color.alphaBlend(colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.12), surfaceBaseColor),
         contentTextStyle: TextStyle(color: colorScheme.onSurface),
         actionTextColor: colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 6,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: surfaceBase(),
+        backgroundColor: scaffoldBgColor,
         indicatorColor: colorScheme.primaryContainer.withValues(alpha: 0.35),
         labelTextStyle: WidgetStatePropertyAll(const TextStyle(fontWeight: FontWeight.w600)),
         iconTheme: WidgetStateProperty.resolveWith((states) {
@@ -347,28 +367,75 @@ class MyApp extends StatelessWidget {
             color: selected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
           );
         }),
-        elevation: 1,
+        elevation: 0,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: surfaceBase(),
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.onSurfaceVariant,
+        backgroundColor: amoled ? Colors.black : (isDark ? const Color(0xFF06080F) : Colors.white),
+        selectedItemColor: colorScheme.primary, // Uses Material You primary
+        unselectedItemColor: isDark ? const Color(0xFF8A8D9F) : Colors.grey.shade500,
         type: BottomNavigationBarType.fixed,
-        elevation: 1,
+        elevation: 0,
         selectedIconTheme: IconThemeData(color: colorScheme.primary),
-        unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
+        unselectedIconTheme: IconThemeData(color: isDark ? const Color(0xFF8A8D9F) : Colors.grey.shade500),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: Color.alphaBlend(colorScheme.primary.withValues(alpha: isDark ? 0.10 : 0.05), surfaceBase()),
+        backgroundColor: Color.alphaBlend(colorScheme.primary.withValues(alpha: isDark ? 0.10 : 0.05), surfaceBaseColor),
         selectedColor: colorScheme.secondaryContainer,
         labelStyle: const TextStyle(fontWeight: FontWeight.w600),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: BorderSide(color: colorScheme.outlineVariant),
+        side: BorderSide(color: outlineColor),
       ),
       dividerTheme: DividerThemeData(
-        color: colorScheme.outlineVariant,
+        color: outlineColor,
         thickness: 1,
         space: 1,
+      ),
+      listTileTheme: const ListTileThemeData(
+        contentPadding: EdgeInsets.symmetric(horizontal: 20),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.white; // White thumb when active
+          }
+          return isDark ? Colors.grey.shade400 : Colors.white;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.primary; // Dynamic blue/accent when active
+          }
+          return isDark ? const Color(0xFF2C324B) : Colors.grey.shade300;
+        }),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return segmentedActiveBg;
+            }
+            return segmentedBgColor;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return segmentedActiveText;
+            }
+            return segmentedInactiveText;
+          }),
+          textStyle: const WidgetStatePropertyAll(
+            TextStyle(fontWeight: FontWeight.w600),
+          ),
+          iconColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return segmentedActiveText;
+            }
+            return segmentedInactiveText;
+          }),
+          side: const WidgetStatePropertyAll(BorderSide.none),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          ),
+        ),
       ),
     );
   }

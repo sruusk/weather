@@ -192,11 +192,12 @@ class _SettingsPageState extends State<SettingsPage>
           if (_isLoggedIn != null && _isLoggedIn!) ...[
             _buildSyncSwitch(localizations, appState, context),
             SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildAccountDeleteButton(context, localizations),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: _buildAccountDeleteButton(context, localizations),
+              ),
             )
           ] else ...[
             Padding(
@@ -348,9 +349,11 @@ class _SettingsPageState extends State<SettingsPage>
       BuildContext context, AppLocalizations localizations) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        backgroundColor: Colors.red.shade500, // Bright solid red
         foregroundColor: Colors.white,
+        shape: const StadiumBorder(), // Fully rounded capsule
+        elevation: 0,
       ),
       onPressed: () {
         // Confirm logout using a dialog
