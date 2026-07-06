@@ -251,6 +251,9 @@ void main() async {
     "1",
     "weatherUpdate",
     frequency: const Duration(minutes: 15),
+    constraints: Constraints(
+      networkType: NetworkType.connected,
+    ),
   );
 
   // Register HomeWidget background callback
