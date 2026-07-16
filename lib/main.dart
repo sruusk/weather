@@ -11,11 +11,7 @@ import 'package:weather/l10n/app_localizations.g.dart';
 
 import 'package:home_widget/home_widget.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:weather/data/location.dart';
-import 'package:weather/data/weather_data.dart';
 import 'package:weather/data/widget_updater.dart';
-import 'package:intl/intl.dart';
 
 import 'app_state.dart';
 import 'appwrite_client.dart';
@@ -230,6 +226,7 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
+    WidgetsFlutterBinding.ensureInitialized();
     await updateWeatherWidget();
     return Future.value(true);
   });
@@ -237,6 +234,7 @@ void callbackDispatcher() {
 
 @pragma('vm:entry-point')
 Future<void> backgroundCallback(Uri? uri) async {
+  WidgetsFlutterBinding.ensureInitialized();
   await updateWeatherWidget();
 }
 

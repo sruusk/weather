@@ -9,16 +9,19 @@ import es.antonborri.home_widget.HomeWidgetGlanceWidgetReceiver
 class WeatherWidgetReceiver : HomeWidgetGlanceWidgetReceiver<WeatherWidget>() {
     override val glanceAppWidget = WeatherWidget()
 
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
-
-        // Trigger Dart background update when Android natively requests a widget update
-        val intent = Intent(context, HomeWidgetBackgroundReceiver::class.java)
-        intent.action = "es.antonborri.home_widget.action.BACKGROUND"
-        context.sendBroadcast(intent)
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        
+        if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
+            val triggeredFromHomeWidget = intent.getBooleanExtra("triggeredFromHomeWidget", false)
+            
+            // Only trigger Dart background update if it was an OS native update!
+            // If it was triggered by Flutter (HomeWidget.updateWidget), do NOT trigger again to avoid infinite loop.
+            if (!triggeredFromHomeWidget) {
+                val backgroundIntent = Intent(context, HomeWidgetBackgroundReceiver::class.java)
+                backgroundIntent.action = "es.antonborri.home_widget.action.BACKGROUND"
+                context.sendBroadcast(backgroundIntent)
+            }
+        }
     }
 }

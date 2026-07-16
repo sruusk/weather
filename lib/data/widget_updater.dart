@@ -39,7 +39,7 @@ Future<void> updateWeatherWidget() async {
 
       // Get location specific to this widget
       final locationStr = await HomeWidget.getWidgetData<String>('widget_${widgetId}_location');
-      Location widgetLocation = defaultLocation!;
+      Location widgetLocation = defaultLocation;
       if (locationStr == 'current_location') {
         try {
           final position = await getLastKnownPosition();
