@@ -41,7 +41,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
   late DateTime _currentTime;
   late List<DateTime> _radarTimes;
   double _sliderValue =
-      5; // 5 represents the latest time, 0 represents 75 minutes ago
+      15; // 15 represents the latest time, 0 represents 75 minutes ago
   bool _isPlaying = false;
   Timer? _timer;
   bool _isMapInitialized = false;
@@ -55,9 +55,9 @@ class _WeatherRadarState extends State<WeatherRadar> {
     super.initState();
     _resetController = StreamController<void>.broadcast();
     _currentTime = getTime();
-    _radarTimes = List.generate(6, (index) {
-      // Generate times for the last 75 minutes in 15 minute intervals
-      return _currentTime.subtract(Duration(minutes: index * 15));
+    _radarTimes = List.generate(16, (index) {
+      // Generate times for the last 75 minutes in 5 minute intervals
+      return _currentTime.subtract(Duration(minutes: index * 5));
     });
     _updateLightningStrikes();
     _tileProviderFuture = () async {
@@ -98,8 +98,8 @@ class _WeatherRadarState extends State<WeatherRadar> {
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       // Decrement slider value to show older data
       double newValue = _sliderValue + 1;
-      // Loop back to 5 when we reach 0
-      if (newValue > 5) {
+      // Loop back to 15 when we reach 0
+      if (newValue > 15) {
         newValue = 0;
       }
       _updateTime(newValue, fromAutoPlay: true);
@@ -121,9 +121,9 @@ class _WeatherRadarState extends State<WeatherRadar> {
 
     setState(() {
       _sliderValue = value;
-      // Calculate time based on inverted slider value (each step is 15 minutes)
-      // 5 is latest time (0 minutes ago), 0 is  time (75 minutes ago)
-      final minutesToSubtract = (5 - value.toInt()) * 15;
+      // Calculate time based on inverted slider value (each step is 5 minutes)
+      // 15 is latest time (0 minutes ago), 0 is oldest time (75 minutes ago)
+      final minutesToSubtract = (15 - value.toInt()) * 5;
 
       try {
         // Get the base time and subtract the minutes
@@ -131,8 +131,8 @@ class _WeatherRadarState extends State<WeatherRadar> {
         _currentTime = baseTime.subtract(Duration(minutes: minutesToSubtract));
         if (!_radarTimes.contains(_currentTime)) {
           // If the time is not in the radar times, update the list
-          _radarTimes = List.generate(6, (index) {
-            return baseTime.subtract(Duration(minutes: index * 15));
+          _radarTimes = List.generate(16, (index) {
+            return baseTime.subtract(Duration(minutes: index * 5));
           });
         }
       } catch (e) {
@@ -155,10 +155,10 @@ class _WeatherRadarState extends State<WeatherRadar> {
       await lightningData.loadStrikes(_currentTime);
       setState(() {
         _currentLightningStrikes =
-            lightningData.getStrikes(_currentTime, const Duration(minutes: 15));
+            lightningData.getStrikes(_currentTime, const Duration(minutes: 5));
         _pastLightningStrikes = lightningData.getStrikes(
-            _currentTime.subtract(const Duration(minutes: 15)),
-            const Duration(minutes: 15));
+            _currentTime.subtract(const Duration(minutes: 5)),
+            const Duration(minutes: 5));
       });
     } catch (e) {
       if (kDebugMode) {
@@ -283,10 +283,10 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                   // baseUrl: 'https://openwms.fmi.fi/geoserver/wms?',
                                   baseUrl: 'https://wfs-proxy.a32.fi/wms?',
                                   // baseUrl: 'http://localhost:8080/wms?',
-                                  layers: const ['Radar:suomi_rr_eureffin'],
+                                  layers: const ['Radar:radar_finland_cappi_rate'],
                                   version: '1.3.0',
                                   crs: const Epsg3857(),
-                                  format: 'image/geotiff',
+                                  format: 'image/png',
                                   transparent: true,
                                   otherParameters: {
                                     'time': time.toIso8601String(),
@@ -389,11 +389,11 @@ class _WeatherRadarState extends State<WeatherRadar> {
                     child: Slider(
                         value: _sliderValue,
                         min: 0,
-                        max: 5,
-                        divisions: 5,
+                        max: 15,
+                        divisions: 15,
                         onChanged: _updateTime,
                         label: localizations
-                            .minutesAgo(((5 - _sliderValue) * 15).toInt())),
+                            .minutesAgo(((15 - _sliderValue) * 5).toInt())),
                   ),
                   Text(
                     '${_currentTime.toLocal().hour.toString()}:${_currentTime.toLocal().minute.toString().padLeft(2, '0')}',
@@ -408,17 +408,17 @@ class _WeatherRadarState extends State<WeatherRadar> {
     });
   }
 
-  // Return the latest quarter hour time in UTC
+  // Return the latest 5 minute time in UTC
   DateTime getTime() {
     final now = DateTime.now().toUtc();
     DateTime roundedTime =
         DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
-    if (roundedTime.minute % 15 < 3) {
+    if (roundedTime.minute % 5 < 3) {
       roundedTime = roundedTime
-          .subtract(Duration(minutes: (roundedTime.minute % 15) + 15));
+          .subtract(Duration(minutes: (roundedTime.minute % 5) + 5));
     } else {
       roundedTime =
-          roundedTime.subtract(Duration(minutes: roundedTime.minute % 15));
+          roundedTime.subtract(Duration(minutes: roundedTime.minute % 5));
     }
     return roundedTime;
   }
