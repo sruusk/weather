@@ -241,21 +241,23 @@ Future<void> backgroundCallback(Uri? uri) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Workmanager
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
-  
-  // Register periodic task (Android restricts this to minimum 15 minutes)
-  Workmanager().registerPeriodicTask(
-    "1",
-    "weatherUpdate",
-    frequency: const Duration(minutes: 15),
-    constraints: Constraints(
-      networkType: NetworkType.connected,
-    ),
-  );
+  if (!kIsWeb) {
+    // Initialize Workmanager
+    Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
+    
+    // Register periodic task (Android restricts this to minimum 15 minutes)
+    Workmanager().registerPeriodicTask(
+      "1",
+      "weatherUpdate",
+      frequency: const Duration(minutes: 15),
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+      ),
+    );
 
-  // Register HomeWidget background callback
-  HomeWidget.registerBackgroundCallback(backgroundCallback);
+    // Register HomeWidget background callback
+    HomeWidget.registerBackgroundCallback(backgroundCallback);
+  }
 
   // Add meteocons to license registry
   LicenseRegistry.addLicense(() async* {
