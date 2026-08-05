@@ -291,6 +291,42 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                   otherParameters: {
                                     'time': time.toIso8601String(),
                                   }),
+                              tileBuilder: (context, tileWidget, tile) {
+                                if (tile.loadError) {
+                                  return Stack(
+                                    fit: StackFit.passthrough,
+                                    children: [
+                                      tileWidget,
+                                      Center(
+                                        child: Icon(Icons.error_outline,
+                                            color: Colors.red.withAlpha(150),
+                                            size: 32),
+                                      ),
+                                    ],
+                                  );
+                                } else if (tile.loadFinishedAt == null) {
+                                  return Stack(
+                                    fit: StackFit.passthrough,
+                                    children: [
+                                      tileWidget,
+                                      Center(
+                                        child: SizedBox(
+                                          width: 32,
+                                          height: 32,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withAlpha(150),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+                                return tileWidget;
+                              },
                               userAgentPackageName: 'com.sruusk.weather',
                               evictErrorTileStrategy:
                                   EvictErrorTileStrategy.dispose,
