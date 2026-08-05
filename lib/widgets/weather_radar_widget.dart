@@ -265,7 +265,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
 
                         for (final time in _radarTimes)
                           Opacity(
-                            opacity: time == _currentTime ? 1.0 : 0,
+                            opacity: time == _currentTime ? 0.75 : 0,
                             child: TileLayer(
                               // tileSize: 128,
                               tileSize: 512,
