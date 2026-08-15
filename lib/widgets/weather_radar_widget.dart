@@ -15,7 +15,8 @@ import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
 import 'package:weather/data/lightning_data.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
-
+import 'package:weather/widgets/fmi_radar_tile_provider.dart';
+import 'package:flutter_shaders/flutter_shaders.dart';
 class WeatherRadar extends StatefulWidget {
   final WeatherRadarController controller;
   final double height;
@@ -269,8 +270,9 @@ class _WeatherRadarState extends State<WeatherRadar> {
                             child: TileLayer(
                               // tileSize: 128,
                               tileSize: 512,
-                              tileProvider:
-                                  NetworkTileProvider(silenceExceptions: true),
+                              tileProvider: (kIsWeb || kIsWasm) 
+                                  ? NetworkTileProvider(silenceExceptions: true)
+                                  : FmiRadarTileProvider(),
                               maxNativeZoom: 12,
                               minNativeZoom: 7,
                               keepBuffer: 2,
@@ -280,9 +282,9 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                   LatLng(70.259452, 32.036133)
                               ),
                               wmsOptions: WMSTileLayerOptions(
-                                  // baseUrl: 'https://openwms.fmi.fi/geoserver/wms?',
-                                  baseUrl: 'https://wfs-proxy.a32.fi/wms?',
-                                  // baseUrl: 'http://localhost:8080/wms?',
+                                  baseUrl: (kIsWeb || kIsWasm)
+                                      ? 'https://wfs-proxy.a32.fi/wms?'
+                                      : 'https://openwms.fmi.fi/geoserver/wms?',
                                   layers: const ['Radar:radar_finland_cappi_rate'],
                                   version: '1.3.0',
                                   crs: const Epsg3857(),
@@ -292,11 +294,35 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     'time': time.toIso8601String(),
                                   }),
                               tileBuilder: (context, tileWidget, tile) {
+                                Widget content = tileWidget;
+                                if (!kIsWeb && !kIsWasm) {
+                                  content = ShaderBuilder(
+                                    assetKey: 'shaders/radar_color.frag',
+                                    (context, shader, child) {
+                                      return AnimatedSampler(
+                                        (image, size, canvas) {
+                                          // Pass the physical image dimensions to the shader, not the logical widget size
+                                          shader.setFloat(0, image.width.toDouble());
+                                          shader.setFloat(1, image.height.toDouble());
+                                          shader.setImageSampler(0, image);
+                                          // Draw with a tiny 0.5px bleed to overlap tiles and prevent black grid lines
+                                          canvas.drawRect(
+                                            Rect.fromLTWH(-0.5, -0.5, size.width + 1.0, size.height + 1.0), 
+                                            Paint()..shader = shader
+                                          );
+                                        },
+                                        child: child!,
+                                      );
+                                    },
+                                    child: tileWidget,
+                                  );
+                                }
+
                                 if (tile.loadError) {
                                   return Stack(
                                     fit: StackFit.passthrough,
                                     children: [
-                                      tileWidget,
+                                      content,
                                       Center(
                                         child: Icon(Icons.error_outline,
                                             color: Colors.red.withAlpha(150),
@@ -308,7 +334,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                   return Stack(
                                     fit: StackFit.passthrough,
                                     children: [
-                                      tileWidget,
+                                      content,
                                       Center(
                                         child: SizedBox(
                                           width: 32,
@@ -325,7 +351,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     ],
                                   );
                                 }
-                                return tileWidget;
+                                return content;
                               },
                               userAgentPackageName: 'com.sruusk.weather',
                               evictErrorTileStrategy:
@@ -449,13 +475,15 @@ class _WeatherRadarState extends State<WeatherRadar> {
     final now = DateTime.now().toUtc();
     DateTime roundedTime =
         DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
-    if (roundedTime.minute % 5 < 3) {
-      roundedTime = roundedTime
-          .subtract(Duration(minutes: (roundedTime.minute % 5) + 5));
-    } else {
-      roundedTime =
-          roundedTime.subtract(Duration(minutes: roundedTime.minute % 5));
-    }
+    
+    // FMI data typically has a processing delay of 5-10 minutes.
+    // We want the returned time to always be at least 8-12 minutes in the past.
+    // First, subtract 8 minutes to guarantee we pass the processing delay window.
+    roundedTime = roundedTime.subtract(const Duration(minutes: 8));
+    
+    // Then round down to the nearest 5-minute boundary
+    roundedTime = roundedTime.subtract(Duration(minutes: roundedTime.minute % 5));
+    
     return roundedTime;
   }
 }
