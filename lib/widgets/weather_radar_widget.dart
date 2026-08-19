@@ -16,7 +16,6 @@ import 'package:weather/data/lightning_data.dart';
 import 'package:weather/l10n/app_localizations.g.dart';
 import 'package:weather/widgets/weather_symbol_widget.dart';
 import 'package:weather/widgets/fmi_radar_tile_provider.dart';
-import 'package:flutter_shaders/flutter_shaders.dart';
 class WeatherRadar extends StatefulWidget {
   final WeatherRadarController controller;
   final double height;
@@ -294,35 +293,11 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     'time': time.toIso8601String(),
                                   }),
                               tileBuilder: (context, tileWidget, tile) {
-                                Widget content = tileWidget;
-                                if (!kIsWeb && !kIsWasm) {
-                                  content = ShaderBuilder(
-                                    assetKey: 'shaders/radar_color.frag',
-                                    (context, shader, child) {
-                                      return AnimatedSampler(
-                                        (image, size, canvas) {
-                                          // Pass the physical image dimensions to the shader, not the logical widget size
-                                          shader.setFloat(0, image.width.toDouble());
-                                          shader.setFloat(1, image.height.toDouble());
-                                          shader.setImageSampler(0, image);
-                                          // Draw with a tiny 0.5px bleed to overlap tiles and prevent black grid lines
-                                          canvas.drawRect(
-                                            Rect.fromLTWH(-0.5, -0.5, size.width + 1.0, size.height + 1.0), 
-                                            Paint()..shader = shader
-                                          );
-                                        },
-                                        child: child!,
-                                      );
-                                    },
-                                    child: tileWidget,
-                                  );
-                                }
-
                                 if (tile.loadError) {
                                   return Stack(
                                     fit: StackFit.passthrough,
                                     children: [
-                                      content,
+                                      tileWidget,
                                       Center(
                                         child: Icon(Icons.error_outline,
                                             color: Colors.red.withAlpha(150),
@@ -334,7 +309,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                   return Stack(
                                     fit: StackFit.passthrough,
                                     children: [
-                                      content,
+                                      tileWidget,
                                       Center(
                                         child: SizedBox(
                                           width: 32,
@@ -351,7 +326,7 @@ class _WeatherRadarState extends State<WeatherRadar> {
                                     ],
                                   );
                                 }
-                                return content;
+                                return tileWidget;
                               },
                               userAgentPackageName: 'com.sruusk.weather',
                               evictErrorTileStrategy:

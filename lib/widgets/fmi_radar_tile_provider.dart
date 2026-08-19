@@ -10,8 +10,97 @@ import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
+import 'package:image/image.dart' as img;
+import 'package:pool/pool.dart';
+
+class _ColorRange {
+  final int rMin, rMax, gMin, gMax, bMin, bMax;
+  _ColorRange(this.rMin, this.rMax, this.gMin, this.gMax, this.bMin, this.bMax);
+  bool contains(int r, int g, int b) {
+    return r >= rMin && r <= rMax &&
+           g >= gMin && g <= gMax &&
+           b >= bMin && b <= bMax;
+  }
+}
+
+// The background processing function running in Isolate
+Uint8List? _processImageInIsolate(Uint8List imageBytes) {
+  try {
+    img.Image? image = img.decodeImage(imageBytes);
+    if (image == null) return null;
+    if (!image.hasAlpha) {
+      image = image.convert(numChannels: 4);
+    }
+
+    final width = image.width;
+    final height = image.height;
+    final buffer = Uint8List(width * height * 4);
+    int bufferIndex = 0;
+
+    final bgRange = _ColorRange(250, 260, -5, 5, 250, 260); // Magenta +/- 5
+
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        final pixel = image.getPixel(x, y);
+        final r = pixel.r.toInt();
+        final g = pixel.g.toInt();
+        final b = pixel.b.toInt();
+
+        bool isBackground = bgRange.contains(r, g, b);
+        
+        if (!isBackground) {
+          if (r >= 183 && g >= 179 && b >= 242) {
+            isBackground = true;
+          } else if (r >= 220 && b >= 240) {
+            isBackground = true;
+          }
+        }
+
+        if (isBackground) {
+          buffer[bufferIndex++] = 0;
+          buffer[bufferIndex++] = 0;
+          buffer[bufferIndex++] = 0;
+          buffer[bufferIndex++] = 0;
+        } else {
+          int finalR = r;
+          int finalG = g;
+          int finalB = b;
+          
+          if (b > 180) {
+            if (g - r <= 20) {
+               finalR = (r * 0.8).toInt();
+               finalG = (g * 1.2).toInt().clamp(0, 255);
+            } else {
+               finalR = (r * 0.4).toInt();
+               finalG = (g * 0.8).toInt();
+               finalB = (b * 0.9).toInt();
+            }
+          }
+
+          buffer[bufferIndex++] = finalR;
+          buffer[bufferIndex++] = finalG;
+          buffer[bufferIndex++] = finalB;
+          buffer[bufferIndex++] = 255;
+        }
+      }
+    }
+
+    final processedImage = img.Image.fromBytes(
+      width: width,
+      height: height,
+      bytes: buffer.buffer,
+      numChannels: 4,
+    );
+
+    final pngBytes = img.encodePng(processedImage, level: 1);
+    return Uint8List.fromList(pngBytes);
+  } catch (e) {
+    return null;
+  }
+}
 
 class FmiRadarTileProvider extends TileProvider {
+  static final Pool _tilePool = Pool(16);
   final http.BaseClient _httpClient;
   static Directory? _cacheDir;
   static bool _cleaningUp = false;
@@ -113,17 +202,30 @@ class _FmiRadarImageProvider extends ImageProvider<_FmiRadarImageProvider> {
 
       if (imageBytes == null) {
         final uri = Uri.parse(url);
-        final response = await httpClient.get(uri);
-        if (response.statusCode != 200) {
-          throw Exception('Failed to load tile: HTTP ${response.statusCode}');
-        }
-        
-        imageBytes = response.bodyBytes;
+        imageBytes = await FmiRadarTileProvider._tilePool.withResource(() async {
+          final response = await httpClient.get(uri);
+          if (response.statusCode != 200) {
+            throw Exception('Failed to load tile: HTTP ${response.statusCode}');
+          }
+          
+          final rawBytes = response.bodyBytes;
+          // Process in Isolate
+          final processedBytes = await compute(_processImageInIsolate, rawBytes);
+          
+          if (processedBytes == null) {
+            throw Exception('Failed to process tile image');
+          }
+          return processedBytes;
+        });
 
         // Save to cache
-        if (cacheFile != null) {
+        if (cacheFile != null && imageBytes != null) {
           await cacheFile.writeAsBytes(imageBytes);
         }
+      }
+
+      if (imageBytes == null) {
+        throw Exception('Failed to obtain image bytes');
       }
 
       final buffer = await ImmutableBuffer.fromUint8List(imageBytes);
